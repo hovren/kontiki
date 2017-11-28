@@ -97,7 +97,7 @@ setup(
     author_email='benjamin.r.jack@gmail.com',
     description='A hybrid Python/C++ test project',
     long_description='',
-    ext_modules=[CMakeExtension('python_example')],
+    ext_modules=[CMakeExtension('pymodule/python_example')],
     cmdclass=dict(build_ext=CMakeBuild, test=CatchTestCommand),
     zip_safe=False,
 )

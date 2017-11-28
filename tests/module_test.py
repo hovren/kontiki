@@ -2,7 +2,7 @@ import pytest
 
 import numpy as np
 
-import python_example as m
+import pymodule.python_example as m
 
 def test_vector_add():
     a = np.array([1., 2, 3])
