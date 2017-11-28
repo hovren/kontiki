@@ -2,7 +2,7 @@ import pytest
 
 import numpy as np
 
-import taser.python_example as m
+import taser.dummy as m
 
 def test_vector_add():
     print(m)

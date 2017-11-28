@@ -74,7 +74,7 @@ setup(
     author_email='benjamin.r.jack@gmail.com',
     description='A hybrid Python/C++ test project',
     long_description='',
-    ext_modules=[CMakeExtension('taser/python_example')],
+    ext_modules=[CMakeExtension('taser/dummy')],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
 )
