@@ -16,7 +16,7 @@ Eigen::Vector3d vector_add(Eigen::Vector3d& a, Eigen::Vector3d& b) {
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(python_example, m) {
+PYBIND11_MODULE(dummy, m) {
 m.doc() = R"pbdoc(
         Pybind11 example plugin
         -----------------------
