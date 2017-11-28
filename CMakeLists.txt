@@ -21,4 +21,4 @@ include_directories(include
 
 # Generate python module
 add_subdirectory(deps/pybind11)
-pybind11_add_module(python_example main.cpp)
+pybind11_add_module(python_example src/main.cpp)
