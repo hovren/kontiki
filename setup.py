@@ -68,11 +68,11 @@ class CMakeBuild(build_ext):
         print()  # Add an empty line for cleaner output
 
 setup(
-    name='python_cpp_example',
-    version='0.1',
-    author='Benjamin Jack',
-    author_email='benjamin.r.jack@gmail.com',
-    description='A hybrid Python/C++ test project',
+    name='taser',
+    version='1.0',
+    author='Hannes Ovrén',
+    author_email='hannes.ovren@liu.se',
+    description='Trajectory and structure estimation',
     long_description='',
     ext_modules=[CMakeExtension('taser/dummy')],
     cmdclass=dict(build_ext=CMakeBuild),

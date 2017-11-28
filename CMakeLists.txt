@@ -6,6 +6,12 @@ set(CMAKE_MODULE_PATH /usr/share/cmake/Modules)
 
 set(CMAKE_CXX_STANDARD 14)
 
+# The following is only used for debug prints
+find_package(PythonInterp)
+message("--- PYTHON configuration")
+message("PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
+message("PYTHON_VERSION_STRING: ${PYTHON_VERSION_STRING}")
+
 # Eigen
 find_package(Eigen3 REQUIRED)
 message("Eigen dir: ${EIGEN3_INCLUDE_DIR}")
@@ -21,4 +27,5 @@ include_directories(include
 
 # Generate python module
 add_subdirectory(deps/pybind11)
-pybind11_add_module(dummy src/dummy.cpp)
+pybind11_add_module(dummy src/pybindings/dummy.cpp)
+message("Built it!")
