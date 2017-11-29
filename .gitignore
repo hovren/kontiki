@@ -1,6 +1,15 @@
-cmake-build-*/
+# Built objects
+*.so
+*.a
+*.pyc
+
+# Python build artifacts
 build/
+dist/
+*.egg-info/
+
+#CLion / PyCharm directories
 .cache/
 .idea/
-*.egg-info/
-*.so
+cmake-build-*/
+
