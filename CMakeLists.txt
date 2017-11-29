@@ -27,5 +27,5 @@ include_directories(include
 
 # Generate python module
 add_subdirectory(deps/pybind11)
-pybind11_add_module(dummy src/pybindings/dummy.cpp)
+pybind11_add_module(dummy src/pybindings/dummy.cc)
 message("Built it!")
