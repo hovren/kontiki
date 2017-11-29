@@ -13,9 +13,8 @@ from setuptools.command.test import test as TestCommand
 
 
 class CMakeExtension(Extension):
-    def __init__(self, name, sourcedir=''):
+    def __init__(self, name):
         Extension.__init__(self, name, sources=[])
-        self.sourcedir = os.path.abspath(sourcedir)
 
 
 class CMakeBuild(build_ext):
@@ -27,18 +26,10 @@ class CMakeBuild(build_ext):
                 "CMake must be installed to build the following extensions: " +
                 ", ".join(e.name for e in self.extensions))
 
-        # Find the directory above the built package
-        # I.e. if the extension outputs are /path/to/build/package/subpack/mod
-        # then this returns /path/to/build/
-        if len(self.get_outputs()) > 1:
-            base_outputdir = os.path.commonpath(self.get_outputs())
-        else:
-            base_outputdir = os.path.dirname(self.get_outputs()[0])
-
-        base_outputdir = os.path.abspath(base_outputdir)
+        build_directory = os.path.abspath(self.build_temp)
 
         cmake_args = [
-            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + base_outputdir,
+            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + build_directory,
             '-DPYTHON_EXECUTABLE=' + sys.executable
         ]
 
@@ -46,6 +37,8 @@ class CMakeBuild(build_ext):
         build_args = ['--config', cfg]
 
         cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
+
+        # Assuming Makefiles
         build_args += ['--', '-j2']
 
         self.build_args = build_args
@@ -64,20 +57,38 @@ class CMakeBuild(build_ext):
                               cwd=self.build_temp, env=env)
 
         print('-'*10, 'Building extensions', '-'*40)
-
         cmake_cmd = ['cmake', '--build', '.'] + self.build_args
         subprocess.check_call(cmake_cmd,
                               cwd=self.build_temp)
 
-def root_extension(modname):
-    return CMakeExtension('taser.' + modname)
+        # Move from build temp to final position
+        for ext in self.extensions:
+            self.move_output(ext)
 
-def trajectory_extension(modname):
-    return root_extension('trajectories.' + modname)
+    def move_output(self, ext):
+        build_temp = Path(self.build_temp).resolve()
+        dest_path = Path(self.get_ext_fullpath(ext.name)).resolve()
+        source_path = build_temp / self.get_ext_filename(ext.name)
+        dest_directory = dest_path.parents[0]
+        dest_directory.mkdir(parents=True, exist_ok=True)
+        self.copy_file(source_path, dest_path)
+
+
+class TaserExtension(CMakeExtension):
+    def __init__(self, module):
+        super().__init__('taser.' + module)
+
+
+class TrajectoryExtension(TaserExtension):
+    def __init__(self, module):
+        super().__init__('trajectories.' + module)
+
 
 ext_modules = [
-    root_extension('dummy'),
-    trajectory_extension('_constant_trajectory'),
+    TaserExtension('dummy'),
+    TrajectoryExtension('_constant_trajectory'),
+    TaserExtension('_trajectory_estimator'),
+    TaserExtension('_ceres'),
 ]
 
 
@@ -88,8 +99,7 @@ setup(
     author_email='hannes.ovren@liu.se',
     description='Trajectory and structure estimation',
     long_description='',
-    #packages=['taser'],
-    pacakges = find_packages(),
+    pacakges=find_packages(),
     ext_modules=ext_modules,
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,

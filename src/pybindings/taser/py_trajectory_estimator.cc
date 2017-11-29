@@ -17,12 +17,14 @@ void declare_estimator(py::module &m) {
 
   cls.def(py::init<std::shared_ptr<TrajectoryImpl>>());
   cls.def_property_readonly("trajectory", &Class::trajectory, "Get the trajectory");
+  cls.def("solve", &Class::Solve);
 
 }
 
 PYBIND11_MODULE(_trajectory_estimator, m) {
   m.doc() = "Trajectory estimation class";
 
+  py::module::import("taser._ceres");
   py::module::import("taser.trajectories._constant_trajectory");
 
   using namespace taser::trajectories;

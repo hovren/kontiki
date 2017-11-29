@@ -42,12 +42,12 @@ function(taser_add_module module)
     list(GET modlist -1 modname)
 
     # Remove everything that is not the root or the module name
-    list(REMOVE_AT modlist 0)
+    #list(REMOVE_AT modlist 0)
     list(REMOVE_AT modlist -1)
 
     # Get the relative path
     if(modlist)
-        string(REPLACE ";" "//" relpath ${modlist})
+        string(REPLACE ";" "/" relpath "${modlist}")
     else()
         set(relpath "")
     endif()
@@ -60,11 +60,14 @@ function(taser_add_module module)
     set(outdir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${relpath})
     set_target_properties(${target_name} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${outdir})
     set_target_properties(${target_name} PROPERTIES OUTPUT_NAME ${modname})
-
+    target_link_libraries(${target_name} PRIVATE ${CERES_LIBRARIES})
 endfunction()
 
 # Dummy module for testing
 taser_add_module(taser.dummy)
+
+# Ceres types
+taser_add_module(taser._ceres)
 
 # Trajectories
 taser_add_module(taser.trajectories._constant_trajectory)

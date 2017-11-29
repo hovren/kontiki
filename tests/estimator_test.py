@@ -9,3 +9,7 @@ def test_create():
     trajectory = ConstantTrajectory(np.array([1, 2, 3]))
     estimator = TrajectoryEstimator(trajectory)
     assert estimator.trajectory is trajectory
+
+    summary = estimator.solve()
+    print(summary)
+    print(summary.FullReport())
