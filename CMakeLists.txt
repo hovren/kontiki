@@ -22,10 +22,50 @@ message("Ceres inc dir: ${CERES_INCLUDE_DIRS}")
 
 # List include directories
 include_directories(include
-        ${EIGEN3_INCLUDE_DIR}
-        ${CERES_INCLUDE_DIRS})
+    ${EIGEN3_INCLUDE_DIR}
+    ${CERES_INCLUDE_DIRS})
 
-# Generate python module
+# Load pybind11
 add_subdirectory(deps/pybind11)
-pybind11_add_module(dummy src/pybindings/dummy.cc)
-message("Built it!")
+
+# Build a Python extension module using pybind11
+#   taser_add_module(<module>)
+# Here <module> should be the fully qualifued name for the module,
+# e.g. taser.trajectories._dummy_trajectory
+# <module> becomes the target name in case you wish to do something to it later
+function(taser_add_module module)
+    set(target_name ${module})
+    string(REPLACE "." "/" modpath ${module})
+    string(REPLACE "." ";" modlist ${module})
+
+    # The module name is the last entry
+    list(GET modlist -1 modname)
+
+    # Remove everything that is not the root or the module name
+    list(REMOVE_AT modlist 0)
+    list(REMOVE_AT modlist -1)
+
+    # Get the relative path
+    if(modlist)
+        string(REPLACE ";" "//" relpath ${modlist})
+    else()
+        set(relpath "")
+    endif()
+
+    # Define the binding source file
+    set(sources src/pybindings/${relpath}/py${modname}.cc)
+
+    # Invoke pybind11 and set where the library should go, and what it is called
+    pybind11_add_module(${target_name} ${sources})
+    set(outdir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${relpath})
+    set_target_properties(${target_name} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${outdir})
+    set_target_properties(${target_name} PROPERTIES OUTPUT_NAME ${modname})
+
+endfunction()
+
+taser_add_module(taser.trajectories._constant_trajectory)
+
+# Generate python modules
+#pybind11_add_module(taser.dummy src/pybindings/dummy.cc)
+#set_target_properties(taser.dummy PROPERTIES OUTPUT_NAME dummy)
+taser_add_module(taser.dummy)
