@@ -64,25 +64,9 @@ class CMakeBuild(build_ext):
                               cwd=self.build_temp, env=env)
 
         print('-'*10, 'Building extensions', '-'*40)
-        print('Extensions:', self.extensions)
-        for ext in self.extensions:
-            self.build_extension(ext)
-
-    def build_extension(self, ext):
-        extdir = os.path.abspath(
-            os.path.dirname(self.get_ext_fullpath(ext.name)))
-
-
-        target = ext.name.split("/")[-1]
-        cmake_cmd = ['cmake', '--build', '.', '--target', target] + self.build_args
+        cmake_cmd = ['cmake', '--build', '.'] + self.build_args
         subprocess.check_call(cmake_cmd,
                               cwd=self.build_temp)
-        print()  # Add an empty line for cleaner output
-        print('DEBUGDEBUGDEBUG')
-        print('extdir:', self.get_ext_fullpath(ext.name))
-        print('command:', ' '.join(cmake_cmd))
-        print('build_args', self.build_args)
-        print('extdir', extdir)
 
 def root_extension(modname):
     return CMakeExtension('taser.' + modname)
