@@ -3,9 +3,9 @@ import pytest
 import numpy as np
 
 import taser
-import taser.trajectories._constant_trajectory as m
+from taser.trajectories._constant_trajectory import ConstantTrajectory
 
 def test_vector_add():
-    print(m)
-    print(taser)
-    assert m.testing() == 6
+    k = np.array([1., 2.5, 4.])
+    traj = ConstantTrajectory(k)
+    np.testing.assert_equal(traj.constant, k)

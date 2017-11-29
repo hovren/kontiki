@@ -21,7 +21,7 @@ find_package(Ceres REQUIRED)
 message("Ceres inc dir: ${CERES_INCLUDE_DIRS}")
 
 # List include directories
-include_directories(include
+include_directories(include/taser
     ${EIGEN3_INCLUDE_DIR}
     ${CERES_INCLUDE_DIRS})
 
@@ -63,9 +63,11 @@ function(taser_add_module module)
 
 endfunction()
 
+# Dummy module for testing
+taser_add_module(taser.dummy)
+
+# Trajectories
 taser_add_module(taser.trajectories._constant_trajectory)
 
-# Generate python modules
-#pybind11_add_module(taser.dummy src/pybindings/dummy.cc)
-#set_target_properties(taser.dummy PROPERTIES OUTPUT_NAME dummy)
-taser_add_module(taser.dummy)
+# Trajectory estimator
+taser_add_module(taser._trajectory_estimator)

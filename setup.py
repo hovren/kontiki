@@ -64,6 +64,7 @@ class CMakeBuild(build_ext):
                               cwd=self.build_temp, env=env)
 
         print('-'*10, 'Building extensions', '-'*40)
+
         cmake_cmd = ['cmake', '--build', '.'] + self.build_args
         subprocess.check_call(cmake_cmd,
                               cwd=self.build_temp)
