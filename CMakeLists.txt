@@ -21,7 +21,9 @@ find_package(Ceres REQUIRED)
 message("Ceres inc dir: ${CERES_INCLUDE_DIRS}")
 
 # List include directories
-include_directories(include/taser
+include_directories(
+    include
+    include/taser
     ${EIGEN3_INCLUDE_DIR}
     ${CERES_INCLUDE_DIRS})
 
@@ -74,3 +76,6 @@ taser_add_module(taser.trajectories._constant_trajectory)
 
 # Trajectory estimator
 taser_add_module(taser._trajectory_estimator)
+
+# Measurements
+taser_add_module(taser.measurements._position_measurement)

@@ -84,11 +84,16 @@ class TrajectoryExtension(TaserExtension):
         super().__init__('trajectories.' + module)
 
 
+class MeasurementExtension(TaserExtension):
+    def __init__(self, module):
+        super().__init__('measurements.' + module)
+
 ext_modules = [
     TaserExtension('dummy'),
     TrajectoryExtension('_constant_trajectory'),
     TaserExtension('_trajectory_estimator'),
     TaserExtension('_ceres'),
+    MeasurementExtension('_position_measurement'),
 ]
 
 

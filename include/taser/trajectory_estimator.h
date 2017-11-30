@@ -7,6 +7,8 @@
 
 #include <ceres/ceres.h>
 
+#include <iostream>
+
 namespace taser {
 template <template<typename> typename TrajectoryModel>
 class TrajectoryEstimator {
@@ -29,6 +31,16 @@ class TrajectoryEstimator {
     return summary;
   }
 
+  template<typename MeasurementType>
+  void AddMeasurement(std::shared_ptr<MeasurementType> m) {
+    std::cout << "Calling hello()" << std::endl;
+    m->hello();
+  }
+
+  template<typename T>
+  T test(T x) {
+    return x*2;
+  }
 
  protected:
   std::shared_ptr<TrajectoryImpl> trajectory_;
