@@ -9,28 +9,19 @@
 
 namespace py = pybind11;
 
-#if 1
-template<typename Class, typename PyClass, typename MType>
+// Recursion base case. Ignore this.
+template<typename Class, typename PyClass>
 void declare_add_measurement(PyClass& cls) {
-#pragma message("ADD MEASUREMENT LEVEL 0")
-  //cls.def("AddMeasurement", &Class::AddMeasurement<MType>);
-  std::cout << "declare_add_measurement" << std::endl;
-  cls.def("add_measurement", (void (Class::*)(std::shared_ptr<MType>)) &Class::AddMeasurement);
+  // This shall do nothing
 };
 
-#elif 0
 template<typename Class, typename PyClass, typename MType, typename... MTargs>
 void declare_add_measurement(PyClass& cls) {
-#pragma message("ADD MEASUREMENT LEVEL N")
-  cls.def("AddMeasurement", &Class::AddMeasurement<MType>);
+  // Add first type
+  cls.def("add_measurement", (void (Class::*)(std::shared_ptr<MType>)) &Class::AddMeasurement);
+
+  // Recurse through the rest of the measurement types
   declare_add_measurement<Class, PyClass, MTargs...>(cls);
-};
-
-#endif
-
-class DummyMeasurement {
- public:
-  DummyMeasurement() {};
 };
 
 template<
@@ -46,20 +37,11 @@ auto declare_estimator(py::module &m) {
   cls.def_property_readonly("trajectory", &Class::trajectory, "Get the trajectory");
   cls.def("solve", &Class::Solve);
 
-  //declare_add_measurement<Class, typeof(cls), MTargs...>(cls);
-
-  taser::measurements::PositionMeasurement meas(0, Eigen::Vector3d(0, 0, 0));
-
-  /*
-  cls.def("add_measurement",
-          (void (Class::*)(std::shared_ptr<taser::measurements::PositionMeasurement>))
-              &Class::AddMeasurement);
-  */
-
-  declare_add_measurement<Class, typeof(cls), TM::PositionMeasurement>(cls);
-  declare_add_measurement<Class, typeof(cls), TM::AnotherMeasurement>(cls);
-
-  //cls.def("test", &Class::test<double>);
+  // Add list of measurement types to this estimator type
+  declare_add_measurement<Class, typeof(cls),
+                          /* List of measurement types starts here */
+                          TM::PositionMeasurement,
+                          TM::AnotherMeasurement>(cls);
 
   return cls;
 }

@@ -73,6 +73,7 @@ taser_add_module(taser._ceres)
 
 # Trajectories
 taser_add_module(taser.trajectories._constant_trajectory)
+taser_add_module(taser.trajectories._linear_trajectory)
 
 # Trajectory estimator
 taser_add_module(taser._trajectory_estimator)
