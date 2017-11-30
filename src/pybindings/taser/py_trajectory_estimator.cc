@@ -2,8 +2,9 @@
 #include <pybind11/eigen.h>
 
 #include <Eigen/Dense>
-#include <trajectory_estimator.h>
 
+#include "trajectory_estimator.h"
+#include "trajectories/linear_trajectory.h"
 #include "trajectories/constant_trajectory.h"
 #include "measurements/position_measurement.h"
 
@@ -15,6 +16,7 @@ void declare_add_measurement(PyClass& cls) {
   // This shall do nothing
 };
 
+// Bind AddMeasurement<T> for all listed measurement types T
 template<typename Class, typename PyClass, typename MType, typename... MTargs>
 void declare_add_measurement(PyClass& cls) {
   // Add first type
@@ -31,7 +33,9 @@ auto declare_estimator(py::module &m) {
   using Class = taser::TrajectoryEstimator<TrajectoryModel>;
   namespace TM = taser::measurements;
 
-  auto cls = py::class_<Class>(m, "TrajectoryEstimator");
+  std::string pyclass_name = "TrajectoryEstimator_" + std::string(TrajectoryImpl::CLASS_ID);
+
+  auto cls = py::class_<Class>(m, pyclass_name.c_str());
 
   cls.def(py::init<std::shared_ptr<TrajectoryImpl>>());
   cls.def_property_readonly("trajectory", &Class::trajectory, "Get the trajectory");
@@ -56,5 +60,6 @@ PYBIND11_MODULE(_trajectory_estimator, m) {
   namespace TT = taser::trajectories;
   namespace TM = taser::measurements;
   declare_estimator<TT::ConstantTrajectory>(m);
+  declare_estimator<TT::LinearTrajectory>(m);
   //declare_estimator<TT::ConstantTrajectory, TM::PositionMeasurement>(m);
 }

@@ -14,10 +14,11 @@ namespace trajectories {
 
 template<typename T>
 class LinearTrajectory {
-  static constexpr const char* CLASS_ID = "Linear";
   using Vector3 = Eigen::Matrix<T, 3, 1>;
 
  public:
+  static constexpr const char* CLASS_ID = "Linear";
+
   LinearTrajectory(const Vector3& k) : constant_(k) {};
 
   Vector3 constant() const {
