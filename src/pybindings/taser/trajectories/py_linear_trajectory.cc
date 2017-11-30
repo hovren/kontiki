@@ -15,8 +15,9 @@ void declare_linear_trajectory(py::module &m) {
   using Class = taser::trajectories::LinearTrajectory<double>;
   auto cls = py::class_<Class, std::shared_ptr<Class>>(m, "LinearTrajectory");
 
-  cls.def(py::init<const Eigen::Vector3d &>());
+  cls.def(py::init<double, const Eigen::Vector3d &>());
   cls.def_property("constant", &Class::constant, &Class::set_constant);
+  cls.def("position", &Class::position);
 }
 
 PYBIND11_MODULE(_linear_trajectory, m) {

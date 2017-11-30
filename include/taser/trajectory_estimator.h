@@ -33,13 +33,16 @@ class TrajectoryEstimator {
 
   template<typename MeasurementType>
   void AddMeasurement(std::shared_ptr<MeasurementType> m) {
-    std::cout << "Calling hello()" << std::endl;
-    m->hello();
+    m->AddToEstimator(*this);
   }
 
   template<typename T>
   T test(T x) {
     return x*2;
+  }
+
+  ceres::Problem& problem() {
+    return problem_;
   }
 
  protected:

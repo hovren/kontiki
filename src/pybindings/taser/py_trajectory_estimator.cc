@@ -44,8 +44,7 @@ auto declare_estimator(py::module &m) {
   // Add list of measurement types to this estimator type
   declare_add_measurement<Class, typeof(cls),
                           /* List of measurement types starts here */
-                          TM::PositionMeasurement,
-                          TM::AnotherMeasurement>(cls);
+                          TM::PositionMeasurement>(cls);
 
   return cls;
 }
@@ -59,7 +58,6 @@ PYBIND11_MODULE(_trajectory_estimator, m) {
 
   namespace TT = taser::trajectories;
   namespace TM = taser::measurements;
-  declare_estimator<TT::ConstantTrajectory>(m);
+  //declare_estimator<TT::ConstantTrajectory>(m);
   declare_estimator<TT::LinearTrajectory>(m);
-  //declare_estimator<TT::ConstantTrajectory, TM::PositionMeasurement>(m);
 }
