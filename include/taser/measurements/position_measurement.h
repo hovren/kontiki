@@ -51,7 +51,8 @@ class PositionMeasurement {
     std::vector<size_t> parameter_sizes;
 
     // Add trajectory to problem
-    estimator.trajectory()->AddToProblem(estimator.problem(), residual->meta, parameter_blocks, parameter_sizes);
+    //estimator.trajectory()->AddToProblem(estimator.problem(), residual->meta, parameter_blocks, parameter_sizes);
+    estimator.PackTrajectoryForTimes({{t,t}}, residual->meta, parameter_blocks, parameter_sizes);
     for (auto ndims : parameter_sizes) {
       cost_function->AddParameterBlock(ndims);
     }

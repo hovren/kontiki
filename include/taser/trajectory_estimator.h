@@ -10,9 +10,19 @@
 #include <iostream>
 
 namespace taser {
+
+using time_span_t = std::pair<double, double>;
+using time_init_t = std::initializer_list<time_span_t>;
+
+struct EstimatorOptions {
+  // Time spans for which the trajectory should be kept constant
+  std::vector<time_span_t> constant_trajectory_spans;
+};
+
 template <template<typename> typename TrajectoryModel>
 class TrajectoryEstimator {
   using TrajectoryImpl = TrajectoryModel<double>;
+  using Meta = typename TrajectoryImpl::Meta;
 
  public:
   TrajectoryEstimator(std::shared_ptr<TrajectoryImpl> trajectory) : trajectory_(trajectory) {};
@@ -43,6 +53,11 @@ class TrajectoryEstimator {
 
   ceres::Problem& problem() {
     return problem_;
+  }
+
+  bool PackTrajectoryForTimes(time_init_t times, Meta &meta,
+                              std::vector<double*> &parameter_blocks, std::vector<size_t> &parameter_sizes) {
+    trajectory_->AddToProblem(problem_, meta, parameter_blocks, parameter_sizes);
   }
 
  protected:

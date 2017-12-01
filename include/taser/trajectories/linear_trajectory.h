@@ -38,6 +38,13 @@ class LinearTrajectory {
     return constant_ * (t - T(t0_));
   }
 
+  static LinearTrajectory<T>
+  Unpack(T const* const* params, const Meta& meta) {
+    Eigen::Map<const Eigen::Matrix<T, 3, 1>> constant(&params[0][0]);
+    LinearTrajectory<T> trajectory(meta.t0, constant);
+    return trajectory;
+  }
+
   // Add to problem, fill Meta struct, return parameter blocks
   void AddToProblem(ceres::Problem &problem, Meta& meta,
                     std::vector<double*> &parameter_blocks,
@@ -51,16 +58,10 @@ class LinearTrajectory {
     parameter_sizes.push_back(3);
   }
 
-  static LinearTrajectory<T>
-  Unpack(T const* const* params, const Meta& meta) {
-    Eigen::Map<const Eigen::Matrix<T, 3, 1>> constant(&params[0][0]);
-    LinearTrajectory<T> trajectory(meta.t0, constant);
-    return trajectory;
-  }
-
  protected:
   double t0_;
   Vector3 constant_;
+
 };
 
 } // namespace trajectories
