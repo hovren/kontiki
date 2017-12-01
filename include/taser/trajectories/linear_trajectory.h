@@ -6,6 +6,7 @@
 #define TASERV2_LINEAR_TRAJECTORY_H
 
 #include "trajectory.h"
+#include "trajectory_estimator.h"
 
 #include <Eigen/Dense>
 #include <ceres/ceres.h>
@@ -34,7 +35,7 @@ class LinearTrajectory {
     constant_ = k;
   }
 
-  Vector3 position(T t) {
+  Vector3 Position(T t) {
     return constant_ * (t - T(t0_));
   }
 
@@ -46,14 +47,15 @@ class LinearTrajectory {
   }
 
   // Add to problem, fill Meta struct, return parameter blocks
-  void AddToProblem(ceres::Problem &problem, Meta& meta,
+  void AddToEstimator(TrajectoryEstimator<LinearTrajectory> &estimator, Meta& meta,
                     std::vector<double*> &parameter_blocks,
                     std::vector<size_t> &parameter_sizes) {
     // Fill meta
     meta.t0 = t0_;
 
     // Define/add parameter blocks and add to problem
-    problem.AddParameterBlock(constant_.data(), 3);
+    // In this case we have only one: the constant slope parameter
+    estimator.problem().AddParameterBlock(constant_.data(), 3);
     parameter_blocks.push_back(constant_.data());
     parameter_sizes.push_back(3);
   }

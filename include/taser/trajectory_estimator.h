@@ -46,23 +46,17 @@ class TrajectoryEstimator {
     m->AddToEstimator(*this);
   }
 
-  template<typename T>
-  T test(T x) {
-    return x*2;
-  }
-
   ceres::Problem& problem() {
     return problem_;
   }
 
-  bool PackTrajectoryForTimes(time_init_t times, Meta &meta,
-                              std::vector<double*> &parameter_blocks, std::vector<size_t> &parameter_sizes) {
-    trajectory_->AddToProblem(problem_, meta, parameter_blocks, parameter_sizes);
+  bool AddTrajectoryForTimes(time_init_t times, Meta &meta,
+                             std::vector<double *> &parameter_blocks, std::vector<size_t> &parameter_sizes) {
+    trajectory_->AddToEstimator(*this, meta, parameter_blocks, parameter_sizes);
   }
 
  protected:
   std::shared_ptr<TrajectoryImpl> trajectory_;
-
   ceres::Problem problem_;
 };
 

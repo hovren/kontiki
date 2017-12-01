@@ -17,7 +17,7 @@ void declare_linear_trajectory(py::module &m) {
 
   cls.def(py::init<double, const Eigen::Vector3d &>());
   cls.def_property("constant", &Class::constant, &Class::set_constant);
-  cls.def("position", &Class::position);
+  cls.def("position", &Class::Position);
 }
 
 PYBIND11_MODULE(_linear_trajectory, m) {

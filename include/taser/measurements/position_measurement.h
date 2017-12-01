@@ -32,7 +32,7 @@ class PositionMeasurement {
     template <typename T>
     bool operator()(T const* const* params, T* residual) const {
       auto trajectory = TrajectoryModel<T>::Unpack(params, meta);
-      Eigen::Matrix<T,3,1> p = trajectory.position(T(measurement.t));
+      Eigen::Matrix<T,3,1> p = trajectory.Position(T(measurement.t));
       Eigen::Map<Eigen::Matrix<T,3,1>> r(residual);
       r = p - measurement.p.cast<T>();
       return true;
@@ -52,7 +52,7 @@ class PositionMeasurement {
 
     // Add trajectory to problem
     //estimator.trajectory()->AddToProblem(estimator.problem(), residual->meta, parameter_blocks, parameter_sizes);
-    estimator.PackTrajectoryForTimes({{t,t}}, residual->meta, parameter_blocks, parameter_sizes);
+    estimator.AddTrajectoryForTimes({{t,t}}, residual->meta, parameter_blocks, parameter_sizes);
     for (auto ndims : parameter_sizes) {
       cost_function->AddParameterBlock(ndims);
     }
