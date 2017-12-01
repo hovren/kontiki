@@ -19,7 +19,7 @@ namespace taser {
 namespace trajectories {
 
 template<typename T>
-class LinearTrajectory {
+class LinearTrajectory : public TrajectoryBase<T, LinearTrajectory<T>> {
   using Vector3 = Eigen::Matrix<T, 3, 1>;
  public:
   using Meta = _Meta;
@@ -35,7 +35,7 @@ class LinearTrajectory {
     constant_ = k;
   }
 
-  Vector3 Position(T t) {
+  Vector3 position_impl(T t) const {
     return constant_ * (t - T(t0_));
   }
 

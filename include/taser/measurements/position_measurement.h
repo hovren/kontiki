@@ -18,6 +18,12 @@ class PositionMeasurement {
  public:
   PositionMeasurement(double t, const Vector3 &p) : t(t), p(p) {};
 
+  template<typename T, template<typename> typename TrajectoryModel>
+  Eigen::Matrix<T, 3, 1> error(const TrajectoryModel<T> &trajectory) const {
+    Eigen::Matrix<T,3,1> p_hat = trajectory.Position(T(t));
+    return p.cast<T>() - p_hat;
+  }
+
   // Measurement data
   double t;
   Vector3 p;
@@ -32,9 +38,8 @@ class PositionMeasurement {
     template <typename T>
     bool operator()(T const* const* params, T* residual) const {
       auto trajectory = TrajectoryModel<T>::Unpack(params, meta);
-      Eigen::Matrix<T,3,1> p = trajectory.Position(T(measurement.t));
       Eigen::Map<Eigen::Matrix<T,3,1>> r(residual);
-      r = p - measurement.p.cast<T>();
+      r = measurement.error(trajectory);
       return true;
     }
 
