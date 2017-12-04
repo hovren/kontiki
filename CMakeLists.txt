@@ -75,6 +75,9 @@ taser_add_module(taser._ceres)
 taser_add_module(taser.trajectories._constant_trajectory)
 taser_add_module(taser.trajectories._linear_trajectory)
 
+# Structire from motion
+taser_add_module(taser.sfm)
+
 # Trajectory estimator
 taser_add_module(taser._trajectory_estimator)
 

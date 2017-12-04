@@ -90,6 +90,7 @@ class MeasurementExtension(TaserExtension):
 
 ext_modules = [
     TaserExtension('dummy'),
+    TaserExtension('sfm'),
     TrajectoryExtension('_constant_trajectory'),
     TrajectoryExtension('_linear_trajectory'),
     TaserExtension('_trajectory_estimator'),
