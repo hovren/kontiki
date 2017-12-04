@@ -13,14 +13,29 @@ namespace py = pybind11;
 
 namespace TT = taser::trajectories;
 
+template<template<typename> typename TrajectoryModel, typename PyClass>
+void declare_trajectory_common(PyClass &cls) {
+  using Class = TrajectoryModel<double>;
+  cls.def("position", &TT::TrajectoryBase<double, TrajectoryModel<double>>::Position);
+  cls.def("velocity", &TT::TrajectoryBase<double, TrajectoryModel<double>>::Velocity);
+  cls.def("acceleration", &TT::TrajectoryBase<double, TrajectoryModel<double>>::Acceleration);
+  cls.def("orientation", [](Class &self, double t){
+    Eigen::Quaterniond q = self.Orientation(t);
+    Eigen::Vector4d out(q.w(), q.x(), q.y(), q.z());
+    return out;
+  });
+  cls.def("angular_velocity", &TT::TrajectoryBase<double, TrajectoryModel<double>>::AngularVelocity);
+};
+
 void declare_linear_trajectory(py::module &m) {
   using Class = TT::LinearTrajectory<double>;
   auto cls = py::class_<Class, std::shared_ptr<Class>>(m, "LinearTrajectory");
 
   cls.def(py::init<double, const Eigen::Vector3d &>());
   cls.def_property("constant", &Class::constant, &Class::set_constant);
-  //cls.def("position", &Class::Position);
-  cls.def("position", &TT::TrajectoryBase<double, TT::LinearTrajectory<double>>::Position);
+
+  // Common trajectory methods/properties/...
+  declare_trajectory_common<TT::LinearTrajectory>(cls);
 }
 
 PYBIND11_MODULE(_linear_trajectory, m) {

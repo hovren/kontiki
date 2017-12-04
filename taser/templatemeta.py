@@ -17,6 +17,7 @@
 # the GNU General Public License along with this program.  If not,
 # see <https://www.lsstcorp.org/LegalNotices/>.
 
+import sys
 
 INTRINSIC_SPECIAL_ATTRIBUTES = frozenset((
     "__qualname__",

@@ -35,8 +35,21 @@ class LinearTrajectory : public TrajectoryBase<T, LinearTrajectory<T>> {
     constant_ = k;
   }
 
-  Vector3 position_impl(T t) const {
-    return constant_ * (t - T(t0_));
+  std::unique_ptr<TrajectoryEvaluation<T>> Evaluate(const T t, const int flags) const {
+    auto result = std::make_unique<TrajectoryEvaluation<T>>();
+    if (!flags)
+      throw std::logic_error("Evaluate() called with flags=0");
+    if (flags & EvalPosition)
+      result->position = constant_ * (t - T(t0_));
+    if (flags & EvalVelocity)
+      result->velocity = constant_;
+    if (flags & EvalAcceleration)
+      result->acceleration.setZero();
+    if (flags & EvalOrientation)
+      result->orientation.setIdentity();
+    if (flags & EvalAngularVelocity)
+      result->angular_velocity.setZero();
+    return result;
   }
 
   static LinearTrajectory<T>
