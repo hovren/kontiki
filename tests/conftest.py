@@ -2,6 +2,8 @@ import pytest
 
 import numpy as np
 
+from fixtures.camera_fixtures import *
+
 from taser.trajectories import LinearTrajectory, ConstantTrajectory
 
 trajectory_classes = [
