@@ -46,9 +46,9 @@ class LinearTrajectory : public TrajectoryBase<T, LinearTrajectory<T>> {
     if (flags & EvalAcceleration)
       result->acceleration.setZero();
     if (flags & EvalOrientation)
-      result->orientation.setIdentity();
+      result->orientation = this->calculate_orientation(t);
     if (flags & EvalAngularVelocity)
-      result->angular_velocity.setZero();
+      result->angular_velocity = constant_;
     return result;
   }
 
@@ -76,6 +76,13 @@ class LinearTrajectory : public TrajectoryBase<T, LinearTrajectory<T>> {
  protected:
   double t0_;
   Vector3 constant_;
+
+  Eigen::Quaternion<T> calculate_orientation(T t) const {
+    T theta = constant_.norm() * (t - t0_);
+    Vector3 n = constant_.normalized();
+    Eigen::AngleAxis<T> aa(theta, n);
+    return Eigen::Quaternion<T>(aa);
+  }
 
 };
 

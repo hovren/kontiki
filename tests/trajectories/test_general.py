@@ -21,6 +21,28 @@ def trajectory_example(simple_trajectory):
         p_ex3 = 2, np.array([0, 0, 0])
         example_data.position.extend([p_ex1, p_ex2, p_ex3])
 
+        # Example velocities
+        example_data.velocity.extend([
+            (0, np.array([1, 0, 4])),
+            (1, np.array([1, 0, 4]))
+        ])
+
+        # Example accelerations
+        example_data.acceleration.extend([
+            (0, np.zeros(3))
+        ])
+
+        # Orientations
+        example_data.orientation.extend([
+            (2, np.array([1, 0, 0, 0])),  # t=t0 -> identity
+            (3, np.array([-0.47129323,  0.21391074,  0.        ,  0.85564297]))
+        ])
+
+        example_data.angular_velocity.extend([
+            (0, np.array([1, 0, 4])),
+            (1, np.array([1, 0, 4]))
+        ])
+
     return trajectory, example_data
 
 
@@ -41,9 +63,14 @@ def test_orientation_return_type(simple_trajectory):
     assert w.shape == (3,)
 
 
-def test_trajectory_example(trajectory_example):
+@pytest.mark.parametrize("modality",
+    ["position", "velocity", "acceleration", "orientation", "angular_velocity"])
+def test_trajectory_example(trajectory_example, modality):
     trajectory, example_data = trajectory_example
+    expected_data = getattr(example_data, modality)
+    func = getattr(trajectory, modality)
 
-    for t, p in example_data.position:
-        phat = trajectory.position(t)
-        np.testing.assert_equal(p, phat)
+    assert len(expected_data) > 0, "No test data available"
+    for t, x in expected_data:
+        xhat = func(t)
+        np.testing.assert_almost_equal(x, xhat)
