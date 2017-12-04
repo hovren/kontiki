@@ -75,6 +75,10 @@ taser_add_module(taser._ceres)
 taser_add_module(taser.trajectories._constant_trajectory)
 taser_add_module(taser.trajectories._linear_trajectory)
 
+# Cameras
+taser_add_module(taser.cameras._pinhole_camera)
+taser_add_module(taser.cameras._atan_camera)
+
 # Structire from motion
 taser_add_module(taser.sfm)
 
