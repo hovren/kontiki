@@ -17,15 +17,15 @@ def trajectory_example(simple_trajectory):
 
     if cls == LinearTrajectory:
         # Example positions
-        p_ex1 = 0, np.array([-2, 0, -8])
-        p_ex2 = -1, np.array([-3, 0, -12])
+        p_ex1 = 0, np.array([-0.2, 0, -0.8])
+        p_ex2 = -1, np.array([-0.3, 0, -1.2])
         p_ex3 = 2, np.array([0, 0, 0])
         example_data.position.extend([p_ex1, p_ex2, p_ex3])
 
         # Example velocities
         example_data.velocity.extend([
-            (0, np.array([1, 0, 4])),
-            (1, np.array([1, 0, 4]))
+            (0, np.array([.1, 0, .4])),
+            (1, np.array([.1, 0, .4]))
         ])
 
         # Example accelerations
@@ -36,12 +36,13 @@ def trajectory_example(simple_trajectory):
         # Orientations
         example_data.orientation.extend([
             (2, np.array([1, 0, 0, 0])),  # t=t0 -> identity
-            (3, np.array([-0.47129323,  0.21391074,  0.        ,  0.85564297]))
+            #(3, np.array([-0.47129323,  0.21391074,  0.        ,  0.85564297])),
+            (3, np.array([ 0.97882515,  0.04964659,  0.        ,  0.19858634])),
         ])
 
         example_data.angular_velocity.extend([
-            (0, np.array([1, 0, 4])),
-            (1, np.array([1, 0, 4]))
+            (0, np.array([.1, 0, .4])),
+            (1, np.array([.1, 0, .4]))
         ])
 
     return trajectory, example_data

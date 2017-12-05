@@ -3,6 +3,7 @@ import pytest
 import numpy as np
 
 from fixtures.camera_fixtures import *
+from fixtures.sfm_fixtures import *
 
 from taser.trajectories import LinearTrajectory, ConstantTrajectory
 
@@ -18,7 +19,7 @@ def simple_trajectory(request):
 
     if cls == LinearTrajectory:
         t0 = 2
-        k = np.array([1, 0, 4])
+        k = np.array([0.1, 0, 0.4])
         trajectory = cls(t0, k)
     elif cls == ConstantTrajectory:
         k = np.array([1, 2, 3])
