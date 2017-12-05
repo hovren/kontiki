@@ -29,7 +29,7 @@ def project_camera_trajectory(X_world, t0, trajectory, camera):
     return project(t), t0 + t
 
 
-def generate_landmark(views, camera, trajectory, view_probs=None, tries=10):
+def generate_landmark(views, camera, trajectory, view_probs=None, tries=100):
     for _ in range(tries):
         i = np.random.choice(len(views), p=view_probs)
         vi = views[i]
@@ -73,7 +73,7 @@ def generate_valid_structure(camera, trajectory):
     nlandmarks = 5
     start_probs = np.exp(-0.5*np.arange(len(views)))
     start_probs /= np.sum(start_probs)
-    landmarks = [generate_landmark(views, camera, trajectory, start_probs)]
+    landmarks = [generate_landmark(views, camera, trajectory, start_probs) for _ in range(nlandmarks)]
     return views, landmarks
 
 @pytest.fixture
@@ -88,10 +88,9 @@ def small_sfm(request, camera, trajectory):
         views, landmarks = generate_valid_structure(camera, trajectory)
         save_structure(cachepath, landmarks)
 
-    # Always load fresh data from disk to ensure all tests get the same
+    # Always load fresh data from disk to ensure all tests get the same data
     print('Loading structure from cache')
     views, landmarks, _ = load_structure(cachepath)
-
 
     return views, trajectory, camera
 
