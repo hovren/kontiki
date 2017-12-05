@@ -103,6 +103,7 @@ ext_modules = [
     CameraExtension('_pinhole_camera'),
     CameraExtension('_atan_camera'),
     MeasurementExtension('_position_measurement'),
+    MeasurementExtension('_static_rscamera_measurement'),
 ]
 
 

@@ -26,3 +26,6 @@ def simple_trajectory(request):
     else:
         raise ValueError(f"Fixture simple_trajectory not available for {cls}")
     return trajectory
+
+
+trajectory = simple_trajectory
