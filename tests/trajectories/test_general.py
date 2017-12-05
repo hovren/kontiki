@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 from taser.trajectories import ConstantTrajectory, LinearTrajectory
+from taser.rotations import quat_to_rotation_matrix
 
 ExampleData = namedtuple('ExampleData',
                          ['position', 'velocity', 'acceleration', 'orientation', 'angular_velocity'])
@@ -74,3 +75,25 @@ def test_trajectory_example(trajectory_example, modality):
     for t, x in expected_data:
         xhat = func(t)
         np.testing.assert_almost_equal(x, xhat)
+
+
+def test_from_world(trajectory):
+    t = 1.0
+    Rwt = quat_to_rotation_matrix(trajectory.orientation(t))
+    pwt = trajectory.position(t)
+
+    X_world = np.random.uniform(-10, 10, size=3)
+    X_traj_expected = Rwt.T @ (X_world - pwt)
+    X_traj_actual = trajectory.from_world(X_world, t)
+    np.testing.assert_almost_equal(X_traj_actual, X_traj_expected)
+
+
+def test_to_world(trajectory):
+    t = 1.0
+    Rwt = quat_to_rotation_matrix(trajectory.orientation(t))
+    pwt = trajectory.position(t)
+
+    X_traj = np.random.uniform(-10, 10, size=3)
+    X_world_expected = Rwt @ X_traj + pwt
+    X_world_actual = trajectory.to_world(X_traj, t)
+    np.testing.assert_almost_equal(X_world_actual, X_world_expected)

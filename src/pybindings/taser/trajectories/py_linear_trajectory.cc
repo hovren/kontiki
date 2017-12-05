@@ -13,6 +13,7 @@ namespace py = pybind11;
 
 namespace TT = taser::trajectories;
 
+// FIXME: Move to helper include
 template<template<typename> typename TrajectoryModel, typename PyClass>
 void declare_trajectory_common(PyClass &cls) {
   using Class = TrajectoryModel<double>;
@@ -25,6 +26,8 @@ void declare_trajectory_common(PyClass &cls) {
     return out;
   });
   cls.def("angular_velocity", &TT::TrajectoryBase<double, TrajectoryModel<double>>::AngularVelocity);
+  cls.def("from_world", &TT::TrajectoryBase<double, TrajectoryModel<double>>::FromWorld);
+  cls.def("to_world", &TT::TrajectoryBase<double, TrajectoryModel<double>>::ToWorld);
 };
 
 void declare_linear_trajectory(py::module &m) {

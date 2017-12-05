@@ -63,6 +63,18 @@ class TrajectoryBase {
     return result->angular_velocity;
   }
 
+  // Move point from world to trajectory coordinate frame
+  Vector3 FromWorld(Vector3 &Xw, T t) {
+    Result result = static_cast<const Derived*>(this)->Evaluate(t, EvalPosition | EvalOrientation);
+    return result->orientation.conjugate() * (Xw - result->position);
+  }
+
+  // Move point from trajectory to world coordinate frame
+  Vector3 ToWorld(Vector3 &Xt, T t) {
+    Result result = static_cast<const Derived*>(this)->Evaluate(t, EvalPosition | EvalOrientation);
+    return result->orientation * Xt + result->position;
+  }
+
 };
 
 } // namespace trajectories
