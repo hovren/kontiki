@@ -10,9 +10,8 @@ ExampleData = namedtuple('ExampleData',
                          ['position', 'velocity', 'acceleration', 'orientation', 'angular_velocity'])
 
 @pytest.fixture
-def trajectory_example(simple_trajectory):
+def trajectory_example(trajectory):
     example_data = ExampleData([],[],[],[],[])
-    trajectory = simple_trajectory
     cls = trajectory.__class__
 
     if cls == LinearTrajectory:
@@ -48,20 +47,20 @@ def trajectory_example(simple_trajectory):
     return trajectory, example_data
 
 
-def test_translation_return_type(simple_trajectory):
-    p = simple_trajectory.position(0)
+def test_translation_return_type(trajectory):
+    p = trajectory.position(0)
     assert p.shape == (3,)
-    v = simple_trajectory.velocity(0)
+    v = trajectory.velocity(0)
     assert v.shape == (3,)
-    a = simple_trajectory.acceleration(0)
+    a = trajectory.acceleration(0)
     assert a.shape == (3,)
 
 
-def test_orientation_return_type(simple_trajectory):
-    q = simple_trajectory.orientation(0)
+def test_orientation_return_type(trajectory):
+    q = trajectory.orientation(0)
     assert q.shape == (4,)
     np.testing.assert_almost_equal(np.linalg.norm(q), 1)
-    w = simple_trajectory.angular_velocity(0)
+    w = trajectory.angular_velocity(0)
     assert w.shape == (3,)
 
 
