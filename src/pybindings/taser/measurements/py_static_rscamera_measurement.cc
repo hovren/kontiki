@@ -34,7 +34,7 @@ template<typename CameraModel>
 static void declare_rsstatic_measurement(py::module &m) {
   using Class = TM::StaticRsCameraMeasurement<CameraModel>;
   std::string pyclass_name = "StaticRsCameraMeasurement_" + std::string(CameraModel::CLASS_ID);
-  auto cls = py::class_<Class>(m, pyclass_name.c_str());
+  auto cls = py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str());
 
   cls.def(py::init<std::shared_ptr<CameraModel>, std::shared_ptr<taser::Landmark>, std::shared_ptr<taser::Observation>>());
 

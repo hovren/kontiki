@@ -2,11 +2,14 @@
 #include <pybind11/eigen.h>
 
 #include <Eigen/Dense>
+#include <cameras/atan.h>
 
 #include "trajectory_estimator.h"
 #include "trajectories/linear_trajectory.h"
 #include "trajectories/constant_trajectory.h"
 #include "measurements/position_measurement.h"
+#include "measurements/static_rscamera_measurement.h"
+#include "cameras/pinhole.h"
 
 namespace py = pybind11;
 
@@ -32,6 +35,7 @@ auto declare_estimator(py::module &m) {
   using TrajectoryImpl = TrajectoryModel<double>;
   using Class = taser::TrajectoryEstimator<TrajectoryModel>;
   namespace TM = taser::measurements;
+  namespace TC = taser::cameras;
 
   std::string pyclass_name = "TrajectoryEstimator_" + std::string(TrajectoryImpl::CLASS_ID);
 
@@ -44,6 +48,8 @@ auto declare_estimator(py::module &m) {
   // Add list of measurement types to this estimator type
   declare_add_measurement<Class, typeof(cls),
                           /* List of measurement types starts here */
+                          TM::StaticRsCameraMeasurement<TC::PinholeCamera>,
+                          TM::StaticRsCameraMeasurement<TC::AtanCamera>,
                           TM::PositionMeasurement>(cls);
 
   return cls;
@@ -55,6 +61,7 @@ PYBIND11_MODULE(_trajectory_estimator, m) {
   py::module::import("taser._ceres");
   py::module::import("taser.trajectories._constant_trajectory");
   py::module::import("taser.measurements._position_measurement");
+  py::module::import("taser.measurements._static_rscamera_measurement");
 
   namespace TT = taser::trajectories;
   namespace TM = taser::measurements;

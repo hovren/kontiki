@@ -9,6 +9,7 @@
 #include "sfm/observation.h"
 #include "sfm/landmark.h"
 #include "sfm/view.h"
+#include "trajectory_estimator.h"
 
 namespace TT = taser::trajectories;
 
@@ -51,6 +52,7 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref, const Observatio
   template<typename CameraImpl>
   class StaticRsCameraMeasurement {
     using Vector2 = Eigen::Vector2d;
+    using ThisType = StaticRsCameraMeasurement<CameraImpl>;
    public:
     StaticRsCameraMeasurement(std::shared_ptr<CameraImpl> camera, std::shared_ptr<Landmark> landmark, std::shared_ptr<Observation> obs)
         : camera(camera), landmark(landmark), observation(obs) {};
@@ -62,7 +64,7 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref, const Observatio
 
     template<typename T, template<typename> typename TrajectoryModel>
     Eigen::Matrix<T, 2, 1> Project(const TrajectoryModel<T> &trajectory) const {
-      return reproject_static(*landmark->reference(), *observation, landmark->inverse_depth(), trajectory, *camera);
+      return reproject_static(*landmark->reference(), *observation, T(landmark->inverse_depth()), trajectory, *camera);
     };
 
     template<typename T, template<typename> typename TrajectoryModel>
@@ -71,6 +73,59 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref, const Observatio
       return observation->uv().cast<T>() - y_hat;
     }
 
+   protected:
+
+    template<template<typename> typename TrajectoryModel>
+    struct Residual {
+      Residual(const ThisType &m) : measurement(m) {};
+
+      template <typename T>
+      bool operator()(T const* const* params, T* residual) const {
+        auto trajectory = TrajectoryModel<T>::Unpack(params, meta);
+        Eigen::Map<Eigen::Matrix<T,2,1>> r(residual);
+        r = measurement.error(trajectory);
+        return true;
+      }
+
+      const ThisType &measurement;
+      typename TrajectoryModel<double>::Meta meta;
+    }; // Residual;
+
+    template<template<typename> typename TrajectoryModel>
+    void AddToEstimator(taser::TrajectoryEstimator<TrajectoryModel>& estimator) {
+      using ResidualImpl = Residual<TrajectoryModel>;
+      auto residual = new ResidualImpl(*this);
+      auto cost_function = new ceres::DynamicAutoDiffCostFunction<ResidualImpl>(residual);
+      std::vector<double*> parameter_blocks;
+      std::vector<size_t> parameter_sizes;
+
+      // Add trajectory to problem
+      auto t0_ref = landmark->reference()->view()->t0();
+      auto t0_obs = observation->view()->t0();
+      estimator.AddTrajectoryForTimes({
+                                          {t0_ref, t0_ref + camera->readout()},
+                                          {t0_obs, t0_obs + camera->readout()}
+                                      },
+                                      residual->meta, parameter_blocks, parameter_sizes);
+      for (auto ndims : parameter_sizes) {
+        cost_function->AddParameterBlock(ndims);
+      }
+
+      // Add measurement info
+      cost_function->SetNumResiduals(2);
+
+      // Landmark inverse depth is the only extra parameter
+      double *p_rho = landmark->inverse_depth_ptr();
+      estimator.problem().AddParameterBlock(p_rho, 1);
+      parameter_blocks.push_back(p_rho);
+      cost_function->AddParameterBlock(1);
+
+      // Give residual block to Problem
+      estimator.problem().AddResidualBlock(cost_function, nullptr, parameter_blocks);
+    }
+
+    template<template<typename> typename TrajectoryModel>
+    friend class taser::TrajectoryEstimator;
   };
 } // namespace measurements
 } // namespace taser
