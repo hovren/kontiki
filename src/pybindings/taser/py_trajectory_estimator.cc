@@ -23,7 +23,7 @@ namespace TM = taser::measurements;
 
 template<
     template<typename> typename TrajectoryModel>
-auto declare_estimator(py::module &m) {
+auto declare_estimator(py::module &m, const TrajectoryModel<double>& dummy_DO_NOT_USE) {
   using TrajectoryImpl = TrajectoryModel<double>;
   using Class = taser::TrajectoryEstimator<TrajectoryModel>;
   namespace TM = taser::measurements;
@@ -49,13 +49,29 @@ auto declare_estimator(py::module &m) {
 PYBIND11_MODULE(_trajectory_estimator, m) {
   m.doc() = "Trajectory estimation class";
 
+  // Need the ceres types since solve() returns a ceres::Solver::Summary
   py::module::import("taser._ceres");
+
+  /* We don't seem to need these here
   py::module::import("taser.trajectories._constant_trajectory");
   py::module::import("taser.measurements._position_measurement");
   py::module::import("taser.measurements._static_rscamera_measurement");
+  */
 
-  namespace TT = taser::trajectories;
-  namespace TM = taser::measurements;
-  //declare_estimator<TT::ConstantTrajectory>(m);
-  declare_estimator<TT::LinearTrajectory>(m);
+  // Create estimator for each trajectory type
+  hana::for_each(trajectory_types, [&](auto t) {
+    // The following unpacks the trajectory (template) and creates the double-specialization for it
+    // An instance of the double-specialization is then used to give type information to
+    // the declare_estimator function.
+    // Not pretty, but can't find any other way since hana::template_ does not play nice
+    // with template-of-templates.
+    // A downside is that we now require that all trajectories have a default constructor.
+    using T = typename decltype(t)::type;
+    auto traj_template_t = T(); // template_t
+    auto traj_double_t = traj_template_t(hana::type_c<double>);
+    using TrajectoryModelDouble = typename decltype(traj_double_t)::type;
+
+    declare_estimator(m, TrajectoryModelDouble());
+  });
+
 }

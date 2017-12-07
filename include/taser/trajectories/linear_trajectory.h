@@ -11,7 +11,7 @@
 #include <Eigen/Dense>
 #include <ceres/ceres.h>
 
-struct _Meta {
+struct _LinearMeta {
   double t0;
 };
 
@@ -22,9 +22,9 @@ template<typename T>
 class LinearTrajectory : public TrajectoryBase<T, LinearTrajectory<T>> {
   using Vector3 = Eigen::Matrix<T, 3, 1>;
  public:
-  using Meta = _Meta;
+  using Meta = _LinearMeta;
   static constexpr const char* CLASS_ID = "Linear";
-
+  LinearTrajectory() : t0_(0), constant_(1, 1, 1) {};
   LinearTrajectory(double t0, const Vector3& k) : t0_(t0), constant_(k) {};
 
   Vector3 constant() const {

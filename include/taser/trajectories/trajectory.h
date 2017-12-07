@@ -6,6 +6,7 @@
 #define TASERV2_TRAJECTORY_H
 
 #include <Eigen/Dense>
+#include <memory>
 
 namespace taser {
 namespace trajectories {
