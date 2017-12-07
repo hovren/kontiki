@@ -5,11 +5,8 @@
 #include <boost/hana/for_each.hpp>
 
 #include "measurements/static_rscamera_measurement.h"
-#include "cameras/pinhole.h"
-#include "cameras/atan.h"
 #include "sfm/landmark.h"
 #include "sfm/observation.h"
-#include "trajectories/linear_trajectory.h"
 
 #include "../type_helpers.h"
 
