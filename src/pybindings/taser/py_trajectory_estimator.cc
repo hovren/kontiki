@@ -11,23 +11,15 @@
 #include "measurements/static_rscamera_measurement.h"
 #include "cameras/pinhole.h"
 
+#include "type_helpers.h"
+
+#include <boost/hana.hpp>
+namespace hana = boost::hana;
+
 namespace py = pybind11;
 
-// Recursion base case. Ignore this.
-template<typename Class, typename PyClass>
-void declare_add_measurement(PyClass& cls) {
-  // This shall do nothing
-};
-
-// Bind AddMeasurement<T> for all listed measurement types T
-template<typename Class, typename PyClass, typename MType, typename... MTargs>
-void declare_add_measurement(PyClass& cls) {
-  // Add first type
-  cls.def("add_measurement", (void (Class::*)(std::shared_ptr<MType>)) &Class::AddMeasurement);
-
-  // Recurse through the rest of the measurement types
-  declare_add_measurement<Class, PyClass, MTargs...>(cls);
-};
+namespace TT = taser::trajectories;
+namespace TM = taser::measurements;
 
 template<
     template<typename> typename TrajectoryModel>
@@ -45,12 +37,11 @@ auto declare_estimator(py::module &m) {
   cls.def_property_readonly("trajectory", &Class::trajectory, "Get the trajectory");
   cls.def("solve", &Class::Solve);
 
-  // Add list of measurement types to this estimator type
-  declare_add_measurement<Class, typeof(cls),
-                          /* List of measurement types starts here */
-                          TM::StaticRsCameraMeasurement<TC::PinholeCamera>,
-                          TM::StaticRsCameraMeasurement<TC::AtanCamera>,
-                          TM::PositionMeasurement>(cls);
+  // Add all known measurement types
+  hana::for_each(measurement_types, [&](auto t) {
+    using MType = typename decltype(t)::type;
+    cls.def("add_measurement", (void (Class::*)(std::shared_ptr<MType>)) &Class::AddMeasurement);
+  });
 
   return cls;
 }

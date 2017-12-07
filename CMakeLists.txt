@@ -24,6 +24,7 @@ message("Ceres inc dir: ${CERES_INCLUDE_DIRS}")
 include_directories(
     include
     include/taser
+    deps/hana/include
     ${EIGEN3_INCLUDE_DIR}
     ${CERES_INCLUDE_DIRS})
 
