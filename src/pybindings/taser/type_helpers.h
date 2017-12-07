@@ -9,6 +9,7 @@
 namespace hana = boost::hana;
 
 #include "trajectories/linear_trajectory.h"
+#include "trajectories/constant_trajectory.h"
 
 #include "cameras/pinhole.h"
 #include "cameras/atan.h"

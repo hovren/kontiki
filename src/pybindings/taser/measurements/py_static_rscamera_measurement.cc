@@ -2,6 +2,7 @@
 #include <pybind11/eigen.h>
 
 #include <Eigen/Dense>
+#include <boost/hana/for_each.hpp>
 
 #include "measurements/static_rscamera_measurement.h"
 #include "cameras/pinhole.h"
@@ -10,24 +11,14 @@
 #include "sfm/observation.h"
 #include "trajectories/linear_trajectory.h"
 
-namespace py = pybind11;
-namespace TM = taser::measurements;
-namespace TC = taser::cameras;
-namespace TT = taser::trajectories;
+#include "../type_helpers.h"
 
-template<typename Class, typename PyClass>
-static void declare_project(PyClass &cls) {
-  // Nothing
-};
+namespace py = pybind11;
 
 template<typename Class, typename PyClass,
-    template<typename> typename TrajectoryModel,
-    template<typename> typename... OtherTrajectoryModels>
-static void declare_project(PyClass &cls) {
+    template<typename> typename TrajectoryModel>
+static void declare_project(PyClass &cls, const TrajectoryModel<double> &dummy_DO_NOT_USE) {
   cls.def("project", &Class::template Project<double, TrajectoryModel>);
-
-  // Recurse through the rest of the trajectory models
-  declare_project<Class, PyClass, OtherTrajectoryModels...>(cls);
 };
 
 template<typename CameraModel>
@@ -38,15 +29,29 @@ static void declare_rsstatic_measurement(py::module &m) {
 
   cls.def(py::init<std::shared_ptr<CameraModel>, std::shared_ptr<taser::Landmark>, std::shared_ptr<taser::Observation>>());
 
-  //cls.def("project", &Class::template Project<double, TT::LinearTrajectory>);
-  declare_project<Class, typeof(cls),
-      TT::LinearTrajectory
-      >(cls);
+  // Add the project() member for all trajectory types
+  hana::for_each(trajectory_types, [&](auto t) {
+    // The following unpacks the trajectory (template) and creates the double-specialization for it
+    // An instance of the double-specialization is then used to give type information to
+    // the declare_estimator function.
+    // Not pretty, but can't find any other way since hana::template_ does not play nice
+    // with template-of-templates.
+    // A downside is that we now require that all trajectories have a default constructor.
+    using T = typename decltype(t)::type;
+    auto traj_template_t = T(); // template_t
+    auto traj_double_t = traj_template_t(hana::type_c<double>);
+    using TrajectoryModelDouble = typename decltype(traj_double_t)::type;
+
+    declare_project<Class>(cls, TrajectoryModelDouble());
+  });
 }
 
 PYBIND11_MODULE(_static_rscamera_measurement, m) {
   m.doc() = "Static rolling shutter projection";
 
-  declare_rsstatic_measurement<TC::PinholeCamera>(m);
-  declare_rsstatic_measurement<TC::AtanCamera>(m);
+  // Create one StaticRsMeasurement class for each camera type
+  hana::for_each(camera_types, [&](auto t) {
+    using T = typename decltype(t)::type;
+    declare_rsstatic_measurement<T>(m);
+  });
 }
