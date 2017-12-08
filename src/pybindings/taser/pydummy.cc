@@ -16,6 +16,17 @@ Eigen::Vector3d vector_add(Eigen::Vector3d& a, Eigen::Vector3d& b) {
 
 namespace py = pybind11;
 
+class Foo {
+ public:
+  int bar(int x) {
+    return x * 2;
+  }
+
+  int bar(float x) {
+    return x * 3;
+  }
+};
+
 PYBIND11_MODULE(dummy, m) {
 m.doc() = R"pbdoc(
         Pybind11 example plugin
@@ -30,11 +41,22 @@ m.doc() = R"pbdoc(
            subtract
     )pbdoc";
 
+py::options options;
+
+auto cls = py::class_<Foo>(m, "Foo");
+  options.disable_function_signatures();
+  options.disable_user_defined_docstrings();
+cls.def("bar", (int (Foo::*)(int)) &Foo::bar, "Do bar");
+  options.enable_user_defined_docstrings();
+cls.def("bar", (int (Foo::*)(float)) &Foo::bar, "Do bar");
+  options.enable_function_signatures();
+
 m.def("add", &add, R"pbdoc(
         Add two numbers
 
         Some other explanation about the add function.
     )pbdoc");
+
 
 m.def("subtract", [](int i, int j) { return i - j; }, R"pbdoc(
         Subtract two numbers

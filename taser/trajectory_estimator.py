@@ -14,6 +14,7 @@ class Meta(TemplateMeta):
 class TrajectoryEstimator(metaclass=Meta):
     pass
 
+
 estimator_classes = {
     name: getattr(MODULE, name) for name in dir(MODULE)
     if name.startswith('TrajectoryEstimator')
@@ -26,3 +27,10 @@ for name, impl in estimator_classes.items():
         TrajectoryEstimator.register(traj_cls, impl)
     except AttributeError:
         pass
+
+
+# import inspect
+# p = inspect.Parameter('measurement', inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=int)
+# sig = inspect.Signature([p])
+# TrajectoryEstimator.add_measurement.__func__.__signature__ = sig
+# TrajectoryEstimator.add_measurement.__func__.__doc__ = "New doc string"

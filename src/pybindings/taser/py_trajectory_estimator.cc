@@ -40,9 +40,25 @@ PYBIND11_MODULE(_trajectory_estimator, m) {
     std::string pyclass_name = "TrajectoryEstimator_" + std::string(TrajectoryImpl::CLASS_ID);
     auto cls = py::class_<Class>(m, pyclass_name.c_str());
 
+    cls.doc() = R"pbdoc(
+    Create estimator bound to the trajectory
+
+    Parameters
+    -----------------------
+    trajectory : Trajectory
+        The trajectory to estimate
+    )pbdoc";
+
     cls.def(py::init<std::shared_ptr<TrajectoryImpl>>());
     cls.def_property_readonly("trajectory", &Class::trajectory, "Get the trajectory");
-    cls.def("solve", &Class::Solve);
+    cls.def("solve", &Class::Solve, R"pbdoc(
+    Estimate trajectory and auxilliary parameters using the current measurements
+
+    Returns
+    ---------
+    taser._ceres.Summary
+        The summary
+    )pbdoc");
 
     // Add all known measurement types
     hana::for_each(measurement_types, [&](auto tm) {
@@ -53,7 +69,14 @@ PYBIND11_MODULE(_trajectory_estimator, m) {
       auto estimator_t = template_template<taser::TrajectoryEstimator>(t);
       using Class = typename decltype(estimator_t)::type;
 
-      cls.def("add_measurement", (void (Class::*)(std::shared_ptr<MType>)) &Class::AddMeasurement);
+      cls.def("add_measurement", (void (Class::*)(std::shared_ptr<MType>)) &Class::AddMeasurement, R"pbdoc(
+        Add measurement to estimation
+
+        Parameters
+        ----------
+        measurement : Measurement
+            Measurement to add
+        )pbdoc");
     });
   });
 

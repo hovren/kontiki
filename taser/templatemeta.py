@@ -262,6 +262,30 @@ class TemplateMeta(type):
         # functionality.
         return tuple(set(self._registry.values()))
 
+    def _add_class_documentation(cls, subclass):
+        cls.__doc__ = subclass.__doc__
+
+        for attr_name in dir(subclass):
+            # Only new attributes and non-special/private
+            if hasattr(cls, attr_name):
+                continue
+            if attr_name.startswith('__'):
+                continue
+
+            # Only callables
+            sub_attr = getattr(subclass, attr_name)
+            if not hasattr(sub_attr, '__call__'):
+                continue
+
+            from types import MethodType
+            def fail_on_call(_self):
+                raise NotImplementedError("This method should never be called since it lives only in the meta class")
+            fail_on_call.__name__ = attr_name
+            fail_on_call.__doc__ = sub_attr.__doc__
+            #setattr(cls, attr_name, classmethod(fail_on_call))
+            setattr(cls, attr_name, MethodType(fail_on_call, cls))
+
+
     def register(self, key, subclass):
         """Register a subclass of this ABC with the given key (a string,
         number, type, or other hashable).
@@ -282,6 +306,8 @@ class TemplateMeta(type):
             raise KeyError(
                 "Another subclass is already registered with {}".format(d)
             )
+        self._add_class_documentation(subclass)
+
 
         def setattrSafe(name, value):
             try:

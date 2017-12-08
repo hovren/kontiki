@@ -18,6 +18,8 @@ void declare_linear_trajectory(py::module &m) {
   using Class = TT::LinearTrajectory<double>;
   auto cls = py::class_<Class, std::shared_ptr<Class>>(m, "LinearTrajectory");
 
+  cls.doc() = "A linear trajectory for testing";
+
   cls.def(py::init<double, const Eigen::Vector3d &>());
   cls.def_property("constant", &Class::constant, &Class::set_constant, "ndarray: Defining constant");
   cls.def_property("t0", &Class::t0, &Class::set_t0, "Time origin");

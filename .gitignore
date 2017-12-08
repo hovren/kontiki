@@ -3,6 +3,9 @@
 *.a
 *.pyc
 
+# Documentation build artifacts
+docs/_build/
+
 # Python build artifacts
 build/
 dist/
