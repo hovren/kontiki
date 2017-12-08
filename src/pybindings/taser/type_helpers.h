@@ -17,16 +17,46 @@ namespace hana = boost::hana;
 #include "measurements/static_rscamera_measurement.h"
 #include "measurements/position_measurement.h"
 
+// Add template-of-template support to hana
+// Thanks to Jason Rice!
+#if 0
+template <template <template <typename...> class> class F>
+struct template_template_t
+{
+  template <template <typename...> class G>
+  constexpr auto operator()(hana::basic_type<hana::template_t<G>>) const
+  -> hana::type<F<G>>
+  { return {}; }
+};
+
+template <template <template <typename> class> class F>
+constexpr auto template_template = template_template_t<F>{};
+#else
+// non-ellipsis versions which actually work
+template <template <template <typename> class> class F>
+struct template_template_t
+{
+  template <template <typename> class G>
+  constexpr auto operator()(hana::basic_type<hana::template_t<G>>) const
+  -> hana::type<F<G>>
+  { return {}; }
+};
+
+template <template <template <typename> class> class F>
+constexpr auto template_template = template_template_t<F>{};
+#endif
+
+// Begin actual
 namespace TT = taser::trajectories;
 namespace TM = taser::measurements;
 namespace TC = taser::cameras;
 
-static auto trajectory_types = hana::tuple_t<
+static constexpr auto trajectory_types = hana::tuple_t<
     hana::template_t<TT::LinearTrajectory>,
     hana::template_t<TT::ConstantTrajectory>
 >;
 
-static auto camera_types = hana::tuple_t<
+static constexpr auto camera_types = hana::tuple_t<
   TC::AtanCamera,
   TC::PinholeCamera
 >;
