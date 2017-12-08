@@ -7,6 +7,7 @@ from .sfm import Landmark, View
 
 
 def save_structure(fileobj, landmarks, *, landmark_colors=None):
+    "Save SfM structure (Views and Landmarks)"
     if isinstance(fileobj, h5py.File) or isinstance(fileobj, h5py.Group):
         _save_structure_impl(fileobj, landmarks, landmark_colors)
     else:
@@ -15,6 +16,22 @@ def save_structure(fileobj, landmarks, *, landmark_colors=None):
 
 
 def load_structure(fileobj):
+    """Load SfM structure (Views and Landmarks)
+
+    Parameters
+    -----------
+    fileobj : h5py.File, h5py.Group, str
+        Either a path to a file, or an h5py file-like object.
+
+    Returns
+    -------
+    views: list of View
+        The views
+    landmarks: list of Landmark
+        Landmarks representing 3D poitns
+    landmark_colors: dict
+        Maps landmark to 8-bit RGB color
+    """
     if isinstance(fileobj, h5py.File) or isinstance(fileobj, h5py.Group):
         return _load_structure_impl(fileobj)
     else:
