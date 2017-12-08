@@ -35,6 +35,14 @@ class LinearTrajectory : public TrajectoryBase<T, LinearTrajectory<T>> {
     constant_ = k;
   }
 
+  T t0() const {
+    return t0_;
+  }
+
+  void set_t0(T x) {
+    t0_ = x;
+  }
+
   std::unique_ptr<TrajectoryEvaluation<T>> Evaluate(const T t, const int flags) const {
     auto result = std::make_unique<TrajectoryEvaluation<T>>();
     if (!flags)

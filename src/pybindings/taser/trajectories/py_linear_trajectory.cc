@@ -20,6 +20,7 @@ void declare_linear_trajectory(py::module &m) {
 
   cls.def(py::init<double, const Eigen::Vector3d &>());
   cls.def_property("constant", &Class::constant, &Class::set_constant);
+  cls.def_property("t0", &Class::t0, &Class::set_t0, "Time origin");
 
   // Common trajectory methods/properties/...
   declare_trajectory_common<TT::LinearTrajectory>(cls);
