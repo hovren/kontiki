@@ -69,7 +69,7 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref, const Observatio
     };
 
     template<typename T, template<typename> typename TrajectoryModel>
-    Eigen::Matrix<T, 2, 1> error(const TrajectoryModel<T> &trajectory) const {
+    Eigen::Matrix<T, 2, 1> Error(const TrajectoryModel<T> &trajectory) const {
       Eigen::Matrix<T,2,1> y_hat = this->Project(trajectory);
       return observation->uv().cast<T>() - y_hat;
     }
@@ -84,7 +84,7 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref, const Observatio
       bool operator()(T const* const* params, T* residual) const {
         auto trajectory = TrajectoryModel<T>::Unpack(params, meta);
         Eigen::Map<Eigen::Matrix<T,2,1>> r(residual);
-        r = measurement.error(trajectory);
+        r = measurement.Error(trajectory);
         return true;
       }
 

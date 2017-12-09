@@ -9,6 +9,7 @@
 #include "sfm/observation.h"
 
 #include "../type_helpers.h"
+#include "measurement_helper.h"
 
 namespace py = pybind11;
 
@@ -31,6 +32,7 @@ PYBIND11_MODULE(_static_rscamera_measurement, m) {
     std::string pyclass_name = "StaticRsCameraMeasurement_" + std::string(CameraModel::CLASS_ID);
     auto cls = py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str());
 
+    declare_measurement_common<Class>(cls);
     cls.def(py::init<std::shared_ptr<CameraModel>, std::shared_ptr<taser::Landmark>, std::shared_ptr<taser::Observation>>());
 
     // Declare the project() function for all trajectory types

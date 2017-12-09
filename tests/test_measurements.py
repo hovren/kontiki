@@ -18,3 +18,8 @@ def test_static(small_sfm):
         m = StaticRsCameraMeasurement(camera, lm, obs)
         yhat = m.project(trajectory)
         np.testing.assert_almost_equal(yhat, obs.uv)
+
+def test_camera_errors_size(trajectory, camera_measurements):
+    for m in camera_measurements:
+        e = m.error(trajectory)
+        assert e.size == 2
