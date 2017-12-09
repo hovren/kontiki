@@ -114,7 +114,7 @@ setup(
     author_email='hannes.ovren@liu.se',
     description='Trajectory and structure estimation',
     long_description='',
-    pacakges=find_packages(),
+    packages=find_packages(),
     ext_modules=ext_modules,
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
