@@ -27,13 +27,12 @@ PYBIND11_MODULE(_trajectory_estimator, m) {
   // Create estimator for each trajectory type
   hana::for_each(trajectory_types, [&](auto t) {
     // Unpack trajectory type
-    using T = typename decltype(t)::type;
-    auto traj_template = T();
-    auto traj_double = traj_template(hana::type_c<double>);
-    using TrajectoryImpl = typename decltype(traj_double)::type;
+    auto traj_double_type = t(hana::type_c<double>);
+    using TrajectoryImpl = typename decltype(traj_double_type)::type;
 
-    // Unpack estimator type
-    auto estimator_t = template_template<taser::TrajectoryEstimator>(t);
+    // Define estimator type
+    auto estimator_template = template_template_t<taser::TrajectoryEstimator>{};
+    auto estimator_t = estimator_template(hana::type_c<decltype(t)>);
     using Class = typename decltype(estimator_t)::type;
 
     // Begin python class binding for TrajectoryEstimator<TrajectoryModel>
@@ -50,7 +49,7 @@ PYBIND11_MODULE(_trajectory_estimator, m) {
       using MType = typename decltype(tm)::type;
 
       // Unpack estimator type again, because of some reason
-      auto estimator_t = template_template<taser::TrajectoryEstimator>(t);
+      auto estimator_t = estimator_template(hana::type_c<decltype(t)>);
       using Class = typename decltype(estimator_t)::type;
 
       cls.def("add_measurement", (void (Class::*)(std::shared_ptr<MType>)) &Class::AddMeasurement);

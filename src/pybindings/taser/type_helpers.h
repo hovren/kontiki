@@ -51,10 +51,10 @@ namespace TT = taser::trajectories;
 namespace TM = taser::measurements;
 namespace TC = taser::cameras;
 
-static constexpr auto trajectory_types = hana::tuple_t<
+static constexpr auto trajectory_types = hana::tuple<
     hana::template_t<TT::LinearTrajectory>,
     hana::template_t<TT::ConstantTrajectory>
->;
+>{};
 
 static constexpr auto camera_types = hana::tuple_t<
   TC::AtanCamera,
