@@ -3,6 +3,7 @@ import pytest
 import numpy as np
 
 from taser.cameras import PinholeCamera, AtanCamera
+from taser.rotations import random_quaternion
 
 IMAGE_ROWS = 1080
 IMAGE_COLS = 1920
@@ -13,6 +14,10 @@ ATAN_K = np.array([[853.12703455, 0., 988.06311256],
                    [0., 0., 1.]])
 ATAN_WC = np.array([0.0029110778971412417, 0.0004189670467132041])#.reshape(2,1)
 ATAN_GAMMA = 0.8894355177968156
+
+@pytest.fixture
+def relative_pose():
+    return random_quaternion(), np.random.uniform(-1, 1, size=3)
 
 @pytest.fixture
 def pinhole_camera():
@@ -33,9 +38,11 @@ camera_classes = {
 
 
 @pytest.fixture(params=camera_classes)
-def camera(request):
+def camera(request, relative_pose):
     cls = request.param
     try:
-        return camera_classes[cls]()
+        instance = camera_classes[cls]()
     except KeyError:
         raise NotImplementedError(f"Fixture for {cls} not implemented")
+    instance.relative_pose = relative_pose
+    return instance

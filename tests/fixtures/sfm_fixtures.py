@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 import numpy as np
+import h5py
 
 from taser.sfm import View, Landmark
 from taser.io import load_structure, save_structure
@@ -13,7 +14,7 @@ def project_camera_trajectory(X_world, t0, trajectory, camera):
         X_traj = trajectory.from_world(X_world, t0 + t)
 
         # Trajectory -> Camera
-        X_camera = X_traj
+        X_camera = camera.from_trajectory(X_traj)
 
         if X_camera[2] <= 0:
             raise ValueError("Behind camera")
@@ -29,7 +30,7 @@ def project_camera_trajectory(X_world, t0, trajectory, camera):
     return project(t), t0 + t
 
 
-def generate_landmark(views, camera, trajectory, view_probs=None, tries=100):
+def generate_landmark(views, camera, trajectory, view_probs=None, tries=1000):
     for _ in range(tries):
         i = np.random.choice(len(views), p=view_probs)
         vi = views[i]
@@ -39,7 +40,7 @@ def generate_landmark(views, camera, trajectory, view_probs=None, tries=100):
         y0 = np.array([u, v])
         z0 = np.random.uniform(0.5, 100)
         X_camera = z0 * camera.unproject(y0)
-        X_trajectory = X_camera
+        X_trajectory = camera.to_trajectory(X_camera)
         t = vi.t0 + v * camera.readout / camera.rows
         X_world = trajectory.to_world(X_trajectory, t)
 
@@ -76,22 +77,37 @@ def generate_valid_structure(camera, trajectory):
     landmarks = [generate_landmark(views, camera, trajectory, start_probs) for _ in range(nlandmarks)]
     return views, landmarks
 
+
+def save_relpose(path, relpose):
+    with h5py.File(str(path), 'w') as f:
+        q_ct, p_ct = relpose
+        f['q_ct'] = q_ct
+        f['p_ct'] = p_ct
+
+
+def load_relpose(path):
+    with h5py.File(str(path), 'r') as f:
+        return f['q_ct'].value, f['p_ct'].value
+
+
 @pytest.fixture
 def small_sfm(request, camera, trajectory):
     # Load world points from cache if possible, otherwise generate it
+    # Since the camera fixture randomly generates a relative pose we must store that as well
     camera_id = camera.__class__.__name__.split('Camera')[0]
     traj_id = trajectory.__class__.__name__.split('Trajectory')[0]
     cachedir = Path(request.config.cache.makedir('structure'))
-    cachepath = cachedir / f'{traj_id}{camera_id}_structure.h5'
-    if not cachepath.exists():
-        print('Generating structure')
+    structpath = cachedir / f'{traj_id}{camera_id}_structure.h5'
+    relposepath = cachedir / f'{traj_id}{camera_id}_camera.h5'
+    if not (structpath.exists() and relposepath.exists()):
+        print('Generating structure and relative pose')
         views, landmarks = generate_valid_structure(camera, trajectory)
-        save_structure(cachepath, landmarks)
+        save_structure(structpath, landmarks)
+        save_relpose(relposepath, camera.relative_pose)
 
     # Always load fresh data from disk to ensure all tests get the same data
     print('Loading structure from cache')
-    views, landmarks, _ = load_structure(cachepath)
+    views, landmarks, _ = load_structure(structpath)
+    camera.relative_pose = load_relpose(relposepath)
 
     return views, trajectory, camera
-
-

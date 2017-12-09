@@ -10,6 +10,7 @@
 #include "sfm/landmark.h"
 #include "sfm/view.h"
 #include "trajectory_estimator.h"
+#include "cameras/camera.h"
 
 namespace TT = taser::trajectories;
 
@@ -32,9 +33,9 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref, const Observatio
   auto eval_ref = trajectory.Evaluate(t_ref, TT::EvalPosition | TT::EvalOrientation);
   auto eval_obs = trajectory.Evaluate(t_obs, TT::EvalPosition | TT::EvalOrientation);
 
-  // FIXME: Relative rotation! (Moved to camera?)
-  Vector3 p_ct = Vector3::Zero();
-  Eigen::Quaternion<T> q_ct = Eigen::Quaternion<T>::Identity();
+  const taser::cameras::RelativePose &rel_pose = camera.relative_pose();
+  const Vector3 p_ct = rel_pose.translation.cast<T>();
+  const Eigen::Quaternion<T> q_ct = rel_pose.orientation.cast<T>();
 
   Vector2 y = ref.uv().cast<T>();
   Vector3 yh = camera.Unproject(y);

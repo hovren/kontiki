@@ -4,12 +4,8 @@ from numpy.testing import assert_almost_equal, assert_equal
 
 from taser.cameras import AtanCamera
 from taser.rotations import random_quaternion, quat_to_rotation_matrix
-from fixtures.camera_fixtures import CAMERA_READOUT, IMAGE_ROWS, IMAGE_COLS, ATAN_K, ATAN_WC, ATAN_GAMMA
+from fixtures.camera_fixtures import relative_pose, CAMERA_READOUT, IMAGE_ROWS, IMAGE_COLS, ATAN_K, ATAN_WC, ATAN_GAMMA
 
-
-@pytest.fixture
-def relative_pose():
-    return random_quaternion(), np.random.uniform(-1, 1, size=3)
 
 def random_image_point(camera):
     u = np.random.uniform(0, camera.cols)
@@ -40,11 +36,6 @@ def test_project_unproject(camera):
     assert_almost_equal(yhat, y)
 
 
-def test_project_unproject_relative_pose(camera, relative_pose):
-    camera.relative_pose = relative_pose
-    test_project_unproject(camera)
-
-
 def test_pinhole(pinhole_camera):
     camera = pinhole_camera
     K = np.random.uniform(0, 20, size=(3,3))
@@ -68,8 +59,8 @@ def test_atan(atan_camera):
     assert camera.gamma == gamma
 
 
-def test_relative_pose_set_get(camera, relative_pose):
-    q_ct, p_ct = relative_pose
+def test_relative_pose_set_get(camera):
+    q_ct, p_ct = relative_pose()
     camera.relative_pose = q_ct, p_ct
 
     qhat_ct, phat_ct = camera.relative_pose
@@ -77,19 +68,17 @@ def test_relative_pose_set_get(camera, relative_pose):
     assert_equal(phat_ct, p_ct)
 
 
-def test_relative_pose_argument_order(camera, relative_pose):
-    q_ct, p_ct = relative_pose
+def test_relative_pose_argument_order(camera):
+    q_ct, p_ct = relative_pose()
     camera.relative_pose = q_ct, p_ct # OK
 
     with pytest.raises(TypeError):
         camera.relative_pose = p_ct, q_ct # Error
 
 
-def test_from_trajectory(camera, relative_pose):
-    q_ct, p_ct = relative_pose
+def test_from_trajectory(camera):
+    q_ct, p_ct = camera.relative_pose
     R_ct = quat_to_rotation_matrix(q_ct)
-    # Set a new relative pose
-    camera.relative_pose = relative_pose
 
     X_trajectory = np.random.uniform(-3, 3, size=3)
     X_camera_true = R_ct @ X_trajectory + p_ct
@@ -97,11 +86,10 @@ def test_from_trajectory(camera, relative_pose):
     assert_almost_equal(X_camera_actual, X_camera_true)
 
 
-def test_to_trajectory(camera, relative_pose):
-    q_ct, p_ct = relative_pose
+def test_to_trajectory(camera):
+    q_ct, p_ct = camera.relative_pose
+    print(q_ct, p_ct)
     R_ct = quat_to_rotation_matrix(q_ct)
-    # Set a new relative pose
-    camera.relative_pose = relative_pose
 
     X_camera = np.random.uniform(-3, 3, size=3)
     X_trajectory_true = R_ct.T @ (X_camera - p_ct)
