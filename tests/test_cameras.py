@@ -3,7 +3,18 @@ import pytest
 from numpy.testing import assert_almost_equal, assert_equal
 
 from taser.cameras import AtanCamera
+from taser.rotations import random_quaternion, quat_to_rotation_matrix
 from fixtures.camera_fixtures import CAMERA_READOUT, IMAGE_ROWS, IMAGE_COLS, ATAN_K, ATAN_WC, ATAN_GAMMA
+
+
+@pytest.fixture
+def relative_pose():
+    return random_quaternion(), np.random.uniform(-1, 1, size=3)
+
+def random_image_point(camera):
+    u = np.random.uniform(0, camera.cols)
+    v = np.random.uniform(0, camera.rows)
+    return np.array([u, v])
 
 def test_basic(camera):
     assert camera.readout == CAMERA_READOUT
@@ -22,13 +33,16 @@ def test_basic(camera):
 
 
 def test_project_unproject(camera):
-    u = np.random.uniform(0, IMAGE_COLS-1)
-    v = np.random.uniform(0, IMAGE_ROWS-1)
-    y = np.array([u, v])
+    y = random_image_point(camera)
     X = camera.unproject(y) * np.random.uniform(0.01, 10)
     yhat = camera.project(X)
 
     assert_almost_equal(yhat, y)
+
+
+def test_project_unproject_relative_pose(camera, relative_pose):
+    camera.relative_pose = relative_pose
+    test_project_unproject(camera)
 
 
 def test_pinhole(pinhole_camera):
@@ -52,7 +66,49 @@ def test_atan(atan_camera):
     gamma = np.random.uniform(0, 1)
     camera.gamma = gamma
     assert camera.gamma == gamma
-    
+
+
+def test_relative_pose_set_get(camera, relative_pose):
+    q_ct, p_ct = relative_pose
+    camera.relative_pose = q_ct, p_ct
+
+    qhat_ct, phat_ct = camera.relative_pose
+    assert_equal(qhat_ct, q_ct)
+    assert_equal(phat_ct, p_ct)
+
+
+def test_relative_pose_argument_order(camera, relative_pose):
+    q_ct, p_ct = relative_pose
+    camera.relative_pose = q_ct, p_ct # OK
+
+    with pytest.raises(TypeError):
+        camera.relative_pose = p_ct, q_ct # Error
+
+
+def test_from_trajectory(camera, relative_pose):
+    q_ct, p_ct = relative_pose
+    R_ct = quat_to_rotation_matrix(q_ct)
+    # Set a new relative pose
+    camera.relative_pose = relative_pose
+
+    X_trajectory = np.random.uniform(-3, 3, size=3)
+    X_camera_true = R_ct @ X_trajectory + p_ct
+    X_camera_actual = camera.from_trajectory(X_trajectory)
+    assert_almost_equal(X_camera_actual, X_camera_true)
+
+
+def test_to_trajectory(camera, relative_pose):
+    q_ct, p_ct = relative_pose
+    R_ct = quat_to_rotation_matrix(q_ct)
+    # Set a new relative pose
+    camera.relative_pose = relative_pose
+
+    X_camera = np.random.uniform(-3, 3, size=3)
+    X_trajectory_true = R_ct.T @ (X_camera - p_ct)
+    X_trajectory_actual = camera.to_trajectory(X_camera)
+    assert_almost_equal(X_trajectory_actual, X_trajectory_true)
+
+
 # Creating the camera should not depend on which constructor is used!
 def test_atan_create_unproject():
     # Using full constructor

@@ -14,7 +14,7 @@
 namespace taser {
 namespace cameras {
 
-class PinholeCamera : public CameraBase {
+class PinholeCamera : public CameraBase<PinholeCamera> {
  public:
   static constexpr const char *CLASS_ID = "Pinhole";
   using CameraMatrix = Eigen::Matrix3d;
