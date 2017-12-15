@@ -12,6 +12,7 @@
 #include "cameras/pinhole.h"
 
 #include "type_helpers.h"
+#include "../../../deps/pybind11/include/pybind11/attr.h"
 
 #include <boost/hana.hpp>
 namespace hana = boost::hana;
@@ -52,7 +53,8 @@ PYBIND11_MODULE(_trajectory_estimator, m) {
       auto estimator_t = estimator_template(hana::type_c<decltype(t)>);
       using Class = typename decltype(estimator_t)::type;
 
-      cls.def("add_measurement", (void (Class::*)(std::shared_ptr<MType>)) &Class::AddMeasurement);
+      cls.def("add_measurement", (void (Class::*)(std::shared_ptr<MType>)) &Class::AddMeasurement,
+        py::keep_alive<1, 2>()); // Keep measurement (2) alive as long as the estimator (1)
     });
   });
 
