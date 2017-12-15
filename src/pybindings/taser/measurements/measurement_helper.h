@@ -10,7 +10,10 @@
 
 template<typename Class, typename PyClass, template<typename> typename TrajectoryModel>
 static void declare_error_for_trajectory(PyClass &cls, const TrajectoryModel<double>& dummy_DO_NOT_USE) {
-  cls.def("error", &Class::template Error<double, TrajectoryModel>);
+  // Since multiple versions of the Error function exists, we bind to a lambda that calls the right one
+  cls.def("error", [](Class &self, const TrajectoryModel<double>& trajectory){
+    return self.Error(trajectory);
+  });
 };
 
 template<typename Class, typename PyClass>

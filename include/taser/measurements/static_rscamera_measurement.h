@@ -74,6 +74,11 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref, const Observatio
       return observation->uv().cast<T>() - y_hat;
     }
 
+    template<typename T, template<typename> typename TrajectoryModel>
+    Eigen::Matrix<T, 2, 1> Error(const TrajectoryModel<T> &trajectory) const {
+      return Error(trajectory, T(landmark->inverse_depth()));
+    }
+
    protected:
 
     template<template<typename> typename TrajectoryModel>
