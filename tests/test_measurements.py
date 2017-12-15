@@ -18,6 +18,18 @@ def test_static(small_sfm):
         m = StaticRsCameraMeasurement(camera, obs)
         yhat = m.project(trajectory)
         np.testing.assert_almost_equal(yhat, obs.uv)
+def test_static_attribute_access(camera):
+    lm = Landmark()
+    views = [View(i, i/30) for i in range(2)]
+
+    ref, obs = [v.create_observation(lm, np.random.uniform(0, camera.cols), np.random.uniform(0, camera.rows))
+                for v in views]
+    lm.reference = ref
+
+    m = StaticRsCameraMeasurement(camera, obs)
+    assert m.camera is camera
+    assert m.observation is obs
+
 
 def test_camera_errors_size(trajectory, camera_measurements):
     for m in camera_measurements:
