@@ -18,7 +18,10 @@ namespace py = pybind11;
 template<typename Class, typename PyClass,
     template<typename> typename TrajectoryModel>
 static void declare_project(PyClass &cls, const TrajectoryModel<double> &dummy_DO_NOT_USE) {
-  cls.def("project", &Class::template Project<double, TrajectoryModel>);
+  // Since multiple versions of the Project function exists, we bind to a lambda that calls the right one
+  cls.def("project", [](Class &self, const TrajectoryModel<double>& trajectory) {
+    return self.Project(trajectory);
+  });
 };
 
 PYBIND11_MODULE(_static_rscamera_measurement, m) {
