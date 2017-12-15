@@ -64,13 +64,13 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref, const Observatio
     std::shared_ptr<taser::Observation> observation;
 
     template<typename T, template<typename> typename TrajectoryModel>
-    Eigen::Matrix<T, 2, 1> Project(const TrajectoryModel<T> &trajectory) const {
-      return reproject_static(*landmark->reference(), *observation, T(landmark->inverse_depth()), trajectory, *camera);
+    Eigen::Matrix<T, 2, 1> Project(const TrajectoryModel<T> &trajectory, const T inverse_depth) const {
+      return reproject_static(*landmark->reference(), *observation, inverse_depth, trajectory, *camera);
     };
 
     template<typename T, template<typename> typename TrajectoryModel>
-    Eigen::Matrix<T, 2, 1> Error(const TrajectoryModel<T> &trajectory) const {
-      Eigen::Matrix<T,2,1> y_hat = this->Project(trajectory);
+    Eigen::Matrix<T, 2, 1> Error(const TrajectoryModel<T> &trajectory, const T inverse_depth) const {
+      Eigen::Matrix<T,2,1> y_hat = this->Project(trajectory, inverse_depth);
       return observation->uv().cast<T>() - y_hat;
     }
 
@@ -83,8 +83,9 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref, const Observatio
       template <typename T>
       bool operator()(T const* const* params, T* residual) const {
         TrajectoryModel<T> trajectory(params, meta);
+        T inverse_depth = params[meta.num_parameters()][0];
         Eigen::Map<Eigen::Matrix<T,2,1>> r(residual);
-        r = measurement.Error(trajectory);
+        r = measurement.Error(trajectory, inverse_depth);
         return true;
       }
 
