@@ -26,6 +26,10 @@ class LinearTrajectory : public TrajectoryBase<T, LinearTrajectory<T>> {
   static constexpr const char* CLASS_ID = "Linear";
   LinearTrajectory() : t0_(0), constant_(1, 1, 1) {};
   LinearTrajectory(double t0, const Vector3& k) : t0_(t0), constant_(k) {};
+  LinearTrajectory(T const* const* params, const Meta& meta) {
+    constant_ = Eigen::Map<const Eigen::Matrix<T, 3, 1>>(&params[0][0]);
+    t0_ = meta.t0;
+  }
 
   Vector3 constant() const {
     return constant_;
@@ -58,13 +62,6 @@ class LinearTrajectory : public TrajectoryBase<T, LinearTrajectory<T>> {
     if (flags & EvalAngularVelocity)
       result->angular_velocity = constant_;
     return result;
-  }
-
-  static LinearTrajectory<T>
-  Unpack(T const* const* params, const Meta& meta) {
-    Eigen::Map<const Eigen::Matrix<T, 3, 1>> constant(&params[0][0]);
-    LinearTrajectory<T> trajectory(meta.t0, constant);
-    return trajectory;
   }
 
   // Add to problem, fill Meta struct, return parameter blocks

@@ -29,6 +29,9 @@ class ConstantTrajectory : public TrajectoryBase<T, ConstantTrajectory<T>> {
 
   ConstantTrajectory() : constant_(1, 2, 3) {};
   ConstantTrajectory(const Vector3& k) : constant_(k) {};
+  ConstantTrajectory(T const* const* params, const Meta& meta) {
+    constant_ = Eigen::Map<const Eigen::Matrix<T, 3, 1>>(&params[0][0]);
+  }
 
   Vector3 constant() const {
     return constant_;
@@ -67,13 +70,6 @@ class ConstantTrajectory : public TrajectoryBase<T, ConstantTrajectory<T>> {
     estimator.problem().AddParameterBlock(constant_.data(), 3);
     parameter_blocks.push_back(constant_.data());
     parameter_sizes.push_back(3);
-  }
-
-  static ConstantTrajectory<T>
-  Unpack(T const* const* params, const Meta& meta) {
-    Eigen::Map<const Eigen::Matrix<T, 3, 1>> constant(&params[0][0]);
-    ConstantTrajectory<T> trajectory(constant);
-    return trajectory;
   }
 
  protected:

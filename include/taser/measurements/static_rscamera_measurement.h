@@ -82,7 +82,7 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref, const Observatio
 
       template <typename T>
       bool operator()(T const* const* params, T* residual) const {
-        auto trajectory = TrajectoryModel<T>::Unpack(params, meta);
+        TrajectoryModel<T> trajectory(params, meta);
         Eigen::Map<Eigen::Matrix<T,2,1>> r(residual);
         r = measurement.Error(trajectory);
         return true;
