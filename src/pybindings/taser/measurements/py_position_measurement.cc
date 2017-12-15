@@ -3,6 +3,7 @@
 
 #include <Eigen/Dense>
 
+#include "measurement_helper.h"
 #include "measurements/position_measurement.h"
 
 namespace py = pybind11;
@@ -14,7 +15,5 @@ PYBIND11_MODULE(_position_measurement, m) {
   auto cls = py::class_<Class, std::shared_ptr<Class>>(m, "PositionMeasurement");
   cls.def(py::init<double, const Eigen::Vector3d &>());
 
-  using Class2 = taser::measurements::AnotherMeasurement;
-  auto cls2 = py::class_<Class2, std::shared_ptr<Class2>>(m, "AnotherMeasurement");
-  cls2.def(py::init<double, const Eigen::Vector3d &>());
+  declare_measurement_common<Class>(cls);
 }
