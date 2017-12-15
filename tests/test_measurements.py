@@ -18,6 +18,8 @@ def test_static(small_sfm):
         m = StaticRsCameraMeasurement(camera, obs)
         yhat = m.project(trajectory)
         np.testing.assert_almost_equal(yhat, obs.uv)
+
+        
 def test_static_attribute_access(camera):
     lm = Landmark()
     views = [View(i, i/30) for i in range(2)]
