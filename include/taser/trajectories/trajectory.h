@@ -11,6 +11,11 @@
 namespace taser {
 namespace trajectories {
 
+struct MetaBase {
+  // This meta uses how many parameters?
+  virtual int num_parameters() const = 0;
+};
+
 template<typename T>
 struct TrajectoryEvaluation {
   using Vector3 = Eigen::Matrix<T, 3, 1>;

@@ -10,8 +10,10 @@
 
 #include <Eigen/Dense>
 
-struct _ConstantMeta {
-
+struct _ConstantMeta : public taser::trajectories::MetaBase {
+  int num_parameters() const override {
+    return 0;
+  }
 };
 
 namespace taser {

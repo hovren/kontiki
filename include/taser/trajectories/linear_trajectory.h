@@ -11,8 +11,12 @@
 #include <Eigen/Dense>
 #include <ceres/ceres.h>
 
-struct _LinearMeta {
+struct _LinearMeta : public taser::trajectories::MetaBase {
   double t0;
+
+  int num_parameters() const override {
+    return 0;
+  }
 };
 
 namespace taser {
