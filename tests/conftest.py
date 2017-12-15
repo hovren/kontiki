@@ -45,7 +45,7 @@ def camera_measurements(request, small_sfm):
     for lm in landmarks:
         for obs in lm.observations:
             if obs is not lm.reference:
-                m = MeasurementClass(camera, lm, obs)
+                m = MeasurementClass(camera, obs)
                 measurements.append(m)
     return measurements
 

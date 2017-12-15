@@ -15,7 +15,7 @@ def test_static(small_sfm):
     # Make sure the measurements agree
     assert len(lm.observations) >= 2
     for obs in lm.observations[1:]:
-        m = StaticRsCameraMeasurement(camera, lm, obs)
+        m = StaticRsCameraMeasurement(camera, obs)
         yhat = m.project(trajectory)
         np.testing.assert_almost_equal(yhat, obs.uv)
 

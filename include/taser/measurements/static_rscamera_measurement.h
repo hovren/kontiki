@@ -55,22 +55,21 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref, const Observatio
     using Vector2 = Eigen::Vector2d;
     using ThisType = StaticRsCameraMeasurement<CameraImpl>;
    public:
-    StaticRsCameraMeasurement(std::shared_ptr<CameraImpl> camera, std::shared_ptr<Landmark> landmark, std::shared_ptr<Observation> obs)
-        : camera(camera), landmark(landmark), observation(obs) {};
+    StaticRsCameraMeasurement(std::shared_ptr<CameraImpl> camera, std::shared_ptr<Observation> obs)
+        : camera(camera), observation(obs) {};
 
     std::shared_ptr<CameraImpl> camera;
     // Measurement data
-    std::shared_ptr<taser::Landmark> landmark;
     std::shared_ptr<taser::Observation> observation;
 
     template<typename T, template<typename> typename TrajectoryModel>
     Eigen::Matrix<T, 2, 1> Project(const TrajectoryModel<T> &trajectory, const T inverse_depth) const {
-      return reproject_static(*landmark->reference(), *observation, inverse_depth, trajectory, *camera);
+      return reproject_static(*observation->landmark()->reference(), *observation, inverse_depth, trajectory, *camera);
     };
 
     template<typename T, template<typename> typename TrajectoryModel>
     Eigen::Matrix<T, 2, 1> Project(const TrajectoryModel<T> &trajectory) const {
-      return Project(trajectory, T(landmark->inverse_depth()));
+      return Project(trajectory, T(observation->landmark()->inverse_depth()));
     };
 
     template<typename T, template<typename> typename TrajectoryModel>
@@ -81,7 +80,7 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref, const Observatio
 
     template<typename T, template<typename> typename TrajectoryModel>
     Eigen::Matrix<T, 2, 1> Error(const TrajectoryModel<T> &trajectory) const {
-      return Error(trajectory, T(landmark->inverse_depth()));
+      return Error(trajectory, T(observation->landmark()->inverse_depth()));
     }
 
    protected:
@@ -112,6 +111,7 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref, const Observatio
       std::vector<size_t> parameter_sizes;
 
       // Add trajectory to problem
+      const auto landmark = observation->landmark();
       auto t0_ref = landmark->reference()->view()->t0();
       auto t0_obs = observation->view()->t0();
       estimator.AddTrajectoryForTimes({

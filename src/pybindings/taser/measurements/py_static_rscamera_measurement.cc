@@ -36,7 +36,7 @@ PYBIND11_MODULE(_static_rscamera_measurement, m) {
     auto cls = py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str());
 
     declare_measurement_common<Class>(cls);
-    cls.def(py::init<std::shared_ptr<CameraModel>, std::shared_ptr<taser::Landmark>, std::shared_ptr<taser::Observation>>());
+    cls.def(py::init<std::shared_ptr<CameraModel>, std::shared_ptr<taser::Observation>>());
 
     // Declare the project() function for all trajectory types
     hana::for_each(trajectory_types, [&](auto t) {
