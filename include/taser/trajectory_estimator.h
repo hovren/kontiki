@@ -50,9 +50,11 @@ class TrajectoryEstimator {
     return problem_;
   }
 
-  bool AddTrajectoryForTimes(time_init_t times, Meta &meta,
-                             std::vector<double *> &parameter_blocks, std::vector<size_t> &parameter_sizes) {
-    trajectory_->AddToEstimator(*this, meta, parameter_blocks, parameter_sizes);
+  bool AddTrajectoryForTimes(const time_init_t &times,
+                             Meta &meta,
+                             std::vector<double *> &parameter_blocks,
+                             std::vector<size_t> &parameter_sizes) {
+    trajectory_->AddToEstimator(*this, times, meta, parameter_blocks, parameter_sizes);
   }
 
  protected:

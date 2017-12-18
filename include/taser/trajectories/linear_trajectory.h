@@ -69,9 +69,11 @@ class LinearTrajectory : public TrajectoryBase<T, LinearTrajectory<T>> {
   }
 
   // Add to problem, fill Meta struct, return parameter blocks
-  void AddToEstimator(TrajectoryEstimator<LinearTrajectory> &estimator, Meta& meta,
-                    std::vector<double*> &parameter_blocks,
-                    std::vector<size_t> &parameter_sizes) {
+  void AddToEstimator(TrajectoryEstimator<LinearTrajectory> &estimator,
+                      const time_init_t &times,
+                      Meta& meta,
+                      std::vector<double*> &parameter_blocks,
+                      std::vector<size_t> &parameter_sizes) {
     // Fill meta
     meta.t0 = t0_;
 
