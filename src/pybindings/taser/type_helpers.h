@@ -52,14 +52,18 @@ namespace TM = taser::measurements;
 namespace TC = taser::cameras;
 
 static constexpr auto trajectory_types = hana::tuple<
-    hana::template_t<TT::LinearTrajectory>,
-    hana::template_t<TT::ConstantTrajectory>
+    hana::template_t<TT::LinearTrajectory>//,
+//    hana::template_t<TT::ConstantTrajectory>
 >{};
 
+# if 0
 static constexpr auto camera_types = hana::tuple_t<
   TC::AtanCamera,
   TC::PinholeCamera
 >;
+#else
+static constexpr auto camera_types = hana::tuple_t<>;
+#endif
 
 static auto make_cam_meas = [](auto mtype, auto ctype) {
   using MeasType = typename decltype(mtype)::type;

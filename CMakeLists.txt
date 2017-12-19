@@ -67,18 +67,18 @@ function(taser_add_module module)
 endfunction()
 
 # Dummy module for testing
-taser_add_module(taser.dummy)
+#taser_add_module(taser.dummy)
 
 # Ceres types
 taser_add_module(taser._ceres)
 
 # Trajectories
-taser_add_module(taser.trajectories._constant_trajectory)
+#taser_add_module(taser.trajectories._constant_trajectory)
 taser_add_module(taser.trajectories._linear_trajectory)
 
 # Cameras
-taser_add_module(taser.cameras._pinhole_camera)
-taser_add_module(taser.cameras._atan_camera)
+#taser_add_module(taser.cameras._pinhole_camera)
+#taser_add_module(taser.cameras._atan_camera)
 
 # Structire from motion
 taser_add_module(taser.sfm)
@@ -88,4 +88,4 @@ taser_add_module(taser._trajectory_estimator)
 
 # Measurements
 taser_add_module(taser.measurements._position_measurement)
-taser_add_module(taser.measurements._static_rscamera_measurement)
+#taser_add_module(taser.measurements._static_rscamera_measurement)

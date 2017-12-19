@@ -10,7 +10,7 @@ from taser.measurements import PositionMeasurement, StaticRsCameraMeasurement
 
 trajectory_classes = [
     LinearTrajectory,
-    ConstantTrajectory,
+#    ConstantTrajectory,
 ]
 
 @pytest.fixture(params=trajectory_classes)

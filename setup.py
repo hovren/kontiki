@@ -94,16 +94,16 @@ class CameraExtension(TaserExtension):
         super().__init__('cameras.' + module)
 
 ext_modules = [
-    TaserExtension('dummy'),
-    TaserExtension('sfm'),
+#    TaserExtension('dummy'),
+#    TaserExtension('sfm'),
     TaserExtension('_trajectory_estimator'),
     TaserExtension('_ceres'),
-    TrajectoryExtension('_constant_trajectory'),
+#    TrajectoryExtension('_constant_trajectory'),
     TrajectoryExtension('_linear_trajectory'),
-    CameraExtension('_pinhole_camera'),
-    CameraExtension('_atan_camera'),
+#    CameraExtension('_pinhole_camera'),
+#    CameraExtension('_atan_camera'),
     MeasurementExtension('_position_measurement'),
-    MeasurementExtension('_static_rscamera_measurement'),
+#    MeasurementExtension('_static_rscamera_measurement'),
 ]
 
 
