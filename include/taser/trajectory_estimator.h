@@ -19,13 +19,12 @@ struct EstimatorOptions {
   std::vector<time_span_t> constant_trajectory_spans;
 };
 
-template <template<typename> typename TrajectoryModel>
+template <typename TrajectoryModel>
 class TrajectoryEstimator {
-  using TrajectoryImpl = TrajectoryModel<double>;
-  using Meta = typename TrajectoryImpl::Meta;
+  using Meta = typename TrajectoryModel::Meta;
 
  public:
-  TrajectoryEstimator(std::shared_ptr<TrajectoryImpl> trajectory) : trajectory_(trajectory) {};
+  TrajectoryEstimator(std::shared_ptr<TrajectoryModel> trajectory) : trajectory_(trajectory) {};
 
   auto trajectory() const {
     return trajectory_;
@@ -58,7 +57,7 @@ class TrajectoryEstimator {
   }
 
  protected:
-  std::shared_ptr<TrajectoryImpl> trajectory_;
+  std::shared_ptr<TrajectoryModel> trajectory_;
   ceres::Problem problem_;
 };
 

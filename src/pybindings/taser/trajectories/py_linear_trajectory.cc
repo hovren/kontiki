@@ -15,7 +15,7 @@ namespace py = pybind11;
 namespace TT = taser::trajectories;
 
 void declare_linear_trajectory(py::module &m) {
-  using Class = TT::LinearTrajectory<double>;
+  using Class = TT::LinearTrajectory;
   auto cls = py::class_<Class, std::shared_ptr<Class>>(m, "LinearTrajectory");
 
   cls.def(py::init<double, const Eigen::Vector3d &>());
@@ -23,7 +23,7 @@ void declare_linear_trajectory(py::module &m) {
   cls.def_property("t0", &Class::t0, &Class::set_t0, "Time origin");
 
   // Common trajectory methods/properties/...
-  declare_trajectory_common<TT::LinearTrajectory>(cls);
+  //declare_trajectory_common<TT::LinearTrajectory>(cls);
 }
 
 PYBIND11_MODULE(_linear_trajectory, m) {

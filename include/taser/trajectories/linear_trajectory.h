@@ -12,6 +12,9 @@
 #include <ceres/ceres.h>
 
 struct _LinearMeta : public taser::trajectories::MetaBase {
+  _LinearMeta() {};
+  _LinearMeta(double t0) : t0(t0) {};
+
   double t0;
 
   int num_parameters() const override {
@@ -22,18 +25,13 @@ struct _LinearMeta : public taser::trajectories::MetaBase {
 namespace taser {
 namespace trajectories {
 
-template<typename T>
-class LinearTrajectory : public TrajectoryBase<T, LinearTrajectory<T>> {
-  using Vector3 = Eigen::Matrix<T, 3, 1>;
+class LinearTrajectory {
+  using Vector3 = Eigen::Vector3d;
  public:
   using Meta = _LinearMeta;
   static constexpr const char* CLASS_ID = "Linear";
   LinearTrajectory() : t0_(0), constant_(1, 1, 1) {};
   LinearTrajectory(double t0, const Vector3& k) : t0_(t0), constant_(k) {};
-  LinearTrajectory(T const* const* params, const Meta& meta) {
-    constant_ = Eigen::Map<const Eigen::Matrix<T, 3, 1>>(&params[0][0]);
-    t0_ = meta.t0;
-  }
 
   Vector3 constant() const {
     return constant_;
@@ -43,30 +41,67 @@ class LinearTrajectory : public TrajectoryBase<T, LinearTrajectory<T>> {
     constant_ = k;
   }
 
-  T t0() const {
+  double t0() const {
     return t0_;
   }
 
-  void set_t0(T x) {
+  void set_t0(double x) {
     t0_ = x;
   }
 
-  std::unique_ptr<TrajectoryEvaluation<T>> Evaluate(const T t, const int flags) const {
-    auto result = std::make_unique<TrajectoryEvaluation<T>>();
-    if (!flags)
-      throw std::logic_error("Evaluate() called with flags=0");
-    if (flags & EvalPosition)
-      result->position = constant_ * (t - T(t0_));
-    if (flags & EvalVelocity)
-      result->velocity = constant_;
-    if (flags & EvalAcceleration)
-      result->acceleration.setZero();
-    if (flags & EvalOrientation)
-      result->orientation = this->calculate_orientation(t);
-    if (flags & EvalAngularVelocity)
-      result->angular_velocity = constant_;
-    return result;
+  template<typename T>
+  class View {
+    using Vector3 = Eigen::Matrix<T, 3, 1>;
+    using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
+   public:
+    View(T const* const* params, const Meta &meta) : params_(params), meta_(meta) { };
+
+    const Vector3& constant() const {
+      const Vector3 v = Eigen::Map<const Vector3>(params_[0]);
+    }
+
+    std::unique_ptr<TrajectoryEvaluation<T>> Evaluate(const T t, const int flags) const {
+      auto result = std::make_unique<TrajectoryEvaluation<T>>();
+      if (!flags)
+        throw std::logic_error("Evaluate() called with flags=0");
+      if (flags & EvalPosition)
+        result->position = constant() * (t - T(meta_.t0));
+      if (flags & EvalVelocity)
+        result->velocity = constant();
+      if (flags & EvalAcceleration)
+        result->acceleration.setZero();
+      if (flags & EvalOrientation)
+        result->orientation = this->calculate_orientation(t);
+      if (flags & EvalAngularVelocity)
+        result->angular_velocity = constant();
+      return result;
+    }
+
+    // FIXME: Belongs in trajectory.h base class
+    Vector3 Position(const T t) const {
+      Result result = this->Evaluate(t, EvalPosition);
+      return result->position;
+    }
+
+   protected:
+    T const* const* params_;
+    const Meta &meta_;
+
+    Eigen::Quaternion<T> calculate_orientation(T t) const {
+      Vector3 c = constant();
+      T theta = c.norm() * (t - meta_.t0);
+      Vector3 n = c.normalized();
+      Eigen::AngleAxis<T> aa(theta, n);
+      return Eigen::Quaternion<T>(aa);
+    }
+  }; // ::View
+
+  std::unique_ptr<TrajectoryEvaluation<double>> Evaluate(const double t, const int flags) const {
+    Meta meta(t0_);
+    const double *c = constant_.data();
+    return View<double>(&c, meta).Evaluate(t, flags);
   }
+
 
   // Add to problem, fill Meta struct, return parameter blocks
   void AddToEstimator(TrajectoryEstimator<LinearTrajectory> &estimator,
@@ -86,14 +121,7 @@ class LinearTrajectory : public TrajectoryBase<T, LinearTrajectory<T>> {
 
  protected:
   double t0_;
-  Vector3 constant_;
-
-  Eigen::Quaternion<T> calculate_orientation(T t) const {
-    T theta = constant_.norm() * (t - t0_);
-    Vector3 n = constant_.normalized();
-    Eigen::AngleAxis<T> aa(theta, n);
-    return Eigen::Quaternion<T>(aa);
-  }
+  Vector3 constant_; // <-- The data to optimize
 
 };
 
