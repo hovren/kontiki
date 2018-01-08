@@ -25,20 +25,31 @@ struct _LinearMeta : public taser::trajectories::MetaBase {
 namespace taser {
 namespace trajectories {
 
-class LinearTrajectory {
+class LinearTrajectory : public TrajectoryBase<LinearTrajectory> {
   using Vector3 = Eigen::Vector3d;
  public:
   using Meta = _LinearMeta;
   static constexpr const char* CLASS_ID = "Linear";
-  LinearTrajectory() : t0_(0), constant_(1, 1, 1) {};
-  LinearTrajectory(double t0, const Vector3& k) : t0_(t0), constant_(k) {};
+
+  LinearTrajectory(double t0, const Vector3& k) : t0_(t0) {
+      data_.push_back(new double[3]);
+      set_constant(k);
+  }
+
+  LinearTrajectory() : LinearTrajectory(0, Eigen::Vector3d(1, 1, 1)) {};
+
 
   Vector3 constant() const {
-    return constant_;
+    std::cout << "BEGIN LinearTrajectory::constant()" << std::endl;
+    std::cout << "data: " << data_[0] << std::endl;
+    Vector3 c = Eigen::Map<Vector3>(data_[0]);
+    std::cout << "END LinearTrajectory::constant()" << std::endl;
+    return c;
   }
 
   void set_constant(const Vector3 &k) {
-    constant_ = k;
+    Eigen::Map<Vector3> c(data_[0]);
+    c = k;
   }
 
   double t0() const {
@@ -50,14 +61,16 @@ class LinearTrajectory {
   }
 
   template<typename T>
-  class View {
+  class View  : public ViewBase<T, View<T>> {
     using Vector3 = Eigen::Matrix<T, 3, 1>;
     using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
    public:
     View(T const* const* params, const Meta &meta) : params_(params), meta_(meta) { };
+    View(const LinearTrajectory *trajectory) : meta_(trajectory->t0_), params_(trajectory->data_.data()) { };
 
-    const Vector3& constant() const {
+    const Vector3 constant() const {
       const Vector3 v = Eigen::Map<const Vector3>(params_[0]);
+      return v;
     }
 
     std::unique_ptr<TrajectoryEvaluation<T>> Evaluate(const T t, const int flags) const {
@@ -77,11 +90,11 @@ class LinearTrajectory {
       return result;
     }
 
-    // FIXME: Belongs in trajectory.h base class
-    Vector3 Position(const T t) const {
-      Result result = this->Evaluate(t, EvalPosition);
-      return result->position;
-    }
+//    // FIXME: Belongs in trajectory.h base class
+//    Vector3 Position(const T t) const {
+//      Result result = this->Evaluate(t, EvalPosition);
+//      return result->position;
+//    }
 
    protected:
     T const* const* params_;
@@ -97,9 +110,7 @@ class LinearTrajectory {
   }; // ::View
 
   std::unique_ptr<TrajectoryEvaluation<double>> Evaluate(const double t, const int flags) const {
-    Meta meta(t0_);
-    const double *c = constant_.data();
-    return View<double>(&c, meta).Evaluate(t, flags);
+    return View<double>(this).Evaluate(t, flags);
   }
 
 
@@ -114,14 +125,13 @@ class LinearTrajectory {
 
     // Define/add parameter blocks and add to problem
     // In this case we have only one: the constant slope parameter
-    estimator.problem().AddParameterBlock(constant_.data(), 3);
-    parameter_blocks.push_back(constant_.data());
+    estimator.problem().AddParameterBlock(data_[0], 3);
+    parameter_blocks.push_back(data_[0]);
     parameter_sizes.push_back(3);
   }
 
  protected:
   double t0_;
-  Vector3 constant_; // <-- The data to optimize
 
 };
 

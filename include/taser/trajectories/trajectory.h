@@ -7,6 +7,7 @@
 
 #include <Eigen/Dense>
 #include <memory>
+#include <iostream>
 
 namespace taser {
 namespace trajectories {
@@ -38,7 +39,7 @@ enum {
 // Used to collect utility functions common to
 // all trajectories (Position, ...)
 template<typename T, class Derived>
-class TrajectoryBase {
+class ViewBase {
   using Vector3 = Eigen::Matrix<T, 3, 1>;
   using Quaternion = Eigen::Quaternion<T>;
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
@@ -81,6 +82,54 @@ class TrajectoryBase {
     return result->orientation * Xt + result->position;
   }
 
+};
+
+template<typename Derived>
+class TrajectoryBase {
+  using Vector3 = Eigen::Vector3d;
+  using Quaternion = Eigen::Quaterniond;
+  using Result = std::unique_ptr<TrajectoryEvaluation<double>>;
+  using T = double;
+ public:
+
+  Vector3 Position(T t) const {
+    using View = typename Derived::template View<double>;
+    return View(static_cast<const Derived*>(this)).Position(t);
+  }
+
+  Vector3 Velocity(T t) const {
+    using View = typename Derived::template View<double>;
+    return View(static_cast<const Derived*>(this)).Velocity(t);
+  }
+
+
+  Vector3 Acceleration(T t) const {
+    using View = typename Derived::template View<double>;
+    return View(static_cast<const Derived*>(this)).Acceleration(t);
+  }
+
+  Quaternion Orientation(T t) const {
+    using View = typename Derived::template View<double>;
+    return View(static_cast<const Derived*>(this)).Orientation(t);
+  }
+
+  Vector3 AngularVelocity(T t) const {
+    using View = typename Derived::template View<double>;
+    return View(static_cast<const Derived*>(this)).AngularVelocity(t);
+  }
+
+  // Move point from world to trajectory coordinate frame
+  Vector3 FromWorld(Vector3 &Xw, T t) {
+    using View = typename Derived::template View<double>;
+    return View(static_cast<const Derived*>(this)).FromWorld(Xw, t);
+  }
+
+  Vector3 ToWorld(Vector3 &Xw, T t) {
+    using View = typename Derived::template View<double>;
+    return View(static_cast<const Derived*>(this)).ToWorld(Xw, t);
+  }
+
+  std::vector<double*> data_;
 };
 
 } // namespace trajectories

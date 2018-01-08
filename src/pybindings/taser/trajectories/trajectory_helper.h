@@ -8,20 +8,20 @@
 #include "trajectories/trajectory.h"
 namespace TT = taser::trajectories;
 
-template<template<typename> typename TrajectoryModel, typename PyClass>
+template<typename TrajectoryModel, typename PyClass>
 void declare_trajectory_common(PyClass &cls) {
-  using Class = TrajectoryModel<double>;
-  cls.def("position", &TT::TrajectoryBase<double, TrajectoryModel<double>>::Position);
-  cls.def("velocity", &TT::TrajectoryBase<double, TrajectoryModel<double>>::Velocity);
-  cls.def("acceleration", &TT::TrajectoryBase<double, TrajectoryModel<double>>::Acceleration);
+  using Class = TrajectoryModel;
+  cls.def("position", &Class::Position);
+  cls.def("velocity", &Class::Velocity);
+  cls.def("acceleration", &Class::Acceleration);
   cls.def("orientation", [](Class &self, double t){
     Eigen::Quaterniond q = self.Orientation(t);
     Eigen::Vector4d out(q.w(), q.x(), q.y(), q.z());
     return out;
   });
-  cls.def("angular_velocity", &TT::TrajectoryBase<double, TrajectoryModel<double>>::AngularVelocity);
-  cls.def("from_world", &TT::TrajectoryBase<double, TrajectoryModel<double>>::FromWorld);
-  cls.def("to_world", &TT::TrajectoryBase<double, TrajectoryModel<double>>::ToWorld);
+  cls.def("angular_velocity", &Class::AngularVelocity);
+  cls.def("from_world", &Class::FromWorld);
+  cls.def("to_world", &Class::ToWorld);
 };
 
 #endif //TASERV2_TRAJECTORY_HELPER_H

@@ -23,7 +23,7 @@ void declare_linear_trajectory(py::module &m) {
   cls.def_property("t0", &Class::t0, &Class::set_t0, "Time origin");
 
   // Common trajectory methods/properties/...
-  //declare_trajectory_common<TT::LinearTrajectory>(cls);
+  declare_trajectory_common<TT::LinearTrajectory>(cls);
 }
 
 PYBIND11_MODULE(_linear_trajectory, m) {
