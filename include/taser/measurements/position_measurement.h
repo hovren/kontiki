@@ -42,7 +42,7 @@ class PositionMeasurement {
 
     template <typename T>
     bool operator()(T const* const* params, T* residual) const {
-      typename TrajectoryModel::template View<T> trajectory(params, meta);
+      auto trajectory = TrajectoryModel::template Map<T>(params, meta);
       Eigen::Map<Eigen::Matrix<T,3,1>> r(residual);
       r = measurement.Error<T, TrajectoryModel>(trajectory);
       return true;
