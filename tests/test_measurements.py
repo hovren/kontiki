@@ -1,9 +1,11 @@
 import pytest
 import numpy as np
 
-from taser.measurements import StaticRsCameraMeasurement
+from taser.measurements import StaticRsCameraMeasurement, PositionMeasurement
 from taser.rotations import quat_to_rotation_matrix
 from taser.sfm import Landmark, View
+
+from trajectories.test_general import trajectory_example
 
 def test_static(small_sfm):
     views, trajectory, camera = small_sfm
@@ -37,3 +39,12 @@ def test_camera_errors_size(trajectory, camera_measurements):
     for m in camera_measurements:
         e = m.error(trajectory)
         assert e.size == 2
+
+def test_position_measurements(trajectory_example):
+    trajectory, example_data = trajectory_example
+
+    expected_positions = example_data.position
+    for t, x in expected_positions:
+        m = PositionMeasurement(t, x)
+        xhat = m.measure(trajectory)
+        np.testing.assert_almost_equal(xhat, x)

@@ -8,12 +8,18 @@
 #include "../type_helpers.h"
 #include <boost/hana.hpp>
 
-template<typename Class, typename TrajectoryModel, typename PyClass>
+template<typename Class, typename TrajectoryImpl, typename PyClass>
 static void declare_error_for_trajectory(PyClass &cls) {
   // Since multiple versions of the Error function exists, we bind to a lambda that calls the right one
-//  cls.def("error", [](Class &self, const TrajectoryModel<double>& trajectory){
-//    return self.Error(trajectory);
-//  });
+  cls.def("error", [](Class &self, const TrajectoryImpl& trajectory){
+    const auto view = trajectory.AsView();
+    return self.template Error<double, TrajectoryImpl>(view);
+  });
+
+  cls.def("measure", [](Class &self, const TrajectoryImpl& trajectory){
+    const auto view = trajectory.AsView();
+    return self.template Measure<double, TrajectoryImpl>(view);
+  });
 };
 
 template<typename Class, typename PyClass>

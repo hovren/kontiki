@@ -84,51 +84,51 @@ class ViewBase {
 
 };
 
-template<typename Derived>
+template<template<typename> typename ViewT>
 class TrajectoryBase {
   using Vector3 = Eigen::Vector3d;
   using Quaternion = Eigen::Quaterniond;
   using Result = std::unique_ptr<TrajectoryEvaluation<double>>;
-  using T = double;
  public:
+  using View = ViewT<double>;
+  using Meta = typename View::Meta;
+  template <typename T>
+      using ViewType = ViewT<T>;
 
-  Vector3 Position(T t) const {
-    using View = typename Derived::template View<double>;
-    return View(static_cast<const Derived*>(this)).Position(t);
+  ViewT<double> AsView() const {
+    return View(this->data_.data(), meta_);
   }
 
-  Vector3 Velocity(T t) const {
-    using View = typename Derived::template View<double>;
-    return View(static_cast<const Derived*>(this)).Velocity(t);
+  Vector3 Position(double t) const {
+    return View(this->data_.data(), meta_).Position(t);
   }
 
-
-  Vector3 Acceleration(T t) const {
-    using View = typename Derived::template View<double>;
-    return View(static_cast<const Derived*>(this)).Acceleration(t);
+  Vector3 Velocity(double t) const {
+    return View(this->data_.data(), meta_).Velocity(t);
   }
 
-  Quaternion Orientation(T t) const {
-    using View = typename Derived::template View<double>;
-    return View(static_cast<const Derived*>(this)).Orientation(t);
+  Vector3 Acceleration(double t) const {
+    return View(this->data_.data(), meta_).Acceleration(t);
   }
 
-  Vector3 AngularVelocity(T t) const {
-    using View = typename Derived::template View<double>;
-    return View(static_cast<const Derived*>(this)).AngularVelocity(t);
+  Quaternion Orientation(double t) const {
+    return View(this->data_.data(), meta_).Orientation(t);
+  }
+
+  Vector3 AngularVelocity(double t) const {
+    return View(this->data_.data(), meta_).AngularVelocity(t);
   }
 
   // Move point from world to trajectory coordinate frame
-  Vector3 FromWorld(Vector3 &Xw, T t) {
-    using View = typename Derived::template View<double>;
-    return View(static_cast<const Derived*>(this)).FromWorld(Xw, t);
+  Vector3 FromWorld(Vector3 &Xw, double t) {
+    return View(this->data_.data(), meta_).FromWorld(Xw, t);
   }
 
-  Vector3 ToWorld(Vector3 &Xw, T t) {
-    using View = typename Derived::template View<double>;
-    return View(static_cast<const Derived*>(this)).ToWorld(Xw, t);
+  Vector3 ToWorld(Vector3 &Xw, double t) {
+    return View(this->data_.data(), meta_).ToWorld(Xw, t);
   }
 
+  Meta meta_;
   std::vector<double*> data_;
 };
 
