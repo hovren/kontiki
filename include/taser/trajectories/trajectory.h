@@ -84,48 +84,49 @@ class ViewBase {
 
 };
 
-template<template<typename> typename ViewT>
+template<template<typename> typename ViewTemplate>
 class TrajectoryBase {
   using Vector3 = Eigen::Vector3d;
   using Quaternion = Eigen::Quaterniond;
   using Result = std::unique_ptr<TrajectoryEvaluation<double>>;
+  using ViewImpl = ViewTemplate<double>;
  public:
-  using View = ViewT<double>;
-  using Meta = typename View::Meta;
   template <typename T>
-      using ViewType = ViewT<T>;
+    using View = ViewTemplate<T>;
 
-  ViewT<double> AsView() const {
-    return View(this->data_.data(), meta_);
+  using Meta = typename View<double>::Meta;
+
+  ViewImpl AsView() const {
+    return ViewImpl(this->data_.data(), meta_);
   }
 
   Vector3 Position(double t) const {
-    return View(this->data_.data(), meta_).Position(t);
+    return ViewImpl(this->data_.data(), meta_).Position(t);
   }
 
   Vector3 Velocity(double t) const {
-    return View(this->data_.data(), meta_).Velocity(t);
+    return ViewImpl(this->data_.data(), meta_).Velocity(t);
   }
 
   Vector3 Acceleration(double t) const {
-    return View(this->data_.data(), meta_).Acceleration(t);
+    return ViewImpl(this->data_.data(), meta_).Acceleration(t);
   }
 
   Quaternion Orientation(double t) const {
-    return View(this->data_.data(), meta_).Orientation(t);
+    return ViewImpl(this->data_.data(), meta_).Orientation(t);
   }
 
   Vector3 AngularVelocity(double t) const {
-    return View(this->data_.data(), meta_).AngularVelocity(t);
+    return ViewImpl(this->data_.data(), meta_).AngularVelocity(t);
   }
 
   // Move point from world to trajectory coordinate frame
   Vector3 FromWorld(Vector3 &Xw, double t) {
-    return View(this->data_.data(), meta_).FromWorld(Xw, t);
+    return ViewImpl(this->data_.data(), meta_).FromWorld(Xw, t);
   }
 
   Vector3 ToWorld(Vector3 &Xw, double t) {
-    return View(this->data_.data(), meta_).ToWorld(Xw, t);
+    return ViewImpl(this->data_.data(), meta_).ToWorld(Xw, t);
   }
 
   Meta meta_;

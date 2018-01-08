@@ -76,9 +76,6 @@ class _LinearView  : public ViewBase<T, _LinearView<T>> {
 class LinearTrajectory : public TrajectoryBase<_LinearView> {
   using Vector3 = Eigen::Vector3d;
  public:
-  template <typename T>
-    using View = _LinearView<T>;
-
   using Meta = _LinearMeta;
   static constexpr const char* CLASS_ID = "Linear";
 
