@@ -38,12 +38,14 @@ enum {
 // Base class for directories using CRTP
 // Used to collect utility functions common to
 // all trajectories (Position, ...)
-template<typename T, class Derived>
+template<typename T, class Derived, class Meta>
 class ViewBase {
   using Vector3 = Eigen::Matrix<T, 3, 1>;
   using Quaternion = Eigen::Quaternion<T>;
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
  public:
+
+  ViewBase(T const* const* params, const Meta& meta) : params_(params), meta_(meta) {};
 
   Vector3 Position(T t) const {
     Result result = static_cast<const Derived*>(this)->Evaluate(t, EvalPosition);
@@ -82,6 +84,9 @@ class ViewBase {
     return result->orientation * Xt + result->position;
   }
 
+ protected:
+  T const* const* params_;
+  const Meta& meta_;
 };
 
 template<template<typename> typename ViewTemplate>
@@ -97,6 +102,11 @@ class TrajectoryBase {
 
   template <typename T>
   static View<T> Map(T const* const* params, const Meta &meta) {
+    return View<T>(params, meta);
+  }
+
+  template <typename T>
+  static View<T> Map(T** params, const Meta &meta) {
     return View<T>(params, meta);
   }
 

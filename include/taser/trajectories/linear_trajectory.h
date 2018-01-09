@@ -29,17 +29,21 @@ namespace trajectories {
 
 // Move outside of namespace to avoid direct instantiation?
 template<typename T>
-class _LinearView  : public ViewBase<T, _LinearView<T>> {
+class _LinearView  : public ViewBase<T, _LinearView<T>, _LinearMeta> {
   using Vector3 = Eigen::Matrix<T, 3, 1>;
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
  public:
   using Meta = _LinearMeta;
 
-  _LinearView(T const* const* params, const Meta &meta) : params_(params), meta_(meta) { };
-//  _LinearView(const LinearTrajectory *trajectory) : meta_(trajectory->t0_), params_(trajectory->data_.data()) { };
+  // Inherit ViewBase constructor
+  using ViewBase<T, _LinearView<T>, _LinearMeta>::ViewBase;
+
+  T t0() const {
+    return T(this->meta_.t0);
+  }
 
   const Vector3 constant() const {
-    const Vector3 v = Eigen::Map<const Vector3>(params_[0]);
+    const Vector3 v = Eigen::Map<const Vector3>(this->params_[0]);
     return v;
   }
 
@@ -48,7 +52,7 @@ class _LinearView  : public ViewBase<T, _LinearView<T>> {
     if (!flags)
       throw std::logic_error("Evaluate() called with flags=0");
     if (flags & EvalPosition)
-      result->position = constant() * (t - T(meta_.t0));
+      result->position = constant() * (t - t0());
     if (flags & EvalVelocity)
       result->velocity = constant();
     if (flags & EvalAcceleration)
@@ -61,12 +65,10 @@ class _LinearView  : public ViewBase<T, _LinearView<T>> {
   }
 
  protected:
-  T const* const* params_;
-  const Meta meta_;
 
   Eigen::Quaternion<T> calculate_orientation(T t) const {
     Vector3 c = constant();
-    T theta = c.norm() * (t - meta_.t0);
+    T theta = c.norm() * (t - t0());
     Vector3 n = c.normalized();
     Eigen::AngleAxis<T> aa(theta, n);
     return Eigen::Quaternion<T>(aa);
@@ -76,7 +78,6 @@ class _LinearView  : public ViewBase<T, _LinearView<T>> {
 class LinearTrajectory : public TrajectoryBase<_LinearView> {
   using Vector3 = Eigen::Vector3d;
  public:
-  using Meta = _LinearMeta;
   static constexpr const char* CLASS_ID = "Linear";
 
   LinearTrajectory(double t0, const Vector3& k) {
@@ -98,7 +99,7 @@ class LinearTrajectory : public TrajectoryBase<_LinearView> {
 
   void set_constant(const Vector3 &k) {
     Eigen::Map<Vector3> c(data_[0]);
-    c = k;
+//    c = k;
   }
 
   double t0() const {
