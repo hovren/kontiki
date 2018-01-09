@@ -43,11 +43,12 @@ class _LinearView  : public ViewBase<T, _LinearView<T>, _LinearMeta> {
   }
 
   const Vector3 constant() const {
-    const Vector3 v = Eigen::Map<const Vector3>(this->params_[0]);
+    const Vector3 v = Eigen::Map<const Vector3>(this->holder_->Parameter(0));
     return v;
   }
 
   std::unique_ptr<TrajectoryEvaluation<T>> Evaluate(const T t, const int flags) const {
+//    std::cout << "t="<<t<<", t0=" << t0() << ", c=" << constant().transpose() << std::endl;
     auto result = std::make_unique<TrajectoryEvaluation<T>>();
     if (!flags)
       throw std::logic_error("Evaluate() called with flags=0");
@@ -80,9 +81,11 @@ class LinearTrajectory : public TrajectoryBase<_LinearView> {
  public:
   static constexpr const char* CLASS_ID = "Linear";
 
-  LinearTrajectory(double t0, const Vector3& k) {
+  LinearTrajectory(double t0, const Vector3& k) : TrajectoryBase(new VectorHolder<double>()) { //: holder_(new VectorHolder<double>()) {
     set_t0(t0);
-    data_.push_back(new double[3]);
+//    holder_ = new VectorHolder<double>();
+    //data_.push_back(new double[3]);
+    holder_->AddParameter(3);
     set_constant(k);
   }
 
@@ -91,15 +94,16 @@ class LinearTrajectory : public TrajectoryBase<_LinearView> {
 
   Vector3 constant() const {
     std::cout << "BEGIN LinearTrajectory::constant()" << std::endl;
-    std::cout << "data: " << data_[0] << std::endl;
-    Vector3 c = Eigen::Map<Vector3>(data_[0]);
+    auto ptr = holder_->Parameter(0);
+    std::cout << "data: " <<  ptr << std::endl;
+    Vector3 c = Eigen::Map<Vector3>(ptr);
     std::cout << "END LinearTrajectory::constant()" << std::endl;
     return c;
   }
 
   void set_constant(const Vector3 &k) {
-    Eigen::Map<Vector3> c(data_[0]);
-//    c = k;
+    Eigen::Map<Vector3> c(holder_->Parameter(0));
+    c = k;
   }
 
   double t0() const {
@@ -128,8 +132,9 @@ class LinearTrajectory : public TrajectoryBase<_LinearView> {
 
     // Define/add parameter blocks and add to problem
     // In this case we have only one: the constant slope parameter
-    estimator.problem().AddParameterBlock(data_[0], 3);
-    parameter_blocks.push_back(data_[0]);
+    auto ptr = holder_->Parameter(0);
+    estimator.problem().AddParameterBlock(ptr, 3);
+    parameter_blocks.push_back(ptr);
     parameter_sizes.push_back(3);
   }
 };

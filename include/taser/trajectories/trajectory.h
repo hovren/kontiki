@@ -35,6 +35,45 @@ enum {
   EvalAngularVelocity = 16
 };
 
+template<typename T>
+class DataHolderBase {
+ public:
+  virtual T* Parameter(size_t i) = 0;
+};
+
+template<typename T>
+class MutableDataHolderBase : public DataHolderBase<T> {
+ public:
+  virtual void AddParameter(size_t ndims) = 0; // FIXME: Move to Mutable-subclass?
+};
+
+template<typename T>
+class PointerHolder : public DataHolderBase<T> {
+ public:
+  PointerHolder(T const* const* data) : data_(data) {};
+  T* Parameter(size_t i) override {
+    return (T*) data_[i];
+  }
+
+ protected:
+  T const* const* data_;
+};
+
+template<typename T>
+class VectorHolder : public MutableDataHolderBase<T> {
+ public:
+  T* Parameter(size_t i) override {
+    return data_[i];
+  }
+
+  void AddParameter(size_t ndims) {
+    data_.push_back(new T[ndims]);
+  }
+
+ protected:
+  std::vector<T*> data_;
+};
+
 // Base class for directories using CRTP
 // Used to collect utility functions common to
 // all trajectories (Position, ...)
@@ -45,7 +84,8 @@ class ViewBase {
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
  public:
 
-  ViewBase(T const* const* params, const Meta& meta) : params_(params), meta_(meta) {};
+  ViewBase(T const* const* params, const Meta& meta) : meta_(meta), holder_(new PointerHolder<T>(params)) {};
+  ViewBase(DataHolderBase<T>* data_holder, const Meta& meta) : meta_(meta), holder_(data_holder) {};
 
   Vector3 Position(T t) const {
     Result result = static_cast<const Derived*>(this)->Evaluate(t, EvalPosition);
@@ -85,7 +125,8 @@ class ViewBase {
   }
 
  protected:
-  T const* const* params_;
+  //T const* const* params_;
+  DataHolderBase<T>* holder_;
   const Meta& meta_;
 };
 
@@ -100,18 +141,16 @@ class TrajectoryBase {
 
   using Meta = typename View<double>::Meta;
 
+  TrajectoryBase(MutableDataHolderBase<double>* holder) : holder_(holder) {};
+
   template <typename T>
   static View<T> Map(T const* const* params, const Meta &meta) {
     return View<T>(params, meta);
   }
 
-  template <typename T>
-  static View<T> Map(T** params, const Meta &meta) {
-    return View<T>(params, meta);
-  }
-
   View<double> AsView() const {
-    return Map<double>(this->data_.data(), meta_);
+//    auto ptr = this->data_.data();
+    return View<double>(holder_, meta_);
   }
 
   Vector3 Position(double t) const {
@@ -143,8 +182,10 @@ class TrajectoryBase {
     return AsView().ToWorld(Xw, t);
   }
 
+ protected:
   Meta meta_;
-  std::vector<double*> data_;
+  //std::vector<double*> data_;
+  MutableDataHolderBase<double>* holder_; // FIXME: Make a const pointer
 };
 
 } // namespace trajectories
