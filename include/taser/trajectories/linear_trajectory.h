@@ -82,10 +82,10 @@ class LinearTrajectory : public TrajectoryBase<_LinearView> {
   static constexpr const char* CLASS_ID = "Linear";
 
   LinearTrajectory(double t0, const Vector3& k) : TrajectoryBase(new VectorHolder<double>()) { //: holder_(new VectorHolder<double>()) {
+    // One 3D parameter: the constant
+    holder_->AddParameter(3); // Parameter(0)
+
     set_t0(t0);
-//    holder_ = new VectorHolder<double>();
-    //data_.push_back(new double[3]);
-    holder_->AddParameter(3);
     set_constant(k);
   }
 

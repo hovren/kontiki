@@ -44,13 +44,15 @@ class DataHolderBase {
 template<typename T>
 class MutableDataHolderBase : public DataHolderBase<T> {
  public:
-  virtual void AddParameter(size_t ndims) = 0; // FIXME: Move to Mutable-subclass?
+  virtual void AddParameter(size_t ndims) = 0;
+  virtual size_t Size() const = 0;
 };
 
 template<typename T>
 class PointerHolder : public DataHolderBase<T> {
  public:
   PointerHolder(T const* const* data) : data_(data) {};
+
   T* Parameter(size_t i) override {
     return (T*) data_[i];
   }
@@ -62,8 +64,18 @@ class PointerHolder : public DataHolderBase<T> {
 template<typename T>
 class VectorHolder : public MutableDataHolderBase<T> {
  public:
+  ~VectorHolder() {
+    for (auto ptr : data_) {
+      delete[] ptr;
+    }
+  }
+
   T* Parameter(size_t i) override {
     return data_[i];
+  }
+
+  size_t Size() const override {
+    return data_.size();
   }
 
   void AddParameter(size_t ndims) {
@@ -125,7 +137,6 @@ class ViewBase {
   }
 
  protected:
-  //T const* const* params_;
   DataHolderBase<T>* holder_;
   const Meta& meta_;
 };
@@ -149,8 +160,8 @@ class TrajectoryBase {
   }
 
   View<double> AsView() const {
-//    auto ptr = this->data_.data();
-    return View<double>(holder_, meta_);
+    // Views are meant to be short lived, so they get a raw pointer
+    return View<double>(holder_.get(), meta_);
   }
 
   Vector3 Position(double t) const {
@@ -184,8 +195,7 @@ class TrajectoryBase {
 
  protected:
   Meta meta_;
-  //std::vector<double*> data_;
-  MutableDataHolderBase<double>* holder_; // FIXME: Make a const pointer
+  std::unique_ptr<MutableDataHolderBase<double>> holder_; // FIXME: Make a const pointer
 };
 
 } // namespace trajectories
