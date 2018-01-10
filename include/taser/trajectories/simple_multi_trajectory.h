@@ -74,20 +74,31 @@ template<typename T>
 class SimpleMultiView : public ViewBase<T, SimpleMultiView<T>, SimpleMultiMeta> {
   using Vector3 = Eigen::Matrix<T, 3, 1>;
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
+  using BaseViewType = ViewBase<T, SimpleMultiView<T>, SimpleMultiMeta>;
  public:
   using Meta = SimpleMultiMeta;
 
-  using ViewBase<T, SimpleMultiView<T>, SimpleMultiMeta>::ViewBase;
+  SimpleMultiView(T const* const* params, const Meta& meta) :
+      BaseViewType::ViewBase(params, meta),
+      view_a_(this->holder_->Slice(0, this->meta_.a.n).get(), this->meta_.a),
+      view_b_(this->holder_->Slice(this->meta_.a.n, this->meta_.b.n).get(), this->meta_.b) {};
+
+  SimpleMultiView(DataHolderBase<T>* data_holder, const Meta& meta) :
+      BaseViewType::ViewBase(data_holder, meta),
+      view_a_(this->holder_->Slice(0, this->meta_.a.n).get(), this->meta_.a),
+      view_b_(this->holder_->Slice(this->meta_.a.n, this->meta_.b.n).get(), this->meta_.b) {};
 
   Result Evaluate(T t, int flags) const {
-    auto view_a = FooView<T>(this->holder_->Slice(0, this->meta_.a.n).get(), this->meta_.a);
-    auto view_b = FooView<T>(this->holder_->Slice(this->meta_.a.n, this->meta_.b.n).get(), this->meta_.b);
-    Vector3 pos_a = view_a.Position(t);
-    Vector3 pos_b = view_b.Position(t);
+    Vector3 pos_a = view_a_.Position(t);
+    Vector3 pos_b = view_b_.Position(t);
     auto r = std::make_unique<TrajectoryEvaluation<T>>();
     r->position = pos_a + pos_b;
     return r;
   }
+
+ protected:
+  const FooView<T> view_a_;
+  const FooView<T> view_b_;
 };
 
 } // namespace detail
