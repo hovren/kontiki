@@ -9,6 +9,7 @@
 namespace hana = boost::hana;
 
 #include "trajectories/linear_trajectory.h"
+#include "trajectories/simple_multi_trajectory.h"
 //#include "trajectories/constant_trajectory.h"
 //
 //#include "cameras/pinhole.h"
@@ -52,6 +53,7 @@ namespace TM = taser::measurements;
 //namespace TC = taser::cameras;
 
 static constexpr auto trajectory_types = hana::tuple_t<
+    TT::SimpleMultiTrajectory,
     TT::LinearTrajectory
 //    hana::template_t<TT::ConstantTrajectory>
 >;

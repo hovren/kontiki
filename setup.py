@@ -100,6 +100,7 @@ ext_modules = [
     TaserExtension('_ceres'),
 #    TrajectoryExtension('_constant_trajectory'),
     TrajectoryExtension('_linear_trajectory'),
+    TrajectoryExtension('_simple_multi_trajectory'),
 #    CameraExtension('_pinhole_camera'),
 #    CameraExtension('_atan_camera'),
     MeasurementExtension('_position_measurement'),

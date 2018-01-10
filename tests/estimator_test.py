@@ -14,7 +14,7 @@ def test_same_trajectory(trajectory):
     assert estimator.trajectory is trajectory
 
 
-def test_solve(estimator):
+def test_solve_empty(estimator):
     summary = estimator.solve()
     print(summary.FullReport())
     assert summary.num_parameters == 0
@@ -31,3 +31,10 @@ def test_add_camera_measurement(estimator, camera_measurements):
 
 def test_add_simple_measurements(estimator, simple_measurements):
     _test_add_measurement(estimator, simple_measurements)
+
+
+def test_solve_simple_nocrash(estimator, simple_measurements):
+    _test_add_measurement(estimator, simple_measurements)
+    summary = estimator.solve()
+    print(summary.FullReport())
+    assert summary.num_parameters > 0

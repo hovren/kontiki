@@ -3,7 +3,7 @@ from collections import defaultdict, namedtuple
 import numpy as np
 import pytest
 
-from taser.trajectories import ConstantTrajectory, LinearTrajectory
+from taser.trajectories import ConstantTrajectory, LinearTrajectory, SimpleMultiTrajectory
 from taser.rotations import quat_to_rotation_matrix
 
 ExampleData = namedtuple('ExampleData',

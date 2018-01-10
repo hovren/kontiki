@@ -38,13 +38,16 @@ enum {
 template<typename T>
 class DataHolderBase {
  public:
-  virtual T* Parameter(size_t i) = 0;
+  virtual T* Parameter(size_t i) const = 0;
+  virtual std::shared_ptr<DataHolderBase<T>> Slice(size_t start, size_t size) const = 0;
 };
 
 template<typename T>
 class MutableDataHolderBase : public DataHolderBase<T> {
  public:
-  virtual void AddParameter(size_t ndims) = 0;
+  // Add parameter and return its index
+  virtual size_t AddParameter(size_t ndims) = 0;
+
   virtual size_t Size() const = 0;
 };
 
@@ -53,8 +56,13 @@ class PointerHolder : public DataHolderBase<T> {
  public:
   PointerHolder(T const* const* data) : data_(data) {};
 
-  T* Parameter(size_t i) override {
+  T* Parameter(size_t i) const override {
     return (T*) data_[i];
+  }
+
+  std::shared_ptr<DataHolderBase<T>> Slice(size_t start, size_t size) const {
+    T const* const* ptr = &data_[start];
+    auto slice = std::make_shared<PointerHolder<T>>(ptr);
   }
 
  protected:
@@ -70,16 +78,21 @@ class VectorHolder : public MutableDataHolderBase<T> {
     }
   }
 
-  T* Parameter(size_t i) override {
+  T* Parameter(size_t i) const override {
     return data_[i];
+  }
+
+  std::shared_ptr<DataHolderBase<T>> Slice(size_t start, size_t size) const {
+    throw std::runtime_error("Not implemented for VectorHolder class");
   }
 
   size_t Size() const override {
     return data_.size();
   }
 
-  void AddParameter(size_t ndims) {
+  size_t AddParameter(size_t ndims) override {
     data_.push_back(new T[ndims]);
+    return data_.size() - 1;
   }
 
  protected:
@@ -152,7 +165,9 @@ class TrajectoryBase {
 
   using Meta = typename View<double>::Meta;
 
+  TrajectoryBase(MutableDataHolderBase<double>* holder, const Meta& meta) : holder_(holder), meta_(meta) {};
   TrajectoryBase(MutableDataHolderBase<double>* holder) : holder_(holder) {};
+
 
   template <typename T>
   static View<T> Map(T const* const* params, const Meta &meta) {
@@ -191,6 +206,14 @@ class TrajectoryBase {
 
   Vector3 ToWorld(Vector3 &Xw, double t) {
     return AsView().ToWorld(Xw, t);
+  }
+
+  MutableDataHolderBase<double>* Holder() const {
+    return holder_.get(); // FIXME: This is not very safe
+  }
+
+  const Meta& MetaRef() const {
+    return meta_;
   }
 
  protected:
