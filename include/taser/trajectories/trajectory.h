@@ -62,7 +62,6 @@ class PointerHolder : public DataHolderBase<T> {
   }
 
   std::shared_ptr<DataHolderBase<T>> Slice(size_t start, size_t size) const {
-//    std::cout << "PointerHolder<T>::Slice(" << start << ", " << size << ")" << std::endl;
     T const* const* ptr = &data_[start];
     auto slice = std::make_shared<PointerHolder<T>>(ptr);
     return slice;
@@ -96,7 +95,6 @@ class VectorHolder : public MutableDataHolderBase<T> {
   size_t AddParameter(size_t ndims) override {
     auto ptr = new T[ndims];
     data_.push_back(ptr);
-    std::cout << "Created Parameter ptr=" << ptr << std::endl;
     return data_.size() - 1;
   }
 
@@ -186,7 +184,6 @@ class TrajectoryBase {
 
   template <typename T>
   static View<T> Map(T const* const* params, const Meta &meta) {
-//    return View<T>(params, meta);
     auto ptr_holder = std::make_shared<PointerHolder<T>>(params);
     return View<T>(ptr_holder, meta);
   }
@@ -235,7 +232,6 @@ class TrajectoryBase {
  protected:
   Meta meta_;
   const std::shared_ptr<MutableDataHolderBase<double>> holder_;
-//  const View<double> view_;
 };
 
 } // namespace trajectories

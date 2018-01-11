@@ -36,8 +36,8 @@ class TrajectoryEstimator {
     options.minimizer_progress_to_stdout = true;
 
 //    // FIXME: Multi-thread
-//    options.num_linear_solver_threads = 1;
-//    options.num_threads = 1;
+    options.num_linear_solver_threads = 4;
+    options.num_threads = 3;
 
     ceres::Solver::Summary summary;
     ceres::Solve(options, &problem_, &summary);

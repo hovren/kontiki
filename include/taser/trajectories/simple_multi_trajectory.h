@@ -44,7 +44,6 @@ class FooView : public ViewBase<T, FooView<T>, FooMeta> {
     std::vector<Vector3> vs(n);
     for (int i=0; i < n; ++i) {
       auto ptr = this->holder_->Parameter(i);
-//      std::cout << "vector["<< i <<"] = " << ptr << std::endl;
       vs[i] = Eigen::Map<Vector3>(ptr);
     }
     return vs;
@@ -102,18 +101,8 @@ class SimpleMultiView : public ViewBase<T, SimpleMultiView<T>, SimpleMultiMeta> 
  public:
   using Meta = SimpleMultiMeta;
 
-//  SimpleMultiView(T const* const* params, const Meta& meta) :
-//      BaseViewType::ViewBase(params, meta),
-//      view_a_(this->holder_->Slice(0, this->meta_.a.n), this->meta_.a),
-//      view_b_(this->holder_->Slice(this->meta_.a.n, this->meta_.b.n), this->meta_.b) {
-//  };
-
   SimpleMultiView(std::shared_ptr<DataHolderBase<T>> data_holder, const Meta& meta) :
       BaseViewType::ViewBase(data_holder, meta) {};
-//  ,
-//      view_a_(data_holder->Slice(0, meta.a.n), meta.a),
-//      view_b_(data_holder->Slice(meta.a.n, meta.b.n), meta.b) {
-//  };
 
   Result Evaluate(T t, int flags) const {
     auto dh1 = this->holder_->Slice(0, this->meta_.a.n);
@@ -128,9 +117,6 @@ class SimpleMultiView : public ViewBase<T, SimpleMultiView<T>, SimpleMultiMeta> 
     return r;
   }
 
- protected:
-//  const FooView<T> view_a_;
-//  const FooView<T> view_b_;
 };
 
 } // namespace detail
@@ -173,13 +159,6 @@ class MultiHolder : public MutableDataHolderBase<T> {
   }
 
   std::shared_ptr<DataHolderBase<T>> Slice(size_t start, size_t size) const override {
-//    std::cout << "Slice: " << start << " size " << size << std::endl;
-//    std::cout << "Subholder sizes: ";
-//    for (auto h : holders_) {
-//      std::cout << h->Size() << " ";
-//    }
-//    std::cout << std::endl;
-//
     int j = 0;
     for (auto h : holders_) {
       const size_t n = h->Size();
@@ -244,14 +223,10 @@ class FooTrajectory : public TrajectoryBase<detail::FooView> {
       break;
     }
 
-    // We must have all vectors up to t2
-    std::cout << "FooTraj extract times " << t1 << " to " << t2 << std::endl;
-
     int i = 0;
     for (auto& v : vectors()) {
       if (t2 >= (i + 1)) {
         auto ptr = holder_->Parameter(i);
-        std::cout << "Adding i=" << i << " ptr=" << ptr << " v=" << v.transpose() << std::endl;
         size_t size = 3;
         parameter_blocks.push_back(ptr);
         parameter_sizes.push_back(size);
@@ -313,36 +288,17 @@ class SimpleMultiTrajectory : public TrajectoryBase<detail::SimpleMultiView> {
   SimpleMultiTrajectory() :
       SimpleMultiTrajectory(SMTInit()) { };
 
-//  SimpleMultiTrajectory() :
-//      TrajectoryBase(new HolderType()) {
-////                                           detail::SimpleMultiMeta(foo_a.MetaRef(), foo_b.MetaRef())) {
-//    static_cast<HolderType*>(this->holder_.get())->Initialize({foo_a.Holder(), foo_b.Holder()});
-//    std::cout << "SimpleMultiTrajectory()" << std::endl;
-//    std::cout << "a meta " << &foo_a.MetaRef() << std::endl;
-//    std::cout << "b meta " << &foo_b.MetaRef() << std::endl;
-//  };
-
   void AddToProblem(ceres::Problem& problem,
                       const time_init_t &times,
                       Meta& meta,
                       std::vector<double*> &parameter_blocks,
                       std::vector<size_t> &parameter_sizes) {
-    std::cout << "SimpleMultiTrajectory::AddToProblem()" << std::endl;
-    std::cout << "BEFORE nparams=" << parameter_blocks.size() << std::endl;
     foo_a->AddToProblem(problem, times, meta.a, parameter_blocks, parameter_sizes);
     foo_b->AddToProblem(problem, times, meta.b, parameter_blocks, parameter_sizes);
-    std::cout << "AFTER nparams=" << parameter_blocks.size() << std::endl;
-
-    std::cout << "a.n=" << meta.a.n << " b.n=" << meta.b.n << std::endl;
 
     if (parameter_blocks.size() != parameter_sizes.size()) {
       throw std::length_error("Num blocks did not match num sizes");
     }
-
-    for (int i=0; i < parameter_blocks.size(); ++i) {
-      std::cout << i << ": ptr=" << parameter_blocks[i] << " size=" << parameter_sizes[i] << std::endl;
-    }
-
   }
 
   std::shared_ptr<FooTrajectory> foo_a;
