@@ -196,30 +196,32 @@ class FooTrajectory : public TrajectoryBase<detail::FooView> {
 
 };
 
+namespace detail {
+// Initialization object needed only to make sure that the two FooTrajectories
+// are constructed fully before being passed to the SimpleMultiTrajectory.
+// We must do this since the DataHolder and SimpleMultiMeta reference these.
 struct SMTInit {
   std::shared_ptr<FooTrajectory> a, b;
-  dataholders::MultiHolder<double, 2>* holder;
+  dataholders::MultiHolder<double, 2> *holder;
   detail::SimpleMultiMeta meta;
 
   SMTInit() :
       a(new FooTrajectory()),
       b(new FooTrajectory()),
       holder(new dataholders::MultiHolder<double, 2>({a->Holder(), b->Holder()})),
-      meta(a->MetaRef(), b->MetaRef()) { };
+      meta(a->MetaRef(), b->MetaRef()) {};
 };
+} //namespace detail
 
 class SimpleMultiTrajectory : public TrajectoryBase<detail::SimpleMultiView> {
- public:
-  static constexpr const char* CLASS_ID = "SimpleMulti";
-  using HolderType = dataholders::MultiHolder<double, 2>;
-
-  SimpleMultiTrajectory(const SMTInit& init) :
+  SimpleMultiTrajectory(const detail::SMTInit& init) :
       TrajectoryBase(init.holder, init.meta),
       foo_a(init.a),
       foo_b(init.b) { };
-
+ public:
+  static constexpr const char* CLASS_ID = "SimpleMulti";
   SimpleMultiTrajectory() :
-      SimpleMultiTrajectory(SMTInit()) { };
+      SimpleMultiTrajectory(detail::SMTInit()) { };
 
   void AddToProblem(ceres::Problem& problem,
                       const time_init_t &times,
@@ -228,10 +230,6 @@ class SimpleMultiTrajectory : public TrajectoryBase<detail::SimpleMultiView> {
                       std::vector<size_t> &parameter_sizes) {
     foo_a->AddToProblem(problem, times, meta.a, parameter_blocks, parameter_sizes);
     foo_b->AddToProblem(problem, times, meta.b, parameter_blocks, parameter_sizes);
-
-    if (parameter_blocks.size() != parameter_sizes.size()) {
-      throw std::length_error("Num blocks did not match num sizes");
-    }
   }
 
   std::shared_ptr<FooTrajectory> foo_a;
