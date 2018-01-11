@@ -10,12 +10,15 @@
 #include <iostream>
 #include <vector>
 
+#include "dataholders/dataholder.h"
+#include "dataholders/pointerholder.h"
+
 namespace taser {
 namespace trajectories {
 
 struct MetaBase {
   // This meta uses how many parameters?
-  virtual int num_parameters() const = 0;
+  virtual int NumParameters() const = 0;
 };
 
 template<typename T>
@@ -36,72 +39,6 @@ enum {
   EvalAngularVelocity = 16
 };
 
-template<typename T>
-class DataHolderBase {
- public:
-  virtual T* Parameter(size_t i) const = 0;
-  virtual std::shared_ptr<DataHolderBase<T>> Slice(size_t start, size_t size) const = 0;
-};
-
-template<typename T>
-class MutableDataHolderBase : public DataHolderBase<T> {
- public:
-  // Add parameter and return its index
-  virtual size_t AddParameter(size_t ndims) = 0;
-
-  virtual size_t Size() const = 0;
-};
-
-template<typename T>
-class PointerHolder : public DataHolderBase<T> {
- public:
-  PointerHolder(T const* const* data) : data_(data) {};
-
-  T* Parameter(size_t i) const override {
-    return (T*) data_[i];
-  }
-
-  std::shared_ptr<DataHolderBase<T>> Slice(size_t start, size_t size) const {
-    T const* const* ptr = &data_[start];
-    auto slice = std::make_shared<PointerHolder<T>>(ptr);
-    return slice;
-  }
-
- protected:
-  T const* const* data_;
-};
-
-template<typename T>
-class VectorHolder : public MutableDataHolderBase<T> {
- public:
-  ~VectorHolder() {
-    for (auto ptr : data_) {
-      delete[] ptr;
-    }
-  }
-
-  T* Parameter(size_t i) const override {
-    return data_[i];
-  }
-
-  std::shared_ptr<DataHolderBase<T>> Slice(size_t start, size_t size) const {
-    throw std::runtime_error("Not implemented for VectorHolder class");
-  }
-
-  size_t Size() const override {
-    return data_.size();
-  }
-
-  size_t AddParameter(size_t ndims) override {
-    auto ptr = new T[ndims];
-    data_.push_back(ptr);
-    return data_.size() - 1;
-  }
-
- protected:
-  std::vector<T*> data_;
-};
-
 // Base class for directories using CRTP
 // Used to collect utility functions common to
 // all trajectories (Position, ...)
@@ -118,7 +55,7 @@ class ViewBase {
  public:
 
 //  ViewBase(T const* const* params, const Meta& meta) : meta_(meta), holder_(new PointerHolder<T>(params)) { };
-  ViewBase(std::shared_ptr<DataHolderBase<T>> data_holder, const Meta& meta) : meta_(meta), holder_(data_holder) { };
+  ViewBase(std::shared_ptr<dataholders::DataHolderBase<T>> data_holder, const Meta& meta) : meta_(meta), holder_(data_holder) { };
 
   Vector3 Position(T t) const {
     Result result = static_cast<const Derived*>(this)->Evaluate(t, EvalPosition);
@@ -157,12 +94,12 @@ class ViewBase {
     return result->orientation * Xt + result->position;
   }
 
-  std::shared_ptr<DataHolderBase<T>> Holder() const {
+  std::shared_ptr<dataholders::DataHolderBase<T>> Holder() const {
     return holder_;
   }
 
  protected:
-  std::shared_ptr<DataHolderBase<T>> holder_;
+  std::shared_ptr<dataholders::DataHolderBase<T>> holder_;
   const Meta& meta_;
 };
 
@@ -178,18 +115,18 @@ class TrajectoryBase {
   using Meta = typename View<double>::Meta;
 
 
-  TrajectoryBase(MutableDataHolderBase<double>* holder, const Meta& meta) :
+  TrajectoryBase(dataholders::MutableDataHolderBase<double>* holder, const Meta& meta) :
       holder_(holder),
       meta_(meta) { };
 
-  TrajectoryBase(MutableDataHolderBase<double>* holder) :
+  TrajectoryBase(dataholders::MutableDataHolderBase<double>* holder) :
       TrajectoryBase(holder, Meta()) { };
 
 
 
   template <typename T>
   static View<T> Map(T const* const* params, const Meta &meta) {
-    auto ptr_holder = std::make_shared<PointerHolder<T>>(params);
+    auto ptr_holder = std::make_shared<dataholders::PointerHolder<T>>(params);
     return View<T>(ptr_holder, meta);
   }
 
@@ -226,7 +163,7 @@ class TrajectoryBase {
     return AsView().ToWorld(Xw, t);
   }
 
-  std::shared_ptr<MutableDataHolderBase<double>> Holder() const {
+  std::shared_ptr<dataholders::MutableDataHolderBase<double>> Holder() const {
     return holder_;
   }
 
@@ -236,7 +173,7 @@ class TrajectoryBase {
 
  protected:
   Meta meta_;
-  const std::shared_ptr<MutableDataHolderBase<double>> holder_;
+  const std::shared_ptr<dataholders::MutableDataHolderBase<double>> holder_;
 };
 
 } // namespace trajectories

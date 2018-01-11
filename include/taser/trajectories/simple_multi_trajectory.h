@@ -10,6 +10,8 @@
 
 #include "trajectory.h"
 #include "../trajectory_estimator.h"
+#include "dataholders/multiholder.h"
+#include "dataholders/vectorholder.h"
 
 namespace taser {
 namespace trajectories {
@@ -22,7 +24,7 @@ struct FooMeta : MetaBase {
 
   FooMeta() : n(0), foo(1.0) {  };
 
-  int num_parameters() const override {
+  int NumParameters() const override {
     return n;
   }
 };
@@ -91,8 +93,8 @@ struct SimpleMultiMeta : MetaBase {
   SimpleMultiMeta() :
       SimpleMultiMeta(__a_owned, __b_owned) { };
 
-  int num_parameters() const override {
-    return a.num_parameters() + b.num_parameters();
+  int NumParameters() const override {
+    return a.NumParameters() + b.NumParameters();
   }
 
  private:
@@ -109,15 +111,13 @@ class SimpleMultiView : public ViewBase<T, SimpleMultiView<T>, SimpleMultiMeta> 
  public:
   using Meta = SimpleMultiMeta;
 
-  SimpleMultiView(std::shared_ptr<DataHolderBase<T>> data_holder, const Meta& meta) :
-      BaseViewType::ViewBase(data_holder, meta) {};
+  SimpleMultiView(std::shared_ptr<dataholders::DataHolderBase<T>> data_holder, const Meta& meta) :
+      BaseViewType::ViewBase(data_holder, meta),
+      view_a_(data_holder->Slice(0, meta.a.n), meta.a),
+      view_b_(data_holder->Slice(meta.a.n, meta.b.n), meta.b) { };
 
   Result Evaluate(T t, int flags) const {
-    auto dh1 = this->holder_->Slice(0, this->meta_.a.n);
-    auto view_a_ = FooView<T>(dh1, this->meta_.a);
     Vector3 pos_a = view_a_.Position(t);
-
-    auto view_b_ = FooView<T>(this->holder_->Slice(this->meta_.a.n, this->meta_.b.n), this->meta_.b);
     Vector3 pos_b = view_b_.Position(t);
 
     auto r = std::make_unique<TrajectoryEvaluation<T>>();
@@ -125,93 +125,18 @@ class SimpleMultiView : public ViewBase<T, SimpleMultiView<T>, SimpleMultiMeta> 
     return r;
   }
 
+  const FooView<T> view_a_;
+  const FooView<T> view_b_;
 };
 
 } // namespace detail
-
-template <typename T, int N>
-class MultiHolder : public MutableDataHolderBase<T> {
- public:
-
-  MultiHolder() {};
-
-  MultiHolder(std::initializer_list<std::shared_ptr<MutableDataHolderBase<T>>> holder_list) {
-    Initialize(holder_list);
-  }
-
-  void Initialize(std::initializer_list<std::shared_ptr<MutableDataHolderBase<T>>> holder_list) {
-    if(holder_list.size() != N) {
-      throw std::length_error("Wrong number of arguments");
-    }
-
-    int i=0;
-    for (auto h : holder_list) {
-      holders_[i] = h;
-      i += 1;
-    }
-  }
-
-  T* Parameter(size_t i) const override {
-    int j = 0;
-    for (auto h : holders_) {
-      const size_t n = h->Size();
-      if ((j + n) > i) {
-        return h->Parameter(i);
-      }
-      else {
-        j += n;
-      }
-    }
-
-    throw std::length_error("Parameter index out of range");
-  }
-
-  std::shared_ptr<DataHolderBase<T>> Slice(size_t start, size_t size) const override {
-    int j = 0;
-    for (auto h : holders_) {
-      const size_t n = h->Size();
-      // Only accept slices on exact boundaries
-      if (j == start) {
-        return h;
-      }
-      else if ((j + n) <= start) {
-        j += n;
-      }
-      else {
-        break;
-      }
-    }
-
-    throw std::runtime_error("Can only slice on exact holder boundaries");
-  }
-
-  size_t AddParameter(size_t ndims) override {
-    throw std::runtime_error("Use the specific MultiHolder interface instead!");
-  }
-
-  size_t Size() const override {
-    size_t sz = 0;
-    for (auto h : holders_) {
-      sz += h->Size();
-    }
-
-    return sz;
-  }
-
-  std::shared_ptr<MutableDataHolderBase<T>> GetHolder(size_t i) {
-    return holders_[i];
-  }
-
- protected:
-  std::array<std::shared_ptr<MutableDataHolderBase<T>>, N> holders_; // FIXME: Ownage of the holder pointers is unclear
-};
 
 class FooTrajectory : public TrajectoryBase<detail::FooView> {
   using Vector3 = Eigen::Vector3d;
  public:
   static constexpr const char* CLASS_ID = "Foo";
   FooTrajectory() :
-      TrajectoryBase(new VectorHolder<double>()) { };
+      TrajectoryBase(new dataholders::VectorHolder<double>()) { };
 
   void AddToProblem(ceres::Problem& problem,
                       const time_init_t &times,
@@ -273,20 +198,20 @@ class FooTrajectory : public TrajectoryBase<detail::FooView> {
 
 struct SMTInit {
   std::shared_ptr<FooTrajectory> a, b;
-  MultiHolder<double, 2>* holder;
+  dataholders::MultiHolder<double, 2>* holder;
   detail::SimpleMultiMeta meta;
 
   SMTInit() :
       a(new FooTrajectory()),
       b(new FooTrajectory()),
-      holder(new MultiHolder<double, 2>({a->Holder(), b->Holder()})),
+      holder(new dataholders::MultiHolder<double, 2>({a->Holder(), b->Holder()})),
       meta(a->MetaRef(), b->MetaRef()) { };
 };
 
 class SimpleMultiTrajectory : public TrajectoryBase<detail::SimpleMultiView> {
  public:
   static constexpr const char* CLASS_ID = "SimpleMulti";
-  using HolderType = MultiHolder<double, 2>;
+  using HolderType = dataholders::MultiHolder<double, 2>;
 
   SimpleMultiTrajectory(const SMTInit& init) :
       TrajectoryBase(init.holder, init.meta),
