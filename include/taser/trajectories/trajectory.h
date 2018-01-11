@@ -62,8 +62,10 @@ class PointerHolder : public DataHolderBase<T> {
   }
 
   std::shared_ptr<DataHolderBase<T>> Slice(size_t start, size_t size) const {
+//    std::cout << "PointerHolder<T>::Slice(" << start << ", " << size << ")" << std::endl;
     T const* const* ptr = &data_[start];
     auto slice = std::make_shared<PointerHolder<T>>(ptr);
+    return slice;
   }
 
  protected:
@@ -73,11 +75,6 @@ class PointerHolder : public DataHolderBase<T> {
 template<typename T>
 class VectorHolder : public MutableDataHolderBase<T> {
  public:
-
-  VectorHolder() {
-    std::cout << "VectorHolder at " << this << " constructed" << std::endl;
-  }
-
   ~VectorHolder() {
     for (auto ptr : data_) {
       delete[] ptr;
@@ -97,7 +94,9 @@ class VectorHolder : public MutableDataHolderBase<T> {
   }
 
   size_t AddParameter(size_t ndims) override {
-    data_.push_back(new T[ndims]);
+    auto ptr = new T[ndims];
+    data_.push_back(ptr);
+    std::cout << "Created Parameter ptr=" << ptr << std::endl;
     return data_.size() - 1;
   }
 
@@ -115,8 +114,8 @@ class ViewBase {
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
  public:
 
-  ViewBase(T const* const* params, const Meta& meta) : meta_(meta), holder_(new PointerHolder<T>(params)) { std::cout << "ViewBase() C1" << std::endl; };
-  ViewBase(DataHolderBase<T>* data_holder, const Meta& meta) : meta_(meta), holder_(data_holder) { std::cout << "ViewBase() C2" << std::endl; };
+//  ViewBase(T const* const* params, const Meta& meta) : meta_(meta), holder_(new PointerHolder<T>(params)) { };
+  ViewBase(std::shared_ptr<DataHolderBase<T>> data_holder, const Meta& meta) : meta_(meta), holder_(data_holder) { };
 
   Vector3 Position(T t) const {
     Result result = static_cast<const Derived*>(this)->Evaluate(t, EvalPosition);
@@ -155,8 +154,12 @@ class ViewBase {
     return result->orientation * Xt + result->position;
   }
 
+  std::shared_ptr<DataHolderBase<T>> Holder() const {
+    return holder_;
+  }
+
  protected:
-  DataHolderBase<T>* holder_;
+  std::shared_ptr<DataHolderBase<T>> holder_;
   const Meta& meta_;
 };
 
@@ -174,9 +177,7 @@ class TrajectoryBase {
 
   TrajectoryBase(MutableDataHolderBase<double>* holder, const Meta& meta) :
       holder_(holder),
-      meta_(meta)
-//      view_(holder_.get(), meta_)
-  { std::cout << "TrajectoryBase()" << std::endl; };
+      meta_(meta) { };
 
   TrajectoryBase(MutableDataHolderBase<double>* holder) :
       TrajectoryBase(holder, Meta()) { };
@@ -185,13 +186,13 @@ class TrajectoryBase {
 
   template <typename T>
   static View<T> Map(T const* const* params, const Meta &meta) {
-    return View<T>(params, meta);
+//    return View<T>(params, meta);
+    auto ptr_holder = std::make_shared<PointerHolder<T>>(params);
+    return View<T>(ptr_holder, meta);
   }
 
   View<double> AsView() const {
-    std::cout << "Get View" << std::endl;
-    // Views are meant to be short lived, so they get a raw pointer
-    return View<double>(holder_.get(), meta_);
+    return View<double>(holder_, meta_);
   }
 
   Vector3 Position(double t) const {
@@ -223,17 +224,17 @@ class TrajectoryBase {
     return AsView().ToWorld(Xw, t);
   }
 
-  MutableDataHolderBase<double>* Holder() const {
-    return holder_.get(); // FIXME: This is not very safe
+  std::shared_ptr<MutableDataHolderBase<double>> Holder() const {
+    return holder_;
   }
 
-  const Meta& MetaRef() const {
+  Meta& MetaRef() {
     return meta_;
   }
 
  protected:
   Meta meta_;
-  std::unique_ptr<MutableDataHolderBase<double>> holder_; // FIXME: Make a const pointer
+  const std::shared_ptr<MutableDataHolderBase<double>> holder_;
 //  const View<double> view_;
 };
 

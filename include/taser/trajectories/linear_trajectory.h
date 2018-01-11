@@ -122,7 +122,8 @@ class LinearTrajectory : public TrajectoryBase<_LinearView> {
 
 
   // Add to problem, fill Meta struct, return parameter blocks
-  void AddToEstimator(TrajectoryEstimator<LinearTrajectory> &estimator,
+  // FIXME: Can we make this virtual in TrajectoryBase?
+  void AddToProblem(ceres::Problem& problem,
                       const time_init_t &times,
                       Meta& meta,
                       std::vector<double*> &parameter_blocks,
@@ -133,7 +134,7 @@ class LinearTrajectory : public TrajectoryBase<_LinearView> {
     // Define/add parameter blocks and add to problem
     // In this case we have only one: the constant slope parameter
     auto ptr = holder_->Parameter(0);
-    estimator.problem().AddParameterBlock(ptr, 3);
+    problem.AddParameterBlock(ptr, 3);
     parameter_blocks.push_back(ptr);
     parameter_sizes.push_back(3);
   }

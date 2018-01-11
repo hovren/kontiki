@@ -35,6 +35,10 @@ class TrajectoryEstimator {
     options.linear_solver_type = ceres::DENSE_QR; // FIXME: SCHUR?
     options.minimizer_progress_to_stdout = true;
 
+//    // FIXME: Multi-thread
+//    options.num_linear_solver_threads = 1;
+//    options.num_threads = 1;
+
     ceres::Solver::Summary summary;
     ceres::Solve(options, &problem_, &summary);
     return summary;
@@ -53,7 +57,7 @@ class TrajectoryEstimator {
                              Meta &meta,
                              std::vector<double *> &parameter_blocks,
                              std::vector<size_t> &parameter_sizes) {
-    trajectory_->AddToEstimator(*this, times, meta, parameter_blocks, parameter_sizes);
+    trajectory_->AddToProblem(problem_, times, meta, parameter_blocks, parameter_sizes);
   }
 
  protected:
