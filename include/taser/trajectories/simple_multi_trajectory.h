@@ -133,7 +133,7 @@ class SimpleMultiView : public ViewBase<T, SimpleMultiView<T>, SimpleMultiMeta> 
     auto r = std::make_unique<TrajectoryEvaluation<T>>();
     T wa = AWeight();
     T wb = BWeight();
-    r->position = wa * pos_a + wb * pos_b;
+    r->position = wa * pos_a + wb * pos_b + Vector3(wa, wb, T(1.));
     return r;
   }
 

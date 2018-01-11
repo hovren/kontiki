@@ -1,7 +1,3 @@
-//
-// Created by hannes on 2017-11-29.
-//
-
 #ifndef TASERV2_TRAJECTORY_H
 #define TASERV2_TRAJECTORY_H
 
@@ -16,6 +12,9 @@
 namespace taser {
 namespace trajectories {
 
+// Base class for trajectory metadata
+// The metadata should contain everything that is needed to use a trajectory given
+// a data holder instance
 struct MetaBase {
   // This meta uses how many parameters?
   virtual int NumParameters() const = 0;
@@ -39,9 +38,10 @@ enum {
   EvalAngularVelocity = 16
 };
 
-// Base class for directories using CRTP
-// Used to collect utility functions common to
-// all trajectories (Position, ...)
+// Base class for trajectory views
+// This is used to collect utility functions common to all views (Position, ...)
+// It uses the CRTP pattern to template over the subclass (Derived).
+// Views are intended to be immutable and uses readonly DataHolderBase parameter stores.
 template<typename T, class Derived, class Meta>
 class ViewBase {
   static_assert(
@@ -103,11 +103,13 @@ class ViewBase {
   const Meta& meta_;
 };
 
+
+// Base class for trajectories
+// A trajectory is the combination of a view, metadata, and a data holder that owns data
 template<template<typename> typename ViewTemplate>
 class TrajectoryBase {
   using Vector3 = Eigen::Vector3d;
   using Quaternion = Eigen::Quaterniond;
-  using Result = std::unique_ptr<TrajectoryEvaluation<double>>;
  public:
   template <typename T>
     using View = ViewTemplate<T>;
