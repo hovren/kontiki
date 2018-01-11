@@ -17,7 +17,7 @@ struct FooMeta {
   int n;
   double foo;
 
-  FooMeta() : n(0), foo(1.0) {};
+  FooMeta() : n(0), foo(1.0) { std::cout << "FooMeta() " << this << std::endl; };
 };
 
 template <typename T>
@@ -61,8 +61,8 @@ struct SimpleMultiMeta {
   const FooMeta& a;
   const FooMeta& b;
 
-  SimpleMultiMeta() : a(__a_owned), b(__b_owned) { };
-  SimpleMultiMeta(const FooMeta& a_external, const FooMeta& b_external) : a(a_external), b(b_external) {};
+  SimpleMultiMeta(const FooMeta& a_external, const FooMeta& b_external) : a(a_external), b(b_external) { std::cout << "SimpleMultiMeta()" << std::endl; };
+  SimpleMultiMeta() : SimpleMultiMeta(__a_owned, __b_owned) { };
 
  private:
   // When we need to carry the data and not just a reference
@@ -106,6 +106,14 @@ class SimpleMultiView : public ViewBase<T, SimpleMultiView<T>, SimpleMultiMeta> 
 template <typename T, int N>
 class MultiHolder : public MutableDataHolderBase<T> {
  public:
+
+  MultiHolder() {};
+
+  MultiHolder(std::initializer_list<MutableDataHolderBase<T>*> holder_list) {
+    std::cout << "MultiHolder constructor" << std::endl;
+    Initialize(holder_list);
+  }
+
   void Initialize(std::initializer_list<MutableDataHolderBase<T>*> holder_list) {
     if(holder_list.size() != N) {
       throw std::length_error("Wrong number of arguments");
@@ -116,6 +124,8 @@ class MultiHolder : public MutableDataHolderBase<T> {
       holders_[i].reset(h); //std::shared_ptr<DataHolderBase<T>>(h);
       i += 1;
     }
+
+    std::cout << "Initialize finished with " << holder_list.size() << " input holders " << std::endl;
   }
 
   T* Parameter(size_t i) const override {
@@ -165,6 +175,10 @@ class MultiHolder : public MutableDataHolderBase<T> {
     return sz;
   }
 
+  std::shared_ptr<MutableDataHolderBase<T>> GetHolder(size_t i) {
+    return holders_[i];
+  }
+
  protected:
   std::array<std::shared_ptr<MutableDataHolderBase<T>>, N> holders_; // FIXME: Ownage of the holder pointers is unclear
 };
@@ -173,7 +187,9 @@ class FooTrajectory : public TrajectoryBase<detail::FooView> {
   using Vector3 = Eigen::Vector3d;
  public:
   static constexpr const char* CLASS_ID = "Foo";
-  FooTrajectory() : TrajectoryBase(new VectorHolder<double>()) {};
+  FooTrajectory() : TrajectoryBase(new VectorHolder<double>()) {
+    std::cout << "FooTrajectory()" << std::endl;
+  };
 
   void AddToEstimator(TrajectoryEstimator<FooTrajectory> &estimator,
                       const time_init_t &times,
@@ -191,7 +207,7 @@ class FooTrajectory : public TrajectoryBase<detail::FooView> {
     meta_.foo = x;
   }
 
-  void AddVector(Vector3& v) {
+  void AddVector(const Vector3& v) {
     size_t i = holder_->AddParameter(3);
     Eigen::Map<Vector3> vmap(holder_->Parameter(i));
     vmap = v;
@@ -204,13 +220,53 @@ class FooTrajectory : public TrajectoryBase<detail::FooView> {
 
 };
 
+struct SMTInit {
+  std::shared_ptr<FooTrajectory> a, b;
+  MultiHolder<double, 2>* holder;
+  detail::SimpleMultiMeta meta;
+
+  SMTInit() :
+      a(new FooTrajectory()),
+      b(new FooTrajectory()),
+      holder(new MultiHolder<double, 2>({a->Holder(), b->Holder()})),
+      meta(a->MetaRef(), b->MetaRef())
+      {
+        std::cout << "SMTInit()" << std::endl;
+        std::cout << "meta.a=" << &meta.a << " meta.b=" << &meta.b << std::endl;
+        std::cout << "a.holder=" << a->Holder() << " holder[0]=" << holder->GetHolder(0) << std::endl;
+        std::cout << "b.holder=" << b->Holder() << " holder[1]=" << holder->GetHolder(1) << std::endl;
+
+      };
+};
+
 class SimpleMultiTrajectory : public TrajectoryBase<detail::SimpleMultiView> {
  public:
   static constexpr const char* CLASS_ID = "SimpleMulti";
   using HolderType = MultiHolder<double, 2>;
-  SimpleMultiTrajectory() : TrajectoryBase(new HolderType(), detail::SimpleMultiMeta(foo_a.MetaRef(), foo_b.MetaRef())) {
-    static_cast<HolderType*>(this->holder_.get())->Initialize({foo_a.Holder(), foo_b.Holder()});
+
+  SimpleMultiTrajectory(const SMTInit& init) :
+      TrajectoryBase(init.holder, init.meta),
+      foo_a(init.a),
+      foo_b(init.b) {
+    std::cout << "SimpleMultiTrajectory() with init" << std::endl;
+    std::cout << "foo_a.meta=" << &foo_a->MetaRef() << " meta.a=" << &meta_.a << std::endl;
+    std::cout << "foo_b.meta=" << &foo_b->MetaRef() << " meta.b=" << &meta_.b << std::endl;
+    std::cout << "foo_a.holder=" << foo_a->Holder() << " holder[0]=" << static_cast<HolderType*>(holder_.get())->GetHolder(0) << std::endl;
+    std::cout << "foo_b.holder=" << foo_b->Holder() << " holder[1]=" << static_cast<HolderType*>(holder_.get())->GetHolder(1) << std::endl;
   };
+
+  SimpleMultiTrajectory() :
+      SimpleMultiTrajectory(SMTInit())
+  {std::cout << "SimpleMultiTrajectory() without init" << std::endl; };
+
+//  SimpleMultiTrajectory() :
+//      TrajectoryBase(new HolderType()) {
+////                                           detail::SimpleMultiMeta(foo_a.MetaRef(), foo_b.MetaRef())) {
+//    static_cast<HolderType*>(this->holder_.get())->Initialize({foo_a.Holder(), foo_b.Holder()});
+//    std::cout << "SimpleMultiTrajectory()" << std::endl;
+//    std::cout << "a meta " << &foo_a.MetaRef() << std::endl;
+//    std::cout << "b meta " << &foo_b.MetaRef() << std::endl;
+//  };
 
   void AddToEstimator(TrajectoryEstimator<SimpleMultiTrajectory> &estimator,
                       const time_init_t &times,
@@ -220,8 +276,8 @@ class SimpleMultiTrajectory : public TrajectoryBase<detail::SimpleMultiView> {
     // Do nothing yet
   }
 
-  FooTrajectory foo_a;
-  FooTrajectory foo_b;
+  std::shared_ptr<FooTrajectory> foo_a;
+  std::shared_ptr<FooTrajectory> foo_b;
 };
 
 } // namespace trajectories

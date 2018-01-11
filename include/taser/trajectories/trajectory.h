@@ -8,6 +8,7 @@
 #include <Eigen/Dense>
 #include <memory>
 #include <iostream>
+#include <vector>
 
 namespace taser {
 namespace trajectories {
@@ -72,6 +73,11 @@ class PointerHolder : public DataHolderBase<T> {
 template<typename T>
 class VectorHolder : public MutableDataHolderBase<T> {
  public:
+
+  VectorHolder() {
+    std::cout << "VectorHolder at " << this << " constructed" << std::endl;
+  }
+
   ~VectorHolder() {
     for (auto ptr : data_) {
       delete[] ptr;
@@ -109,8 +115,8 @@ class ViewBase {
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
  public:
 
-  ViewBase(T const* const* params, const Meta& meta) : meta_(meta), holder_(new PointerHolder<T>(params)) {};
-  ViewBase(DataHolderBase<T>* data_holder, const Meta& meta) : meta_(meta), holder_(data_holder) {};
+  ViewBase(T const* const* params, const Meta& meta) : meta_(meta), holder_(new PointerHolder<T>(params)) { std::cout << "ViewBase() C1" << std::endl; };
+  ViewBase(DataHolderBase<T>* data_holder, const Meta& meta) : meta_(meta), holder_(data_holder) { std::cout << "ViewBase() C2" << std::endl; };
 
   Vector3 Position(T t) const {
     Result result = static_cast<const Derived*>(this)->Evaluate(t, EvalPosition);
@@ -165,8 +171,16 @@ class TrajectoryBase {
 
   using Meta = typename View<double>::Meta;
 
-  TrajectoryBase(MutableDataHolderBase<double>* holder, const Meta& meta) : holder_(holder), meta_(meta) {};
-  TrajectoryBase(MutableDataHolderBase<double>* holder) : holder_(holder) {};
+
+  TrajectoryBase(MutableDataHolderBase<double>* holder, const Meta& meta) :
+      holder_(holder),
+      meta_(meta)
+//      view_(holder_.get(), meta_)
+  { std::cout << "TrajectoryBase()" << std::endl; };
+
+  TrajectoryBase(MutableDataHolderBase<double>* holder) :
+      TrajectoryBase(holder, Meta()) { };
+
 
 
   template <typename T>
@@ -175,6 +189,7 @@ class TrajectoryBase {
   }
 
   View<double> AsView() const {
+    std::cout << "Get View" << std::endl;
     // Views are meant to be short lived, so they get a raw pointer
     return View<double>(holder_.get(), meta_);
   }
@@ -219,6 +234,7 @@ class TrajectoryBase {
  protected:
   Meta meta_;
   std::unique_ptr<MutableDataHolderBase<double>> holder_; // FIXME: Make a const pointer
+//  const View<double> view_;
 };
 
 } // namespace trajectories
