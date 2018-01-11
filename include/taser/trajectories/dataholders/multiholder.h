@@ -31,14 +31,18 @@ class MultiHolder : public MutableDataHolderBase<T> {
 
   T* Parameter(size_t i) const override {
     int j = 0;
+    int hi = 0;
     for (auto h : holders_) {
       const size_t n = h->Size();
       if ((j + n) > i) {
-        return h->Parameter(i);
+        int subi = i - j;
+        return h->Parameter(subi);
       }
       else {
         j += n;
       }
+
+      hi += 1;
     }
 
     throw std::length_error("Parameter index out of range");
