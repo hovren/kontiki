@@ -17,12 +17,25 @@ int main() {
   std::cout << "Starting" << std::endl;
 
   auto traj = std::make_shared<SimpleMultiTrajectory>();
+  double wa, wb;
+  wa = traj->AWeight();
+  wb = traj->BWeight();
+  std::cout << "FIRST wa=" << wa << ", wb=" << wb << std::endl;
 
   traj->foo_a->AddVector(Eigen::Vector3d(1, 2, 3));
   traj->foo_a->AddVector(Eigen::Vector3d(11, 11, 12));
   traj->foo_a->AddVector(Eigen::Vector3d(1000, 1000, 1000));
 
   traj->foo_b->AddVector(Eigen::Vector3d(100, 100, 100));
+
+  std::cout << "FIRST DONE" << std::endl;
+  traj->set_AWeight(2.0);
+  traj->set_BWeight(10.5);
+
+  wa = traj->AWeight();
+  wb = traj->BWeight();
+  std::cout << "SECOND wa=" << wa << ", wb=" << wb << std::endl;
+
 //
 //  std::vector<double*> vec = {
 //      new double[3]{2., 2., 2.},
@@ -106,6 +119,8 @@ int main() {
   for (auto v : traj2->foo_b->AsView().vectors()) {
     std::cout << v.transpose() << std::endl;
   }
+
+  std::cout << "Weights: wa=" << traj2->AWeight() << ", wb=" << traj2->BWeight() << std::endl;
 
   std::cout << "DONE" << std::endl;
   return 0;

@@ -116,12 +116,24 @@ class SimpleMultiView : public ViewBase<T, SimpleMultiView<T>, SimpleMultiMeta> 
       view_a_(data_holder->Slice(0, meta.a.n), meta.a),
       view_b_(data_holder->Slice(meta.a.n, meta.b.n), meta.b) { };
 
+  T AWeight() const {
+    const int offset = this->meta_.a.n + this->meta_.b.n;
+    return *this->holder_->Parameter(offset + 0);
+  }
+
+  T BWeight() const {
+    const int offset = this->meta_.a.n + this->meta_.b.n;
+    return *this->holder_->Parameter(offset + 1);
+  }
+
   Result Evaluate(T t, int flags) const {
     Vector3 pos_a = view_a_.Position(t);
     Vector3 pos_b = view_b_.Position(t);
 
     auto r = std::make_unique<TrajectoryEvaluation<T>>();
-    r->position = pos_a + pos_b;
+    T wa = AWeight();
+    T wb = BWeight();
+    r->position = wa * pos_a + wb * pos_b;
     return r;
   }
 
@@ -202,34 +214,76 @@ namespace detail {
 // We must do this since the DataHolder and SimpleMultiMeta reference these.
 struct SMTInit {
   std::shared_ptr<FooTrajectory> a, b;
-  dataholders::MultiHolder<double, 2> *holder;
+  std::shared_ptr<dataholders::VectorHolder<double>> param_holder;
+  dataholders::MultiHolder<double, 3> *holder;
   detail::SimpleMultiMeta meta;
+
 
   SMTInit() :
       a(new FooTrajectory()),
       b(new FooTrajectory()),
-      holder(new dataholders::MultiHolder<double, 2>({a->Holder(), b->Holder()})),
+      param_holder(new dataholders::VectorHolder<double>()),
+      holder(new dataholders::MultiHolder<double, 3>({a->Holder(),
+                                                      b->Holder(),
+                                                      param_holder})),
       meta(a->MetaRef(), b->MetaRef()) {};
 };
 } //namespace detail
 
 class SimpleMultiTrajectory : public TrajectoryBase<detail::SimpleMultiView> {
+  // Hidden constructor using SMTInit proxy object
   SimpleMultiTrajectory(const detail::SMTInit& init) :
       TrajectoryBase(init.holder, init.meta),
       foo_a(init.a),
-      foo_b(init.b) { };
+      foo_b(init.b) {
+    ParamHolder()->AddParameter(1); // a weight
+    set_AWeight(1.0);
+    ParamHolder()->AddParameter(1); // b weight
+    set_BWeight(1.0);
+  };
+
+  std::shared_ptr<dataholders::MutableDataHolderBase<double>> ParamHolder() {
+    return static_cast<dataholders::MultiHolder<double, 3> *>(holder_.get())->GetHolder(2);
+  }
+
  public:
   static constexpr const char* CLASS_ID = "SimpleMulti";
   SimpleMultiTrajectory() :
       SimpleMultiTrajectory(detail::SMTInit()) { };
+
+  double AWeight() const {
+    return AsView().AWeight();
+  }
+
+  void set_AWeight(double w) {
+    *ParamHolder()->Parameter(0) = w;
+  }
+
+  double BWeight() const {
+    return AsView().BWeight();
+  }
+
+  void set_BWeight(double w) {
+    *ParamHolder()->Parameter(1) = w;
+  }
 
   void AddToProblem(ceres::Problem& problem,
                       const time_init_t &times,
                       Meta& meta,
                       std::vector<double*> &parameter_blocks,
                       std::vector<size_t> &parameter_sizes) {
+    // Trajectories
     foo_a->AddToProblem(problem, times, meta.a, parameter_blocks, parameter_sizes);
     foo_b->AddToProblem(problem, times, meta.b, parameter_blocks, parameter_sizes);
+
+    // Weights
+    for (auto i : {0, 1}) {
+      auto ptr = ParamHolder()->Parameter(i);
+      size_t size = 1;
+      problem.AddParameterBlock(ptr, size);
+      parameter_blocks.push_back(ptr);
+      parameter_sizes.push_back(size);
+    }
   }
 
   std::shared_ptr<FooTrajectory> foo_a;
