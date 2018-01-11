@@ -107,6 +107,11 @@ class VectorHolder : public MutableDataHolderBase<T> {
 // all trajectories (Position, ...)
 template<typename T, class Derived, class Meta>
 class ViewBase {
+  static_assert(
+      std::is_base_of<MetaBase, Meta>::value,
+      "Meta must be subclass of MetaBase"
+  );
+
   using Vector3 = Eigen::Matrix<T, 3, 1>;
   using Quaternion = Eigen::Quaternion<T>;
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;

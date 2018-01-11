@@ -16,11 +16,15 @@ namespace trajectories {
 
 namespace detail {
 
-struct FooMeta {
+struct FooMeta : MetaBase {
   int n;
   double foo;
 
   FooMeta() : n(0), foo(1.0) {  };
+
+  int num_parameters() const override {
+    return n;
+  }
 };
 
 template <typename T>
@@ -74,7 +78,7 @@ class FooView : public ViewBase<T, FooView<T>, FooMeta> {
 
 };
 
-struct SimpleMultiMeta {
+struct SimpleMultiMeta : MetaBase {
   // References used by all calling code
   // FIXME: Can we make these const references?
   FooMeta& a;
@@ -86,6 +90,10 @@ struct SimpleMultiMeta {
 
   SimpleMultiMeta() :
       SimpleMultiMeta(__a_owned, __b_owned) { };
+
+  int num_parameters() const override {
+    return a.num_parameters() + b.num_parameters();
+  }
 
  private:
   // When we need to carry the data and not just a reference
