@@ -46,13 +46,24 @@ def trajectory_example(trajectory):
             (1, np.array([.1, 0, .4]))
         ])
 
-    if cls == ConstantTrajectory:
+    elif cls == ConstantTrajectory:
         k = np.array([1, 2, 3])
         example_data.position.extend([[0, k], [2, k]])
         example_data.velocity.extend([[0, zero], [1, zero]])
         example_data.acceleration.extend([[0, zero], [1, zero]])
         example_data.orientation.extend([[0, q0], [1, q0]])
         example_data.angular_velocity.extend([[0, zero], [0, zero]])
+
+    elif cls == SimpleMultiTrajectory:
+        example_data.position.extend([
+            (0.1, np.array([1,5,1])),
+            (1.1, np.array([7, 61, 557])),
+            (2.2, np.array([17, 71, 567])),
+            (3.3, np.array([117, 171, 667])),
+            (4.3, np.array([117, 171, 667]))
+        ])
+        example_data.velocity.extend([])
+
 
     return trajectory, example_data
 

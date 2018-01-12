@@ -28,7 +28,14 @@ def trajectory(request):
         k = np.array([1, 2, 3])
         return cls(k)
     elif cls == SimpleMultiTrajectory:
-        return cls()
+        traj = cls()
+        for v in [(1, 1, 1), (10, 10, 10), (100, 100, 100)]:
+            traj.foo_a.add_vector(np.array(v))
+        traj.foo_b.add_vector(np.array([1, 11, 111]))
+        traj.wa = 1
+        traj.wb = 5
+
+        return traj
     else:
         raise ValueError(f"Fixture simple_trajectory not available for {cls}")
 

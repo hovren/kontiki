@@ -23,6 +23,8 @@ void declare_simple_trajectory(py::module &m) {
   cls.def_readonly("foo_a", &Class::foo_a);
   cls.def_readonly("foo_b", &Class::foo_b);
 
+  cls.def_property("wa", &Class::AWeight, &Class::set_AWeight);
+  cls.def_property("wb", &Class::BWeight, &Class::set_BWeight);
 
   // Common trajectory methods/properties/...
   declare_trajectory_common<Class>(cls);
