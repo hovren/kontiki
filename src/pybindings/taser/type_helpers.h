@@ -12,10 +12,10 @@ namespace hana = boost::hana;
 #include "trajectories/simple_multi_trajectory.h"
 //#include "trajectories/constant_trajectory.h"
 //
-//#include "cameras/pinhole.h"
-//#include "cameras/atan.h"
+#include "cameras/pinhole.h"
+#include "cameras/atan.h"
 
-//#include "measurements/static_rscamera_measurement.h"
+#include "measurements/static_rscamera_measurement.h"
 #include "measurements/position_measurement.h"
 
 // Add template-of-template support to hana
@@ -50,7 +50,7 @@ constexpr auto template_template = template_template_t<F>{};
 // Begin actual
 namespace TT = taser::trajectories;
 namespace TM = taser::measurements;
-//namespace TC = taser::cameras;
+namespace TC = taser::cameras;
 
 static constexpr auto trajectory_types = hana::tuple_t<
     TT::SimpleMultiTrajectory,
@@ -58,34 +58,34 @@ static constexpr auto trajectory_types = hana::tuple_t<
 //    hana::template_t<TT::ConstantTrajectory>
 >;
 
-# if 0
+// Define valid camera types
 static constexpr auto camera_types = hana::tuple_t<
   TC::AtanCamera,
   TC::PinholeCamera
 >;
-#else
-static constexpr auto camera_types = hana::tuple_t<>;
-#endif
-//
-//static auto make_cam_meas = [](auto mtype, auto ctype) {
-//  using MeasType = typename decltype(mtype)::type;
-//  auto mclass = MeasType();
-//  return mclass(ctype);
-//};
-//
-//static auto cam_meas_templates = hana::tuple_t<
-//  hana::template_t<TM::StaticRsCameraMeasurement>
-//>;
-//
-//static auto camera_measurements = hana::ap(
-//    hana::make_tuple(make_cam_meas),
-//    cam_meas_templates,
-//    camera_types
-//    );
 
-//static auto measurement_types = hana::concat(
-//  camera_measurements,
-//  hana::tuple_t<TM::PositionMeasurement>
-//);
-static auto measurement_types = hana::tuple_t<TM::PositionMeasurement>;
+// Define Camera measurements
+static auto cam_meas_templates = hana::tuple_t<
+    hana::template_t<TM::StaticRsCameraMeasurement>
+>;
+
+
+static auto make_cam_meas = [](auto mtype, auto ctype) {
+  using MeasType = typename decltype(mtype)::type;
+  auto mclass = MeasType();
+  return mclass(ctype);
+};
+
+static auto camera_measurements = hana::ap(
+    hana::make_tuple(make_cam_meas),
+    cam_meas_templates,
+    camera_types
+    );
+
+// Final list of measurement types
+static auto measurement_types = hana::concat(
+  camera_measurements,
+  hana::tuple_t<TM::PositionMeasurement>
+);
+
 #endif //TASERV2_TYPE_HELPERS_H

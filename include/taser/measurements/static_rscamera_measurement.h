@@ -62,47 +62,52 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref, const Observatio
     // Measurement data
     std::shared_ptr<taser::Observation> observation;
 
-    template<typename T, template<typename> typename TrajectoryModel>
-    Eigen::Matrix<T, 2, 1> Project(const TrajectoryModel<T> &trajectory, const T inverse_depth) const {
+    template<typename T, typename TrajectoryModel>
+    Eigen::Matrix<T, 2, 1> Project(const typename TrajectoryModel::template View<T> &trajectory, const T inverse_depth) const {
       return reproject_static(*observation->landmark()->reference(), *observation, inverse_depth, trajectory, *camera);
     };
 
-    template<typename T, template<typename> typename TrajectoryModel>
-    Eigen::Matrix<T, 2, 1> Project(const TrajectoryModel<T> &trajectory) const {
-      return Project(trajectory, T(observation->landmark()->inverse_depth()));
+    template<typename T, typename TrajectoryModel>
+    Eigen::Matrix<T, 2, 1> Project(const typename TrajectoryModel::template View<T> &trajectory) const {
+      return Project<T, TrajectoryModel>(trajectory, T(observation->landmark()->inverse_depth()));
     };
 
-    template<typename T, template<typename> typename TrajectoryModel>
-    Eigen::Matrix<T, 2, 1> Error(const TrajectoryModel<T> &trajectory, const T inverse_depth) const {
-      Eigen::Matrix<T,2,1> y_hat = this->Project(trajectory, inverse_depth);
+    template<typename T, typename TrajectoryModel>
+    Eigen::Matrix<T, 2, 1> Measure(const typename TrajectoryModel::template View<T> &trajectory) const {
+      return Project<T, TrajectoryModel>(trajectory);
+    };
+
+    template<typename T, typename TrajectoryModel>
+    Eigen::Matrix<T, 2, 1> Error(const typename TrajectoryModel::template View<T> &trajectory, const T inverse_depth) const {
+      Eigen::Matrix<T,2,1> y_hat = this->Project<T, TrajectoryModel>(trajectory, inverse_depth);
       return observation->uv().cast<T>() - y_hat;
     }
 
-    template<typename T, template<typename> typename TrajectoryModel>
-    Eigen::Matrix<T, 2, 1> Error(const TrajectoryModel<T> &trajectory) const {
-      return Error(trajectory, T(observation->landmark()->inverse_depth()));
+    template<typename T, typename TrajectoryModel>
+    Eigen::Matrix<T, 2, 1> Error(const typename TrajectoryModel::template View<T> &trajectory) const {
+      return Error<T, TrajectoryModel>(trajectory, T(observation->landmark()->inverse_depth()));
     }
 
    protected:
 
-    template<template<typename> typename TrajectoryModel>
+    template<typename TrajectoryModel>
     struct Residual {
       Residual(const ThisType &m) : measurement(m) {};
 
       template <typename T>
       bool operator()(T const* const* params, T* residual) const {
-        TrajectoryModel<T> trajectory(params, meta);
-        T inverse_depth = params[meta.num_parameters()][0];
+        auto trajectory = TrajectoryModel::template Map<T>(params, meta);
+        T inverse_depth = params[meta.NumParameters()][0];
         Eigen::Map<Eigen::Matrix<T,2,1>> r(residual);
-        r = measurement.Error(trajectory, inverse_depth);
+        r = measurement.Error<T, TrajectoryModel>(trajectory, inverse_depth);
         return true;
       }
 
       const ThisType &measurement;
-      typename TrajectoryModel<double>::Meta meta;
+      typename TrajectoryModel::Meta meta;
     }; // Residual;
 
-    template<template<typename> typename TrajectoryModel>
+    template<typename TrajectoryModel>
     void AddToEstimator(taser::TrajectoryEstimator<TrajectoryModel>& estimator) {
       using ResidualImpl = Residual<TrajectoryModel>;
       auto residual = new ResidualImpl(*this);

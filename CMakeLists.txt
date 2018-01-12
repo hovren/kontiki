@@ -78,8 +78,8 @@ taser_add_module(taser.trajectories._linear_trajectory)
 taser_add_module(taser.trajectories._simple_multi_trajectory)
 
 # Cameras
-#taser_add_module(taser.cameras._pinhole_camera)
-#taser_add_module(taser.cameras._atan_camera)
+taser_add_module(taser.cameras._pinhole_camera)
+taser_add_module(taser.cameras._atan_camera)
 
 # Structire from motion
 taser_add_module(taser.sfm)
@@ -89,7 +89,7 @@ taser_add_module(taser._trajectory_estimator)
 
 # Measurements
 taser_add_module(taser.measurements._position_measurement)
-#taser_add_module(taser.measurements._static_rscamera_measurement)
+taser_add_module(taser.measurements._static_rscamera_measurement)
 
 add_executable(debug_constructor src/debug_constructor.cc)
 target_link_libraries(debug_constructor PRIVATE ${CERES_LIBRARIES})

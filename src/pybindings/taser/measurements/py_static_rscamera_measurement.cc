@@ -15,21 +15,21 @@ namespace py = pybind11;
 
 // Binds the Project() function for a TrajectoryModel
 // We use a temporary dummy instance to extract the trajectory template (TrajectoryModel)
-template<typename Class, typename PyClass,
-    template<typename> typename TrajectoryModel>
-static void declare_project(PyClass &cls, const TrajectoryModel<double> &dummy_DO_NOT_USE) {
+template<typename Class, typename TrajectoryModel, typename PyClass>
+static void declare_project(PyClass &cls) {
   // Since multiple versions of the Project function exists, we bind to a lambda that calls the right one
-  cls.def("project", [](Class &self, const TrajectoryModel<double>& trajectory) {
-    return self.Project(trajectory);
+  cls.def("project", [](Class &self, const TrajectoryModel& trajectory) {
+    return self.template Project<double, TrajectoryModel>(trajectory.AsView());
   });
 };
+
 
 PYBIND11_MODULE(_static_rscamera_measurement, m) {
   m.doc() = "Static rolling shutter projection";
 
   // Create one StaticRsMeasurement class for each camera type
-  hana::for_each(camera_types, [&](auto t) {
-    using CameraModel = typename decltype(t)::type;
+  hana::for_each(camera_types, [&](auto ct) {
+    using CameraModel = typename decltype(ct)::type;
 
     using Class = TM::StaticRsCameraMeasurement<CameraModel>;
     std::string pyclass_name = "StaticRsCameraMeasurement_" + std::string(CameraModel::CLASS_ID);
@@ -42,12 +42,12 @@ PYBIND11_MODULE(_static_rscamera_measurement, m) {
     cls.def_readonly("observation", &Class::observation);
 
     // Declare the project() function for all trajectory types
-    hana::for_each(trajectory_types, [&](auto t) {
-      auto traj_double_type = t(hana::type_c<double>);
-      using TrajectoryImpl = typename decltype(traj_double_type)::type;
+    hana::for_each(trajectory_types, [&](auto tt) {
+      using TrajectoryImpl = typename decltype(tt)::type;
 
       // Use temporary to extract TrajectoryModel from TrajectoryImpl
-      declare_project<Class>(cls, TrajectoryImpl());
+      declare_project<Class, TrajectoryImpl>(cls);
+
     }); // for_each(trajectory_types)
   }); // for_each(camera_types)
 }
