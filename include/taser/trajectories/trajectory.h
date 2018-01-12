@@ -40,9 +40,8 @@ enum {
 
 // Base class for trajectory views
 // This is used to collect utility functions common to all views (Position, ...)
-// It uses the CRTP pattern to template over the subclass (Derived).
 // Views are intended to be immutable and uses readonly DataHolderBase parameter stores.
-template<typename T, class Derived, class Meta>
+template<typename T, class Meta>
 class ViewBase {
   static_assert(
       std::is_base_of<MetaBase, Meta>::value,
@@ -57,40 +56,37 @@ class ViewBase {
 //  ViewBase(T const* const* params, const Meta& meta) : meta_(meta), holder_(new PointerHolder<T>(params)) { };
   ViewBase(std::shared_ptr<dataholders::DataHolderBase<T>> data_holder, const Meta& meta) : meta_(meta), holder_(data_holder) { };
 
+  virtual Result Evaluate(T t, int flags) const = 0;
+
   Vector3 Position(T t) const {
-    Result result = static_cast<const Derived*>(this)->Evaluate(t, EvalPosition);
-    return result->position;
+    return this->Evaluate(t, EvalPosition)->position;
   }
 
   Vector3 Velocity(T t) const {
-    Result result = static_cast<const Derived*>(this)->Evaluate(t, EvalVelocity);
-    return result->velocity;
+    return this->Evaluate(t, EvalVelocity)->velocity;
   }
 
   Vector3 Acceleration(T t) const {
-    Result result = static_cast<const Derived*>(this)->Evaluate(t, EvalAcceleration);
-    return result->acceleration;
+    return this->Evaluate(t, EvalAcceleration)->acceleration;
   }
 
   Quaternion Orientation(T t) const {
-    Result result = static_cast<const Derived*>(this)->Evaluate(t, EvalOrientation);
-    return result->orientation;
+    return this->Evaluate(t, EvalOrientation)->orientation;
   }
 
   Vector3 AngularVelocity(T t) const {
-    Result result = static_cast<const Derived*>(this)->Evaluate(t, EvalAngularVelocity);
-    return result->angular_velocity;
+    return this->Evaluate(t, EvalAngularVelocity)->angular_velocity;
   }
 
   // Move point from world to trajectory coordinate frame
   Vector3 FromWorld(Vector3 &Xw, T t) {
-    Result result = static_cast<const Derived*>(this)->Evaluate(t, EvalPosition | EvalOrientation);
+    Result result = this->Evaluate(t, EvalPosition | EvalOrientation);
     return result->orientation.conjugate() * (Xw - result->position);
   }
 
   // Move point from trajectory to world coordinate frame
   Vector3 ToWorld(Vector3 &Xt, T t) {
-    Result result = static_cast<const Derived*>(this)->Evaluate(t, EvalPosition | EvalOrientation);
+    Result result = this->Evaluate(t, EvalPosition | EvalOrientation);
     return result->orientation * Xt + result->position;
   }
 

@@ -30,12 +30,12 @@ struct FooMeta : MetaBase {
 };
 
 template <typename T>
-class FooView : public ViewBase<T, FooView<T>, FooMeta> {
+class FooView : public ViewBase<T, FooMeta> {
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
   using Vector3 = Eigen::Matrix<T, 3, 1>;
  public:
   using Meta = FooMeta;
-  using ViewBase<T, FooView<T>, FooMeta>::ViewBase;
+  using ViewBase<T, FooMeta>::ViewBase;
 
   T foo() const {
     return T(this->meta_.foo);
@@ -104,10 +104,10 @@ struct SimpleMultiMeta : MetaBase {
 };
 
 template<typename T>
-class SimpleMultiView : public ViewBase<T, SimpleMultiView<T>, SimpleMultiMeta> {
+class SimpleMultiView : public ViewBase<T, SimpleMultiMeta> {
   using Vector3 = Eigen::Matrix<T, 3, 1>;
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
-  using BaseViewType = ViewBase<T, SimpleMultiView<T>, SimpleMultiMeta>;
+  using BaseViewType = ViewBase<T, SimpleMultiMeta>;
  public:
   using Meta = SimpleMultiMeta;
 

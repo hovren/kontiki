@@ -30,14 +30,14 @@ struct LinearMeta : public taser::trajectories::MetaBase {
 
 
 template<typename T>
-class LinearView  : public ViewBase<T, LinearView<T>, LinearMeta> {
+class LinearView  : public ViewBase<T, LinearMeta> {
   using Vector3 = Eigen::Matrix<T, 3, 1>;
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
  public:
   using Meta = LinearMeta;
 
   // Inherit ViewBase constructor
-  using ViewBase<T, LinearView<T>, LinearMeta>::ViewBase;
+  using ViewBase<T, LinearMeta>::ViewBase;
 
   T t0() const {
     return T(this->meta_.t0);
@@ -48,7 +48,7 @@ class LinearView  : public ViewBase<T, LinearView<T>, LinearMeta> {
     return v;
   }
 
-  std::unique_ptr<TrajectoryEvaluation<T>> Evaluate(const T t, const int flags) const {
+  Result Evaluate(const T t, const int flags) const override {
 //    std::cout << "t="<<t<<", t0=" << t0() << ", c=" << constant().transpose() << std::endl;
     auto result = std::make_unique<TrajectoryEvaluation<T>>();
     if (!flags)
