@@ -90,12 +90,10 @@ int main() {
   }
 
   auto traj2 = std::make_shared<SimpleMultiTrajectory>();
-  for (auto i=0; i < 5; ++i)
+  for (auto i=0; i < 4; ++i)
     traj2->foo_a->AddVector(Eigen::Vector3d::Zero());
   for (auto i=0; i < 2; ++i)
     traj2->foo_b->AddVector(Eigen::Vector3d::Zero());
-
-  traj2->set_AWeight(traj->AWeight());
 
   TrajectoryEstimator<SimpleMultiTrajectory> estimator(traj2);
 

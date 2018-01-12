@@ -118,12 +118,12 @@ class SimpleMultiView : public ViewBase<T, SimpleMultiView<T>, SimpleMultiMeta> 
 
   T AWeight() const {
     const int offset = this->meta_.a.n + this->meta_.b.n;
-    return *this->holder_->Parameter(offset + 0);
+    return this->holder_->Parameter(offset)[0];
   }
 
   T BWeight() const {
     const int offset = this->meta_.a.n + this->meta_.b.n;
-    return *this->holder_->Parameter(offset + 1);
+    return this->holder_->Parameter(offset)[1];
   }
 
   Result Evaluate(T t, int flags) const {
@@ -236,9 +236,8 @@ class SimpleMultiTrajectory : public TrajectoryBase<detail::SimpleMultiView> {
       TrajectoryBase(init.holder, init.meta),
       foo_a(init.a),
       foo_b(init.b) {
-    ParamHolder()->AddParameter(1); // a weight
+    ParamHolder()->AddParameter(2); // a and b weight storage
     set_AWeight(1.0);
-    ParamHolder()->AddParameter(1); // b weight
     set_BWeight(1.0);
   };
 
@@ -256,7 +255,7 @@ class SimpleMultiTrajectory : public TrajectoryBase<detail::SimpleMultiView> {
   }
 
   void set_AWeight(double w) {
-    *ParamHolder()->Parameter(0) = w;
+    ParamHolder()->Parameter(0)[0] = w;
   }
 
   double BWeight() const {
@@ -264,7 +263,7 @@ class SimpleMultiTrajectory : public TrajectoryBase<detail::SimpleMultiView> {
   }
 
   void set_BWeight(double w) {
-    *ParamHolder()->Parameter(1) = w;
+    ParamHolder()->Parameter(0)[1] = w;
   }
 
   void AddToProblem(ceres::Problem& problem,
@@ -277,13 +276,11 @@ class SimpleMultiTrajectory : public TrajectoryBase<detail::SimpleMultiView> {
     foo_b->AddToProblem(problem, times, meta.b, parameter_blocks, parameter_sizes);
 
     // Weights
-    for (auto i : {0, 1}) {
-      auto ptr = ParamHolder()->Parameter(i);
-      size_t size = 1;
-      problem.AddParameterBlock(ptr, size);
-      parameter_blocks.push_back(ptr);
-      parameter_sizes.push_back(size);
-    }
+    auto ptr = ParamHolder()->Parameter(0);
+    size_t size = 2;
+    problem.AddParameterBlock(ptr, size);
+    parameter_blocks.push_back(ptr);
+    parameter_sizes.push_back(size);
   }
 
   std::shared_ptr<FooTrajectory> foo_a;
