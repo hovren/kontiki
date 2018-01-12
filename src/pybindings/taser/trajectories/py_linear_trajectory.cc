@@ -14,7 +14,9 @@ namespace py = pybind11;
 
 namespace TT = taser::trajectories;
 
-void declare_linear_trajectory(py::module &m) {
+PYBIND11_MODULE(_linear_trajectory, m) {
+  m.doc() = "Linear Trajectory for testing purposes";
+
   using Class = TT::LinearTrajectory;
   auto cls = py::class_<Class, std::shared_ptr<Class>>(m, "LinearTrajectory");
 
@@ -24,11 +26,5 @@ void declare_linear_trajectory(py::module &m) {
 
   // Common trajectory methods/properties/...
   declare_trajectory_common<TT::LinearTrajectory>(cls);
-}
-
-PYBIND11_MODULE(_linear_trajectory, m) {
-  m.doc() = "Linear Trajectory for testing purposes";
-
-  declare_linear_trajectory(m);
 
 } // PYBIND11_MODULE

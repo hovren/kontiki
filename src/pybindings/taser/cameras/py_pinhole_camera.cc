@@ -10,7 +10,7 @@ namespace py = pybind11;
 
 namespace C = taser::cameras;
 
-static void declare_pinhole(py::module &m) {
+PYBIND11_MODULE(_pinhole_camera, m) {
   using Class = C::PinholeCamera;
   auto cls = py::class_<Class, std::shared_ptr<Class>>(m, "PinholeCamera");
 
@@ -19,8 +19,4 @@ static void declare_pinhole(py::module &m) {
   // Declare extra Pinhole related things here
   cls.def(py::init<int, int, double, const Class::CameraMatrix &>());
   cls.def_property("camera_matrix", &Class::camera_matrix, &Class::set_camera_matrix);
-}
-
-PYBIND11_MODULE(_pinhole_camera, m) {
-  declare_pinhole(m);
 }

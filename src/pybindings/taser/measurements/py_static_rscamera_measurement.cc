@@ -13,17 +13,6 @@
 
 namespace py = pybind11;
 
-// Binds the Project() function for a TrajectoryModel
-// We use a temporary dummy instance to extract the trajectory template (TrajectoryModel)
-template<typename Class, typename TrajectoryModel, typename PyClass>
-static void declare_project(PyClass &cls) {
-  // Since multiple versions of the Project function exists, we bind to a lambda that calls the right one
-  cls.def("project", [](Class &self, const TrajectoryModel& trajectory) {
-    return self.template Project<double, TrajectoryModel>(trajectory.AsView());
-  });
-};
-
-
 PYBIND11_MODULE(_static_rscamera_measurement, m) {
   m.doc() = "Static rolling shutter projection";
 
@@ -43,10 +32,12 @@ PYBIND11_MODULE(_static_rscamera_measurement, m) {
 
     // Declare the project() function for all trajectory types
     hana::for_each(trajectory_types, [&](auto tt) {
-      using TrajectoryImpl = typename decltype(tt)::type;
+      using TrajectoryModel = typename decltype(tt)::type;
 
       // Use temporary to extract TrajectoryModel from TrajectoryImpl
-      declare_project<Class, TrajectoryImpl>(cls);
+      cls.def("project", [](Class &self, const TrajectoryModel& trajectory) {
+        return self.template Project<double, TrajectoryModel>(trajectory.AsView());
+        });
 
     }); // for_each(trajectory_types)
   }); // for_each(camera_types)
