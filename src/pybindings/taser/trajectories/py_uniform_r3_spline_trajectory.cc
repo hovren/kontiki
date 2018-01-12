@@ -17,6 +17,9 @@ PYBIND11_MODULE(_uniform_r3_spline_trajectory, m) {
   auto cls = py::class_<Class, std::shared_ptr<Class>>(m, "UniformR3SplineTrajectory");
 
   cls.def(py::init<>());
+  cls.def_property_readonly("dt", &Class::dt);
+  cls.def_property_readonly("t0", &Class::t0);
+  cls.def("__len__", &Class::NumKnots);
 
   // Common trajectory methods/properties/...
   declare_trajectory_common<Class>(cls);
