@@ -5,13 +5,13 @@ import numpy as np
 from fixtures.camera_fixtures import *
 from fixtures.sfm_fixtures import *
 
-from taser.trajectories import LinearTrajectory, ConstantTrajectory, SimpleMultiTrajectory
+from taser.trajectories import LinearTrajectory, ConstantTrajectory, SimpleMultiTrajectory, UniformR3SplineTrajectory
 from taser.measurements import PositionMeasurement, StaticRsCameraMeasurement
 
 trajectory_classes = [
     LinearTrajectory,
     SimpleMultiTrajectory,
-
+    UniformR3SplineTrajectory,
 #    ConstantTrajectory,
 ]
 
@@ -36,6 +36,8 @@ def trajectory(request):
         traj.wb = 5
 
         return traj
+    elif cls == UniformR3SplineTrajectory:
+        return cls()
     else:
         raise ValueError(f"Fixture simple_trajectory not available for {cls}")
 
