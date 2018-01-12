@@ -7,36 +7,37 @@
 
 #include "trajectory.h"
 #include "trajectory_estimator.h"
+#include "dataholders/vectorholder.h"
 
 #include <Eigen/Dense>
 #include <ceres/ceres.h>
 
-struct _LinearMeta : public taser::trajectories::MetaBase {
-  _LinearMeta() {};
-  _LinearMeta(double t0) : t0(t0) {};
+namespace taser {
+namespace trajectories {
 
-  double t0;
+namespace detail {
 
-  int num_parameters() const override {
+struct LinearMeta : public taser::trajectories::MetaBase {
+  LinearMeta() {};
+  LinearMeta(double t0) : t0(t0) {};
+
+  double t0; // Time origin
+
+  int NumParameters() const override {
     return 0;
   }
 };
 
 
-
-namespace taser {
-namespace trajectories {
-
-// Move outside of namespace to avoid direct instantiation?
 template<typename T>
-class _LinearView  : public ViewBase<T, _LinearView<T>, _LinearMeta> {
+class LinearView  : public ViewBase<T, LinearView<T>, LinearMeta> {
   using Vector3 = Eigen::Matrix<T, 3, 1>;
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
  public:
-  using Meta = _LinearMeta;
+  using Meta = LinearMeta;
 
   // Inherit ViewBase constructor
-  using ViewBase<T, _LinearView<T>, _LinearMeta>::ViewBase;
+  using ViewBase<T, LinearView<T>, LinearMeta>::ViewBase;
 
   T t0() const {
     return T(this->meta_.t0);
@@ -76,14 +77,22 @@ class _LinearView  : public ViewBase<T, _LinearView<T>, _LinearMeta> {
   }
 }; // ::View
 
-class LinearTrajectory : public TrajectoryBase<_LinearView> {
+
+} // namespace detail
+
+
+// Linear trajectory such that we have
+// position p(t) = c * (t - t0)
+// angular velocity w(t) = c
+// Here c is a 3D vector parameter and t0 is the time origin (metadata)
+class LinearTrajectory : public TrajectoryBase<detail::LinearView> {
   using Vector3 = Eigen::Vector3d;
  public:
   static constexpr const char* CLASS_ID = "Linear";
 
-  LinearTrajectory(double t0, const Vector3& k) : TrajectoryBase(new VectorHolder<double>()) { //: holder_(new VectorHolder<double>()) {
+  LinearTrajectory(double t0, const Vector3& k) : TrajectoryBase(new dataholders::VectorHolder<double>()) {
     // One 3D parameter: the constant
-    holder_->AddParameter(3); // Parameter(0)
+    this->holder_->AddParameter(3); // Parameter(0)
 
     set_t0(t0);
     set_constant(k);
@@ -93,12 +102,7 @@ class LinearTrajectory : public TrajectoryBase<_LinearView> {
 
 
   Vector3 constant() const {
-    std::cout << "BEGIN LinearTrajectory::constant()" << std::endl;
-    auto ptr = holder_->Parameter(0);
-    std::cout << "data: " <<  ptr << std::endl;
-    Vector3 c = Eigen::Map<Vector3>(ptr);
-    std::cout << "END LinearTrajectory::constant()" << std::endl;
-    return c;
+    return AsView().constant();
   }
 
   void set_constant(const Vector3 &k) {
@@ -107,19 +111,12 @@ class LinearTrajectory : public TrajectoryBase<_LinearView> {
   }
 
   double t0() const {
-    return this->meta_.t0;
+    return AsView().t0();
   }
 
   void set_t0(double x) {
     this->meta_.t0 = x;
   }
-
-
-
-//  std::unique_ptr<TrajectoryEvaluation<double>> Evaluate(const double t, const int flags) const {
-//    return View<double>(this).Evaluate(t, flags);
-//  }
-
 
   // Add to problem, fill Meta struct, return parameter blocks
   // FIXME: Can we make this virtual in TrajectoryBase?
