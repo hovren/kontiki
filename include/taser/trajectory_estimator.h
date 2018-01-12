@@ -5,19 +5,14 @@
 #ifndef TASERV2_TRAJECTORY_ESTIMATOR_H
 #define TASERV2_TRAJECTORY_ESTIMATOR_H
 
+#include <iostream>
+#include <vector>
+
 #include <ceres/ceres.h>
 
-#include <iostream>
+#include "trajectories/trajectory.h"
 
 namespace taser {
-
-using time_span_t = std::pair<double, double>;
-using time_init_t = std::initializer_list<time_span_t>;
-
-struct EstimatorOptions {
-  // Time spans for which the trajectory should be kept constant
-  std::vector<time_span_t> constant_trajectory_spans;
-};
 
 template <typename TrajectoryModel>
 class TrajectoryEstimator {
@@ -53,11 +48,12 @@ class TrajectoryEstimator {
     return problem_;
   }
 
-  bool AddTrajectoryForTimes(const time_init_t &times,
+  bool AddTrajectoryForTimes(const trajectories::time_init_t &times,
                              Meta &meta,
                              std::vector<double *> &parameter_blocks,
                              std::vector<size_t> &parameter_sizes) {
     trajectory_->AddToProblem(problem_, times, meta, parameter_blocks, parameter_sizes);
+    return true;
   }
 
  protected:

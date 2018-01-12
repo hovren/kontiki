@@ -1,10 +1,12 @@
 #ifndef TASERV2_TRAJECTORY_H
 #define TASERV2_TRAJECTORY_H
 
-#include <Eigen/Dense>
 #include <memory>
 #include <iostream>
 #include <vector>
+
+#include <Eigen/Dense>
+#include <ceres/ceres.h>
 
 #include "dataholders/dataholder.h"
 #include "dataholders/pointerholder.h"
@@ -37,6 +39,9 @@ enum {
   EvalOrientation = 8,
   EvalAngularVelocity = 16
 };
+
+using time_span_t = std::pair<double, double>;
+using time_init_t = std::initializer_list<time_span_t>;
 
 // Base class for trajectory views
 // This is used to collect utility functions common to all views (Position, ...)
@@ -120,6 +125,11 @@ class TrajectoryBase {
   TrajectoryBase(dataholders::MutableDataHolderBase<double>* holder) :
       TrajectoryBase(holder, Meta()) { };
 
+  virtual void AddToProblem(ceres::Problem& problem,
+                    const time_init_t &times,
+                    Meta& meta,
+                    std::vector<double*> &parameter_blocks,
+                    std::vector<size_t> &parameter_sizes) const = 0;
 
 
   template <typename T>

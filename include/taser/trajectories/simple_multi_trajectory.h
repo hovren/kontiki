@@ -154,7 +154,7 @@ class FooTrajectory : public TrajectoryBase<detail::FooView> {
                       const time_init_t &times,
                       Meta& meta,
                       std::vector<double*> &parameter_blocks,
-                      std::vector<size_t> &parameter_sizes) {
+                      std::vector<size_t> &parameter_sizes) const override {
 
     if (times.size() != 1) {
       throw std::length_error("Can only handle single timespans, for now");
@@ -241,7 +241,7 @@ class SimpleMultiTrajectory : public TrajectoryBase<detail::SimpleMultiView> {
     set_BWeight(1.0);
   };
 
-  std::shared_ptr<dataholders::MutableDataHolderBase<double>> ParamHolder() {
+  std::shared_ptr<dataholders::MutableDataHolderBase<double>> ParamHolder() const {
     return static_cast<dataholders::MultiHolder<double, 3> *>(holder_.get())->GetHolder(2);
   }
 
@@ -270,7 +270,7 @@ class SimpleMultiTrajectory : public TrajectoryBase<detail::SimpleMultiView> {
                       const time_init_t &times,
                       Meta& meta,
                       std::vector<double*> &parameter_blocks,
-                      std::vector<size_t> &parameter_sizes) {
+                      std::vector<size_t> &parameter_sizes) const override {
     // Trajectories
     foo_a->AddToProblem(problem, times, meta.a, parameter_blocks, parameter_sizes);
     foo_b->AddToProblem(problem, times, meta.b, parameter_blocks, parameter_sizes);

@@ -119,12 +119,11 @@ class LinearTrajectory : public TrajectoryBase<detail::LinearView> {
   }
 
   // Add to problem, fill Meta struct, return parameter blocks
-  // FIXME: Can we make this virtual in TrajectoryBase?
   void AddToProblem(ceres::Problem& problem,
                       const time_init_t &times,
                       Meta& meta,
                       std::vector<double*> &parameter_blocks,
-                      std::vector<size_t> &parameter_sizes) {
+                      std::vector<size_t> &parameter_sizes) const override {
     // Fill meta
     meta = meta_; // FIXME: Can we use that meta_ is now part of TrajectoryBase?
 
