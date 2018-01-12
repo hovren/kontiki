@@ -82,7 +82,7 @@ class FooView : public ViewBase<T, FooMeta> {
 
 struct SimpleMultiMeta : MetaBase {
   // References used by all calling code
-  // FIXME: Can we make these const references?
+  // It eiher points to external FooMeta instances or this instances __X_owned members
   FooMeta& a;
   FooMeta& b;
 

@@ -125,7 +125,7 @@ class LinearTrajectory : public TrajectoryBase<detail::LinearView> {
                       std::vector<double*> &parameter_blocks,
                       std::vector<size_t> &parameter_sizes) const override {
     // Fill meta
-    meta = meta_; // FIXME: Can we use that meta_ is now part of TrajectoryBase?
+    meta = meta_;
 
     // Define/add parameter blocks and add to problem
     // In this case we have only one: the constant slope parameter

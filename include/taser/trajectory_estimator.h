@@ -30,7 +30,7 @@ class TrajectoryEstimator {
     options.linear_solver_type = ceres::DENSE_QR; // FIXME: SCHUR?
     options.minimizer_progress_to_stdout = true;
 
-//    // FIXME: Multi-thread
+    // FIXME: Don't hardcode thread counts
     options.num_linear_solver_threads = 4;
     options.num_threads = 3;
 

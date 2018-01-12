@@ -85,7 +85,7 @@ class MultiHolder : public MutableDataHolderBase<T> {
   }
 
  protected:
-  std::array<std::shared_ptr<MutableDataHolderBase<T>>, N> holders_; // FIXME: Ownage of the holder pointers is unclear
+  std::array<std::shared_ptr<MutableDataHolderBase<T>>, N> holders_;
 };
 
 } // namespace dataholders
