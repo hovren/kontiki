@@ -26,7 +26,7 @@ int main() {
 
   std::cout << "::KNOTS" << std::endl;
   for (int i=0; i < traj->NumKnots(); ++i) {
-    std::cout << i << ": " << (*traj)[i].transpose() << std::endl;
+    std::cout << i << ": " << traj->ControlPoint(i).transpose() << std::endl;
   }
 
   auto m1 = std::make_shared<PositionMeasurement>(0.1, Eigen::Vector3d(1, 1, 2));
@@ -52,7 +52,7 @@ int main() {
 
   std::cout << "::KNOTS" << std::endl;
   for (int i=0; i < traj->NumKnots(); ++i) {
-    std::cout << i << ": " << (*traj)[i].transpose() << std::endl;
+    std::cout << i << ": " << traj->ControlPoint(i).transpose() << std::endl;
   }
 
   return 0;

@@ -132,6 +132,7 @@ class UniformR3SplineView : public SplineViewBase<T, SplineMeta> {
 
 class UniformR3SplineTrajectory : public TrajectoryBase<detail::UniformR3SplineView> {
   using Vector3 = Eigen::Vector3d;
+  using Vector3Map = Eigen::Map<Vector3>;
  public:
   static constexpr const char* CLASS_ID = "UniformR3Spline";
 
@@ -153,12 +154,8 @@ class UniformR3SplineTrajectory : public TrajectoryBase<detail::UniformR3SplineV
     return AsView().dt();
   }
 
-  Vector3 ControlPoint(size_t i) {
-    return AsView().ControlPoint(i);
-  }
-
-  Vector3 operator[](size_t i) {
-    return ControlPoint(i);
+  Vector3Map ControlPoint(size_t i) {
+    return AsView().MutableControlPoint(i);
   }
 
   void AppendKnot(const Vector3& cp) {

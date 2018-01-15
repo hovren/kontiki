@@ -37,7 +37,23 @@ def trajectory(request):
 
         return traj
     elif cls == UniformR3SplineTrajectory:
-        return cls()
+        dt = 0.5
+        t0 = 1.0
+
+        control_points = [
+            np.array([1, 1, 2]),
+            np.array([1, 2, 1.4]),
+            np.array([1, 4, 0]),
+            np.array([-2, 2, 2]),
+            np.array([-3, -2, 1]),
+            np.array([-4, -2, 0])
+        ]
+
+        instance = cls(dt, t0)
+
+        for cp in control_points:
+            instance.append_knot(cp)
+        return instance
     else:
         raise ValueError(f"Fixture simple_trajectory not available for {cls}")
 
