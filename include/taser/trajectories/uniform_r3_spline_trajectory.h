@@ -176,6 +176,12 @@ class UniformR3SplineView : public SplineViewBase<T, SplineMeta> {
 
     }
 
+    // This trajectory is not concerned with orientations, so just return identity/zero if requested
+    if (flags & EvalOrientation)
+      result->orientation.setIdentity();
+    if (flags & EvalAngularVelocity)
+      result->angular_velocity.setZero();
+
     return result;
   }
 };
