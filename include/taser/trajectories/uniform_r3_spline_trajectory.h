@@ -4,7 +4,10 @@
 #include <vector>
 #include <cmath>
 
+#include <Eigen/Dense>
+
 #include "trajectory.h"
+#include "spline_base.h"
 #include "../trajectory_estimator.h"
 #include "dataholders/vectorholder.h"
 
@@ -13,90 +16,8 @@ namespace trajectories {
 
 namespace detail {
 
-static const Eigen::Matrix4d M = (Eigen::Matrix4d() <<
-    1. / 6., 4. / 6.,  1. / 6., 0,
-    -3. / 6.,       0,  3. / 6., 0,
-    3. / 6., -6. / 6,  3. / 6., 0,
-    -1. / 6.,   3./6., -3. / 6., 1./6.).finished();
-
-static const Eigen::Matrix4d M_cumul = (Eigen::Matrix4d() <<
-    6. / 6.,  5. / 6.,  1. / 6., 0,
-    0. / 6.,  3. / 6.,  3. / 6., 0,
-    0. / 6., -3. / 6.,  3. / 6., 0,
-    0. / 6.,  1. / 6., -2. / 6., 1. / 6.).finished();
-
-struct SplineMeta : public MetaBase {
-  double t0; // First valid time
-  double dt; // Knot spacing
-  size_t n; // Number of knots
-
-  SplineMeta(double dt, double t0) :
-      dt(dt),
-      t0(t0),
-      n(0) { };
-
-  SplineMeta() :
-       SplineMeta(1.0, 0.0) { };
-
-  int NumParameters() const override {
-    return n;
-  }
-
-  double MinTime() const {
-    return t0;
-  }
-
-  double MaxTime() const {
-    return t0 + (n-3) * dt;
-  }
-};
-
-template<typename T, typename Meta>
-class SplineViewBase : public ViewBase<T, Meta> {
- public:
-  // Inherit constructor
-  using ViewBase<T, Meta>::ViewBase;
-
-  T t0() const {
-    return T(this->meta_.t0);
-  }
-
-  T dt() const {
-    return T(this->meta_.dt);
-  }
-
-  size_t NumKnots() const {
-    return this->meta_.n;
-  }
-
-  double MinTime() const override {
-    return this->meta_.MinTime();
-  }
-
-  double MaxTime() const override {
-    return this->meta_.MaxTime();
-  }
-
-  void CalculateIndexAndInterpolationAmount(T t, int& i0, T& u) const {
-    T s = (t - t0()) / dt();
-    i0 = PotentiallyUnsafeFloor(s);
-    u = s - T(i0);
-  }
-
- protected:
-  int PotentiallyUnsafeFloor(double x) const {
-    return static_cast<int>(std::floor(x));
-  }
-
-  // This way of treating Jets are potentially unsafe, hence the function name
-  template<typename Scalar, int N>
-  int PotentiallyUnsafeFloor(const ceres::Jet<Scalar, N>& x) const {
-    return static_cast<int>(std::floor(x.a));
-  };
-};
-
 template<typename T>
-class UniformR3SplineView : public SplineViewBase<T, SplineMeta> {
+class UniformR3SplineView : public SplineViewBase<T> {
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
   using Vector3 = Eigen::Matrix<T, 3, 1>;
   using Vector4 = Eigen::Matrix<T, 4, 1>;
@@ -105,7 +26,7 @@ class UniformR3SplineView : public SplineViewBase<T, SplineMeta> {
   using Meta = SplineMeta;
 
   // Import constructor
-  using SplineViewBase<T, SplineMeta>::SplineViewBase;
+  using SplineViewBase<T>::SplineViewBase;
 
   const Vector3Map ControlPoint(int i) const {
     return Vector3Map(this->holder_->Parameter(i));
@@ -188,29 +109,12 @@ class UniformR3SplineView : public SplineViewBase<T, SplineMeta> {
 
 } // namespace detail
 
-class UniformR3SplineTrajectory : public TrajectoryBase<detail::UniformR3SplineView> {
+class UniformR3SplineTrajectory : public detail::SplinedTrajectoryBase<detail::UniformR3SplineView> {
   using Vector3 = Eigen::Vector3d;
   using Vector3Map = Eigen::Map<Vector3>;
  public:
   static constexpr const char* CLASS_ID = "UniformR3Spline";
-
-  UniformR3SplineTrajectory(double dt, double t0) :
-      TrajectoryBase(new dataholders::VectorHolder<double>(), Meta(dt, t0)) {
-  };
-
-  UniformR3SplineTrajectory(double dt) :
-    UniformR3SplineTrajectory(dt, 0.0) { };
-
-  UniformR3SplineTrajectory() :
-      UniformR3SplineTrajectory(1.0) { };
-
-  double t0() const {
-    return AsView().t0();
-  }
-
-  double dt() const {
-    return AsView().dt();
-  }
+  using SplinedTrajectoryBase<detail::UniformR3SplineView>::SplinedTrajectoryBase;
 
   Vector3Map ControlPoint(size_t i) {
     return AsView().MutableControlPoint(i);
@@ -220,10 +124,6 @@ class UniformR3SplineTrajectory : public TrajectoryBase<detail::UniformR3SplineV
     auto i = this->holder_->AddParameter(3);
     AsView().MutableControlPoint(i) = cp;
     this->meta_.n += 1;
-  }
-
-  size_t NumKnots() const {
-    return AsView().NumKnots();
   }
 
   void AddToProblem(ceres::Problem& problem,
