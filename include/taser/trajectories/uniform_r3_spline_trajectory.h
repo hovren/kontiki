@@ -31,8 +31,8 @@ struct SplineMeta : public MetaBase {
   size_t n; // Number of knots
 
   SplineMeta(double dt, double t0) :
-      t0(0.0),
-      dt(1.0),
+      dt(dt),
+      t0(t0),
       n(0) { };
 
   SplineMeta() :
