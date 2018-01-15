@@ -10,6 +10,31 @@ ExampleData = namedtuple('ExampleData',
                          ['position', 'velocity', 'acceleration', 'orientation', 'angular_velocity',
                           'min_time', 'max_time'])
 
+
+def safe_time(trajectory):
+    tmin, tmax = trajectory.valid_time
+
+    # Base case: Both finite
+    if np.isfinite(tmin) and np.isfinite(tmax):
+        t = 0.5 * (tmin + tmax)
+
+    else:
+        # At least one is infinite
+        # Make sure tmin is not inf or tmax = -inf
+        assert tmax > tmin
+
+        if np.isfinite(tmin):  # (a, np.inf) -> t >= a OK
+            t = tmin + 1
+        elif np.isfinite(tmax):  # (-inf, b) -> t < b is OK
+            t = tmax - 1
+        else:
+            t = 42.  # (-inf, inf) means any time is valid, pick something non-zero
+
+    # Sanity check
+    assert np.isfinite(t)
+    return t
+
+
 @pytest.fixture
 def trajectory_example(trajectory):
     def make_example(tmin, tmax):
@@ -82,6 +107,8 @@ def trajectory_example(trajectory):
         example_data.position.extend([(t, bspline(t)) for t in times])
         example_data.velocity.extend([(t, bspline_vel(t)) for t in times])
         example_data.acceleration.extend([(t, bspline_acc(t)) for t in times])
+        example_data.orientation.extend([(t, q0) for t in times])
+        example_data.angular_velocity.extend([(t, np.zeros(3)) for t in times])
     else:
         raise NotImplementedError(f"No example data for {cls} available")
 
@@ -89,19 +116,21 @@ def trajectory_example(trajectory):
 
 
 def test_translation_return_type(trajectory):
-    p = trajectory.position(0)
+    t = safe_time(trajectory)
+    p = trajectory.position(t)
     assert p.shape == (3,)
-    v = trajectory.velocity(0)
+    v = trajectory.velocity(t)
     assert v.shape == (3,)
-    a = trajectory.acceleration(0)
+    a = trajectory.acceleration(t)
     assert a.shape == (3,)
 
 
 def test_orientation_return_type(trajectory):
-    q = trajectory.orientation(0)
+    t = safe_time(trajectory)
+    q = trajectory.orientation(t)
     assert q.shape == (4,)
     np.testing.assert_almost_equal(np.linalg.norm(q), 1)
-    w = trajectory.angular_velocity(0)
+    w = trajectory.angular_velocity(t)
     assert w.shape == (3,)
 
 
@@ -129,7 +158,7 @@ def test_valid_time(trajectory_example):
 
 
 def test_from_world(trajectory):
-    t = 1.0
+    t = safe_time(trajectory)
     Rwt = quat_to_rotation_matrix(trajectory.orientation(t))
     pwt = trajectory.position(t)
 
@@ -140,7 +169,7 @@ def test_from_world(trajectory):
 
 
 def test_to_world(trajectory):
-    t = 1.0
+    t = safe_time(trajectory)
     Rwt = quat_to_rotation_matrix(trajectory.orientation(t))
     pwt = trajectory.position(t)
 
