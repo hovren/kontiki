@@ -78,6 +78,13 @@ class FooView : public ViewBase<T, FooMeta> {
     return r;
   }
 
+  double MinTime() const override {
+    return -std::numeric_limits<double>::infinity();
+  }
+
+  double MaxTime() const override {
+    return std::numeric_limits<double>::infinity();
+  }
 };
 
 struct SimpleMultiMeta : MetaBase {
@@ -135,6 +142,14 @@ class SimpleMultiView : public ViewBase<T, SimpleMultiMeta> {
     T wb = BWeight();
     r->position = wa * pos_a + wb * pos_b + Vector3(wa, wb, T(1.));
     return r;
+  }
+
+  double MinTime() const override {
+    return std::max(view_a_.MinTime(), view_b_.MinTime());
+  }
+
+  double MaxTime() const override {
+    return std::min(view_a_.MaxTime(), view_b_.MaxTime());
   }
 
   const FooView<T> view_a_;

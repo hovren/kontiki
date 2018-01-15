@@ -16,6 +16,10 @@ def scipy_bspline_valid_time_interval(bspl):
     return bspl.t[bspl.k], bspl.t[-bspl.k - 1]
 
 
+def scipy_bspline_for_trajectory(trajectory):
+    control_points = np.vstack([cp for cp in trajectory])
+    return scipy_bspline(control_points, dt=trajectory.dt, t0=trajectory.t0, k=3)
+
 @pytest.fixture
 def random_r3_spline():
     N = 10

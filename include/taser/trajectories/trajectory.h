@@ -62,6 +62,8 @@ class ViewBase {
   ViewBase(std::shared_ptr<dataholders::DataHolderBase<T>> data_holder, const Meta& meta) : meta_(meta), holder_(data_holder) { };
 
   virtual Result Evaluate(T t, int flags) const = 0;
+  virtual double MinTime() const = 0;
+  virtual double MaxTime() const = 0;
 
   Vector3 Position(T t) const {
     return this->Evaluate(t, EvalPosition)->position;
@@ -170,6 +172,20 @@ class TrajectoryBase {
   Vector3 ToWorld(Vector3 &Xw, double t) {
     return AsView().ToWorld(Xw, t);
   }
+
+  // First time the trajectory is valid for
+  double MinTime() const {
+    return AsView().MinTime();
+  }
+
+  // First time the trajectory is NOT valid for
+  double MaxTime() const {
+    return AsView().MaxTime();
+  }
+
+  std::pair<double, double> ValidTime() const {
+    return std::make_pair<double, double>(MinTime(), MaxTime());
+  };
 
   std::shared_ptr<dataholders::MutableDataHolderBase<double>> Holder() const {
     return holder_;

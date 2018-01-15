@@ -37,8 +37,8 @@ def trajectory(request):
 
         return traj
     elif cls == UniformR3SplineTrajectory:
-        dt = 0.5
-        t0 = 1.0
+        dt = 0.34
+        t0 = 1.22
 
         control_points = [
             np.array([1, 1, 2]),

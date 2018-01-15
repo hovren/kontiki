@@ -41,6 +41,14 @@ struct SplineMeta : public MetaBase {
   int NumParameters() const override {
     return n;
   }
+
+  double MinTime() const {
+    return t0;
+  }
+
+  double MaxTime() const {
+    return t0 + (n-3) * dt;
+  }
 };
 
 template<typename T, typename Meta>
@@ -59,6 +67,14 @@ class SplineViewBase : public ViewBase<T, Meta> {
 
   size_t NumKnots() const {
     return this->meta_.n;
+  }
+
+  double MinTime() const override {
+    return this->meta_.MinTime();
+  }
+
+  double MaxTime() const override {
+    return this->meta_.MaxTime();
   }
 
   void CalculateIndexAndInterpolationAmount(T t, int& i0, T& u) const {

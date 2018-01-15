@@ -66,6 +66,14 @@ class LinearView  : public ViewBase<T, LinearMeta> {
     return result;
   }
 
+  double MinTime() const override {
+    return -std::numeric_limits<double>::infinity();
+  }
+
+  double MaxTime() const override {
+    return std::numeric_limits<double>::infinity();
+  }
+
  protected:
 
   Eigen::Quaternion<T> calculate_orientation(T t) const {
