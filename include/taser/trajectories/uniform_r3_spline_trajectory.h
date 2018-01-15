@@ -83,6 +83,7 @@ template<typename T>
 class UniformR3SplineView : public SplineViewBase<T, SplineMeta> {
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
   using Vector3 = Eigen::Matrix<T, 3, 1>;
+  using Vector4 = Eigen::Matrix<T, 4, 1>;
   using Vector3Map = Eigen::Map<Vector3>;
  public:
   using Meta = SplineMeta;
@@ -113,16 +114,51 @@ class UniformR3SplineView : public SplineViewBase<T, SplineMeta> {
       throw std::range_error(ss.str());
     }
 
-    const Eigen::Matrix<T, 1, 4> U(T(1), u, u*u, u*u*u);
-    const Eigen::Matrix<T, 4, 1> Q = U * M.cast<T>();
+    Vector4 Up, Uv, Ua;
+    Vector4 Qp, Qv, Qa;
+    T u2, u3;
+    Vector3 &p = result->position;
+    Vector3 &v = result->velocity;
+    Vector3 &a = result->acceleration;
+    T dt_inv = T(1) / this->dt();
 
-    Eigen::Matrix<T, 3, 1> p = Eigen::Matrix<T, 3, 1>::Zero();
+    if ((flags & EvalPosition) || (flags & EvalVelocity))
+      u2 = ceres::pow(u, 2);
+    if (flags & EvalPosition)
+      u3 = ceres::pow(u, 3);
 
-    for (int i=i0; i < i0 + 4; ++i) {
-      p += Q(i - i0) * ControlPoint(i);
+    if (flags & EvalPosition) {
+      Up = Vector4(T(1), u, u2, u3);
+      Qp = Up.transpose() * M.cast<T>();
+      p.setZero();
     }
 
-    result->position = p;
+    if (flags & EvalVelocity) {
+      Uv = dt_inv * Vector4(T(0), T(1), T(2) * u, T(3) * u2);
+      Qv = Uv.transpose() * M.cast<T>();
+      v.setZero();
+    }
+
+    if (flags & EvalAcceleration) {
+      Ua = ceres::pow(dt_inv, 2) *  Vector4(T(0), T(0), T(2), T(6) * u);
+      Qa = Ua.transpose() * M.cast<T>();
+      a.setZero();
+    }
+
+
+    for (int i=i0; i < i0 + 4; ++i) {
+      Vector3Map cp = ControlPoint(i);
+
+      if (flags & EvalPosition)
+        p += Qp(i - i0) * cp;
+
+      if (flags & EvalVelocity)
+        v += Qv(i - i0) * cp;
+
+      if (flags & EvalAcceleration)
+        a += Qa(i - i0) * cp;
+
+    }
 
     return result;
   }

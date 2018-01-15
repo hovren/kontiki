@@ -103,7 +103,32 @@ def test_position(random_r3_spline):
     for t in times:
         pos_sp = bspl_sp(t)
         pos_our = traj.position(t)
-        print(pos_sp, pos_our, traj.dt, traj.t0)
         np.testing.assert_almost_equal(pos_our, pos_sp)
 
+
+def test_velocity(random_r3_spline):
+    traj, control_points = random_r3_spline
+
+    bspl_sp = scipy_bspline(control_points, dt=traj.dt, t0=traj.t0, k=3)
+
+    times = np.linspace(*scipy_bspline_valid_time_interval(bspl_sp), endpoint=False)
+
+    vel_func = bspl_sp.derivative(1)
+    for t in times:
+        vel_sp = vel_func(t)
+        vel_our = traj.velocity(t)
         np.testing.assert_almost_equal(vel_our, vel_sp)
+
+
+def test_acceleration(random_r3_spline):
+    traj, control_points = random_r3_spline
+
+    bspl_sp = scipy_bspline(control_points, dt=traj.dt, t0=traj.t0, k=3)
+
+    times = np.linspace(*scipy_bspline_valid_time_interval(bspl_sp), endpoint=False)
+
+    acc_func = bspl_sp.derivative(2)
+    for t in times:
+        acc_sp = acc_func(t)
+        acc_our = traj.acceleration(t)
+        np.testing.assert_almost_equal(acc_our, acc_sp)
