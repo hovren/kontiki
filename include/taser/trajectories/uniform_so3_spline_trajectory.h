@@ -95,24 +95,24 @@ class UniformSO3SplineView : public SplineViewBase<T> {
       QuaternionMap qa = ControlPoint(i - 1);
       QuaternionMap qb = ControlPoint(i);
       Quaternion omega = math::logq(qa.conjugate() * qb);
-      Quaternion eomegab = math::expq(Quaternion(omega.coeffs() * B(i)));
+      Quaternion eomegab = math::expq(Quaternion(omega.coeffs() * B(i-i0)));
       q *= eomegab;
 
       // Angular velocity
       // This iterative scheme follows from the product rule of derivatives
       if (do_angular_velocity) {
         for (int j = (i0 + 1); j < K; ++j) {
+          const int m = j - i0 - 1;
           if (i==j) {
-            dq_parts[j - 1] *= Quaternion(omega.coeffs()*dB(i));
+            dq_parts[m] *= Quaternion(omega.coeffs()*dB(i-i0));
           }
-          dq_parts[j - 1] *= eomegab;
+          dq_parts[m] *= eomegab;
         }
       }
     }
 
     if (do_angular_velocity) {
       Quaternion dq = ControlPoint(i0)*Quaternion(dq_parts[0].coeffs() + dq_parts[1].coeffs() + dq_parts[2].coeffs());
-      std::cout << "dq = " << dq.w() << ", " << dq.x() << ", " << dq.y() << ", " << dq.z() << std::endl;
       result->angular_velocity = math::angular_velocity(q, dq);
     }
 

@@ -90,7 +90,7 @@ Eigen::Quaternion<T> expq(const Eigen::Quaternion<T>& q)
 
 template<typename T>
 Eigen::Matrix<T, 3, 1> angular_velocity(const Eigen::Quaternion<T> &q, const Eigen::Quaternion<T> &dq) {
-  Eigen::Quaternion<T> w(T(2) * (q.conjugate() * dq).coeffs());
+  Eigen::Quaternion<T> w(T(2) * (dq * q.conjugate()).coeffs());
   return w.vec();
 };
 
