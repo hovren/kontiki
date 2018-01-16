@@ -94,8 +94,20 @@ def trajectory_example(trajectory):
         times = np.linspace(t1, t2, endpoint=False)
 
         # Note: We don't have any reference implementation for quaternion cubic b-splines
-        # to test agains, and constructing examples by hand is difficult.
-        # Accept that the tests will fail for now
+        # to test against, and constructing examples by hand is difficult.
+        # Accept that the orientation test will fail for now
+
+        # Constant angular velocity
+        w, axis = np.deg2rad(10), np.array([1., 0, 1])
+        axis /= np.linalg.norm(axis)
+        def axis_angle_to_quat(n, theta):
+            q = np.empty(4)
+            q[0] = np.cos(theta / 2)
+            q[1:] = np.sin(theta / 2) * n
+            return q
+
+        #example_data.orientation.extend([(t, axis_angle_to_quat(axis, w*t)) for t in times])
+        example_data.angular_velocity.extend([(t, w * axis) for t in times])
 
         # Position modalities should be zero for this trajectory type
         example_data.position.extend([(t, zero) for t in times])
