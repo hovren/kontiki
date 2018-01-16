@@ -72,7 +72,7 @@ def trajectory_example(trajectory):
         example_data.velocity.extend([])
 
     elif cls == UniformR3SplineTrajectory:
-        from test_r3spline_trajectory import scipy_bspline_for_trajectory, scipy_bspline_valid_time_interval
+        from test_spline_trajectories import scipy_bspline_for_trajectory, scipy_bspline_valid_time_interval
         bspline = scipy_bspline_for_trajectory(trajectory)
         bspline_vel = bspline.derivative(1)
         bspline_acc = bspline.derivative(2)
@@ -86,24 +86,18 @@ def trajectory_example(trajectory):
         example_data.orientation.extend([(t, q0) for t in times])
         example_data.angular_velocity.extend([(t, np.zeros(3)) for t in times])
     elif cls == UniformSO3SplineTrajectory:
-        from test_r3spline_trajectory import scipy_bspline_for_trajectory, scipy_bspline_valid_time_interval
+        from test_spline_trajectories import scipy_bspline_for_trajectory, scipy_bspline_valid_time_interval
         # Extract time information
         bspline_DONTUSE = scipy_bspline_for_trajectory(trajectory)
         t1, t2 = scipy_bspline_valid_time_interval(bspline_DONTUSE)
         example_data = make_example(t1, t2)
         times = np.linspace(t1, t2, endpoint=False)
 
-        # Constant angular velocity
-        w, axis = np.deg2rad(10), np.array([1., 0, 1])
-        axis /= np.linalg.norm(axis)
-        def axis_angle_to_quat(n, theta):
-            q = np.empty(4)
-            q[0] = np.cos(theta / 2)
-            q[1:] = np.sin(theta / 2) * n
-            return q
+        # Note: We don't have any reference implementation for quaternion cubic b-splines
+        # to test agains, and constructing examples by hand is difficult.
+        # Accept that the tests will fail for now
 
-        example_data.orientation.extend([(t, axis_angle_to_quat(axis, w*t)) for t in times])
-        example_data.angular_velocity.extend([(t, w) for t in times])
+        # Position modalities should be zero for this trajectory type
         example_data.position.extend([(t, zero) for t in times])
         example_data.velocity.extend([(t, zero) for t in times])
         example_data.acceleration.extend([(t, zero) for t in times])
