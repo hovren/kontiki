@@ -128,6 +128,8 @@ class TrajectoryBase {
   TrajectoryBase(dataholders::MutableDataHolderBase<double>* holder) :
       TrajectoryBase(holder, Meta()) { };
 
+  // Add trajectory to problem for a set of time spans
+  // Implementers can assume that the the list of time spans is ordered
   virtual void AddToProblem(ceres::Problem& problem,
                     const time_init_t &times,
                     Meta& meta,

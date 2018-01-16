@@ -52,20 +52,44 @@ class TrajectoryEstimator {
                              Meta &meta,
                              std::vector<double *> &parameter_blocks,
                              std::vector<size_t> &parameter_sizes) {
-    for (auto& tspan : times) {
-      double t1, t2;
-      std::tie(t1, t2) = tspan;
-      if ((t1 > t2) ||
-          (t1 < trajectory_->MinTime()) ||
-          (t2 >= trajectory_->MaxTime())) {
-        throw std::range_error("Time span out of range for trajectory");
-      }
-    }
+    CheckTimeSpans(times);
     trajectory_->AddToProblem(problem_, times, meta, parameter_blocks, parameter_sizes);
     return true;
   }
 
  protected:
+
+  // Check the following
+  // 1) All time spans are valid for the current trajectory
+  // 2) Time spans are ordered (ascending)
+  // Throw std::range_error on failure
+  void CheckTimeSpans(const trajectories::time_init_t &times) {
+    int i=0;
+    double t1_prev;
+
+    for (auto &tspan : times) {
+      double t1, t2;
+      std::tie(t1, t2) = tspan;
+
+      // Valid for trajectory?
+      if ((t1 < trajectory_->MinTime()) ||
+          (t2 >= trajectory_->MaxTime())) {
+        throw std::range_error("Time span out of range for trajectory");
+      }
+
+      // Ordered?
+      if (t1 > t2) {
+        throw std::range_error("At least one time span begins before it ends");
+      }
+      else if((i > 0) && (t1 < t1_prev)) {
+        throw std::range_error("Time spans are not ordered");
+      }
+
+      t1_prev = t1;
+      i += 1;
+    }
+  }
+
   std::shared_ptr<TrajectoryModel> trajectory_;
   ceres::Problem problem_;
 };
