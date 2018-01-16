@@ -46,10 +46,10 @@ using time_init_t = std::initializer_list<time_span_t>;
 // Base class for trajectory views
 // This is used to collect utility functions common to all views (Position, ...)
 // Views are intended to be immutable and uses readonly DataHolderBase parameter stores.
-template<typename T, class Meta>
+template<typename T, class MetaType>
 class ViewBase {
   static_assert(
-      std::is_base_of<MetaBase, Meta>::value,
+      std::is_base_of<MetaBase, MetaType>::value,
       "Meta must be subclass of MetaBase"
   );
 
@@ -57,6 +57,7 @@ class ViewBase {
   using Quaternion = Eigen::Quaternion<T>;
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
  public:
+  using Meta = MetaType;
 
 //  ViewBase(T const* const* params, const Meta& meta) : meta_(meta), holder_(new PointerHolder<T>(params)) { };
   ViewBase(std::shared_ptr<dataholders::DataHolderBase<T>> data_holder, const Meta& meta) : meta_(meta), holder_(data_holder) { };

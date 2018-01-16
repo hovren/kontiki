@@ -55,6 +55,7 @@ template<typename T>
 class SplineViewBase : public ViewBase<T, SplineMeta> {
  public:
   // Inherit constructor
+  using ViewBase<T, SplineMeta>::Meta;
   using ViewBase<T, SplineMeta>::ViewBase;
 
   T t0() const {

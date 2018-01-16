@@ -102,6 +102,7 @@ ext_modules = [
     TrajectoryExtension('_linear_trajectory'),
     TrajectoryExtension('_simple_multi_trajectory'),
     TrajectoryExtension('_uniform_r3_spline_trajectory'),
+    TrajectoryExtension('_uniform_so3_spline_trajectory'),
     CameraExtension('_pinhole_camera'),
     CameraExtension('_atan_camera'),
     MeasurementExtension('_position_measurement'),
