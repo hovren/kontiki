@@ -11,6 +11,7 @@ namespace hana = boost::hana;
 #include "trajectories/linear_trajectory.h"
 #include "trajectories/simple_multi_trajectory.h"
 #include "trajectories/uniform_r3_spline_trajectory.h"
+#include "trajectories/uniform_so3_spline_trajectory.h"
 //
 #include "cameras/pinhole.h"
 #include "cameras/atan.h"
@@ -55,7 +56,8 @@ namespace TC = taser::cameras;
 static constexpr auto trajectory_types = hana::tuple_t<
     TT::SimpleMultiTrajectory,
     TT::LinearTrajectory,
-    TT::UniformR3SplineTrajectory
+    TT::UniformR3SplineTrajectory,
+    TT::UniformSO3SplineTrajectory
 >;
 
 // Define valid camera types
