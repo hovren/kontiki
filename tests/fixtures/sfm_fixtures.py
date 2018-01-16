@@ -97,6 +97,7 @@ def load_relpose(path):
 def small_sfm(request, camera, trajectory):
     # Load world points from cache if possible, otherwise generate it
     # Since the camera fixture randomly generates a relative pose we must store that as well
+    # Note: If changes are made to the trajectory evaluation, this cache must be manually cleared!
     camera_id = camera.__class__.__name__.split('Camera')[0]
     traj_id = trajectory.__class__.__name__.split('Trajectory')[0]
     cachedir = Path(request.config.cache.makedir('structure'))

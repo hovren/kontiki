@@ -8,6 +8,9 @@ from taser.sfm import Landmark, View
 from trajectories.test_general import trajectory_example
 
 def test_static(small_sfm):
+    # NOTE: If this test fails, first try to clear the pytest cache using
+    #  python3 -m pytest --cache-clear
+
     views, trajectory, camera = small_sfm
 
     # Take the first landmark
