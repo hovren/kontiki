@@ -52,6 +52,15 @@ class TrajectoryEstimator {
                              Meta &meta,
                              std::vector<double *> &parameter_blocks,
                              std::vector<size_t> &parameter_sizes) {
+    for (auto& tspan : times) {
+      double t1, t2;
+      std::tie(t1, t2) = tspan;
+      if ((t1 > t2) ||
+          (t1 < trajectory_->MinTime()) ||
+          (t2 >= trajectory_->MaxTime())) {
+        throw std::range_error("Time span out of range for trajectory");
+      }
+    }
     trajectory_->AddToProblem(problem_, times, meta, parameter_blocks, parameter_sizes);
     return true;
   }
