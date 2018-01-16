@@ -52,7 +52,7 @@ class UniformR3SplineView : public SplineViewBase<T> {
     }
 
     Vector4 Up, Uv, Ua;
-    Vector4 Qp, Qv, Qa;
+    Vector4 Bp, Bv, Ba;
     T u2, u3;
     Vector3 &p = result->position;
     Vector3 &v = result->velocity;
@@ -66,19 +66,19 @@ class UniformR3SplineView : public SplineViewBase<T> {
 
     if (flags & EvalPosition) {
       Up = Vector4(T(1), u, u2, u3);
-      Qp = Up.transpose() * M.cast<T>();
+      Bp = Up.transpose() * M.cast<T>();
       p.setZero();
     }
 
     if (flags & EvalVelocity) {
       Uv = dt_inv * Vector4(T(0), T(1), T(2) * u, T(3) * u2);
-      Qv = Uv.transpose() * M.cast<T>();
+      Bv = Uv.transpose() * M.cast<T>();
       v.setZero();
     }
 
     if (flags & EvalAcceleration) {
       Ua = ceres::pow(dt_inv, 2) *  Vector4(T(0), T(0), T(2), T(6) * u);
-      Qa = Ua.transpose() * M.cast<T>();
+      Ba = Ua.transpose() * M.cast<T>();
       a.setZero();
     }
 
@@ -87,13 +87,13 @@ class UniformR3SplineView : public SplineViewBase<T> {
       Vector3Map cp = ControlPoint(i);
 
       if (flags & EvalPosition)
-        p += Qp(i - i0) * cp;
+        p += Bp(i - i0) * cp;
 
       if (flags & EvalVelocity)
-        v += Qv(i - i0) * cp;
+        v += Bv(i - i0) * cp;
 
       if (flags & EvalAcceleration)
-        a += Qa(i - i0) * cp;
+        a += Ba(i - i0) * cp;
 
     }
 
@@ -132,7 +132,7 @@ class UniformR3SplineTrajectory : public detail::SplinedTrajectoryBase<detail::U
                     std::vector<double*> &parameter_blocks,
                     std::vector<size_t> &parameter_sizes) const {
     if (times.size() != 1) {
-      throw std::length_error("Mult i times not implemented yet");
+      throw std::length_error("Multi times not implemented yet");
     }
 
     int i1, i2;

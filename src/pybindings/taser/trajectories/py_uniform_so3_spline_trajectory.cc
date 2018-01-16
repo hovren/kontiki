@@ -11,6 +11,7 @@ namespace py = pybind11;
 
 namespace TT = taser::trajectories;
 
+// FIXME: Move to shared file
 static constexpr int python_index_to_linear(int i, int N) {
   if ((i >= N) || (i < -N)) {
     throw py::index_error("Invalid sequence index");
@@ -19,6 +20,14 @@ static constexpr int python_index_to_linear(int i, int N) {
     return i + N;
   else
     return i;
+}
+
+static Eigen::Quaterniond vec_to_quat(const Eigen::Vector4d& qv) {
+  return Eigen::Quaterniond(qv(0), qv(1), qv(2), qv(3));
+}
+
+static Eigen::Vector4d quat_to_vec(const Eigen::Quaterniond& q) {
+  return Eigen::Vector4d(q.w(), q.x(), q.y(), q.z());
 }
 
 PYBIND11_MODULE(_uniform_so3_spline_trajectory, m) {
@@ -33,16 +42,16 @@ PYBIND11_MODULE(_uniform_so3_spline_trajectory, m) {
   cls.def_property_readonly("dt", &Class::dt);
   cls.def_property_readonly("t0", &Class::t0);
   cls.def("__len__", &Class::NumKnots);
-//  cls.def("__getitem__", [&](Class& self, int i) {
-//    Eigen::Quaterniond cp = self.ControlPoint(python_index_to_linear(i, self.NumKnots()));
-//    Eigen::Vector4d q(cp.w(), cp.x(), cp.y(), cp.z());
-//    return cp;
-//  });
-//  cls.def("__setitem__", [&](Class& self, int i, Eigen::Vector4d cp) {
-//    Eigen::Quaterniond q(cp(0), cp(1), cp(2), cp(3));
-//    self.ControlPoint(python_index_to_linear(i, self.NumKnots())) = cp;
-//  });
-//  cls.def("append_knot", &Class::AppendKnot);
+  cls.def("__getitem__", [&](Class& self, int i) {
+    Eigen::Quaterniond cp = self.ControlPoint(python_index_to_linear(i, self.NumKnots()));
+    return quat_to_vec(cp);
+  });
+  cls.def("__setitem__", [&](Class& self, int i, Eigen::Vector4d cp) {
+    self.ControlPoint(python_index_to_linear(i, self.NumKnots())) = vec_to_quat(cp);
+  });
+  cls.def("append_knot", [&](Class& self, Eigen::Vector4d qvec) {
+    self.AppendKnot(vec_to_quat(qvec));
+  });
 
   // Common trajectory methods/properties/...
   declare_trajectory_common<Class>(cls);

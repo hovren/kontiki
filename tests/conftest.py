@@ -5,13 +5,15 @@ import numpy as np
 from fixtures.camera_fixtures import *
 from fixtures.sfm_fixtures import *
 
-from taser.trajectories import LinearTrajectory, ConstantTrajectory, SimpleMultiTrajectory, UniformR3SplineTrajectory
+from taser.trajectories import LinearTrajectory, ConstantTrajectory, SimpleMultiTrajectory, \
+    UniformR3SplineTrajectory, UniformSO3SplineTrajectory
 from taser.measurements import PositionMeasurement, StaticRsCameraMeasurement
 
 trajectory_classes = [
     LinearTrajectory,
-    SimpleMultiTrajectory,
+    # SimpleMultiTrajectory,
     UniformR3SplineTrajectory,
+    UniformSO3SplineTrajectory,
 #    ConstantTrajectory,
 ]
 
@@ -53,6 +55,36 @@ def trajectory(request):
 
         for cp in control_points:
             instance.append_knot(cp)
+        return instance
+    elif cls == UniformSO3SplineTrajectory:
+        dt = 0.34
+        t0 = 1.22
+
+        N = 8
+        times = t0 + np.arange(-3, N - 3) * dt
+        w, axis = np.deg2rad(10), np.array([1., 0, 1])
+        axis /= np.linalg.norm(axis)
+
+        control_points = []
+        for t in times:
+            theta = w * t
+            q = np.empty(4)
+            q[0] = np.cos(theta / 2)
+            q[1:] = np.sin(theta / 2) * axis
+            control_points.append(q)
+
+        # # Make unit quaternions and make sure they are not flipped
+        # control_points /= np.linalg.norm(control_points, axis=1).reshape(-1, 1)
+        # for i in range(1, len(control_points)):
+        #     q1 = control_points[i-1]
+        #     q2 = control_points[i]
+        #     if np.dot(q1, q2) < 0:
+        #         q2[:] = -q2
+
+        instance = cls(dt, t0)
+        for cp in control_points:
+            instance.append_knot(cp)
+
         return instance
     else:
         raise ValueError(f"Fixture simple_trajectory not available for {cls}")
