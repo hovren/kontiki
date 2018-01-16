@@ -22,10 +22,7 @@ def test_solve_empty(estimator):
 
 def _test_add_measurement(estimator, measurements):
     for m in measurements:
-        try:
-            estimator.add_measurement(m)
-        except ValueError:
-            pass  # This means only that the measurement time doesn't match the trajectory
+        estimator.add_measurement(m)
 
 
 def test_add_camera_measurement(estimator, camera_measurements):
