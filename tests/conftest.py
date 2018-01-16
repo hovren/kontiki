@@ -18,7 +18,7 @@ trajectory_classes = [
 
 @pytest.fixture(params=trajectory_classes)
 def trajectory(request):
-    "Handcrafted 'simple' trajectory"
+    "Handcrafted 'simple' trajectory which is at least 5 seconds long"
     cls = request.param
 
     if cls == LinearTrajectory:
@@ -35,7 +35,7 @@ def trajectory(request):
 
         return traj
     elif cls == UniformR3SplineTrajectory:
-        dt = 0.34
+        dt = 2.3
         t0 = 1.22
 
         control_points = [
@@ -53,10 +53,10 @@ def trajectory(request):
             instance.append_knot(cp)
         return instance
     elif cls == UniformSO3SplineTrajectory:
-        dt = 0.34
+        dt = 0.6
         t0 = 1.22
 
-        N = 8
+        N = int(np.ceil(5. / dt)) + 3
         times = t0 + np.arange(-3, N - 3) * dt
         w, axis = np.deg2rad(10), np.array([1., 0, 1])
         axis /= np.linalg.norm(axis)
@@ -107,8 +107,11 @@ def camera_measurements(request, small_sfm):
     return measurements
 
 @pytest.fixture(params=[PositionMeasurement])
-def simple_measurements(request):
-    times = np.linspace(-5, 5, num=20)
+def simple_measurements(request, trajectory):
+    from taser.utils import safe_time_span
+    length = 5.
+    n = int(length * 3)
+    times = np.linspace(*safe_time_span(trajectory, length), num=n)
     cls = request.param
     if cls == PositionMeasurement:
         return [cls(t, np.random.uniform(-1, 1, size=3)) for t in times]
