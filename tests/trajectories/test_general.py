@@ -169,3 +169,37 @@ def test_to_world(trajectory):
     X_world_expected = Rwt @ X_traj + pwt
     X_world_actual = trajectory.to_world(X_traj, t)
     np.testing.assert_almost_equal(X_world_actual, X_world_expected)
+
+
+def test_velocity_numerical(trajectory):
+    import scipy.misc
+    t = safe_time(trajectory)
+    dt = 1e-3
+    vel_num = scipy.misc.derivative(trajectory.position, t, dx=dt, n=1)
+    vel_actual = trajectory.velocity(t)
+    np.testing.assert_almost_equal(vel_actual, vel_num, decimal=3)
+
+
+def test_acceleration_numerical(trajectory):
+    import scipy.misc
+    t = safe_time(trajectory)
+    dt = 1e-3
+    acc_num = scipy.misc.derivative(trajectory.velocity, t, dx=dt, n=1)
+    acc_actual = trajectory.acceleration(t)
+    np.testing.assert_almost_equal(acc_actual, acc_num, decimal=3)
+
+
+def test_angular_velocity_numerical(trajectory):
+    import scipy.misc
+    from taser.rotations import quat_mult, quat_conj
+    t = safe_time(trajectory)
+    dt = 1e-3
+    q = trajectory.orientation(t)
+    dq_num = scipy.misc.derivative(trajectory.orientation, t, dx=dt, n=1)
+    w_num = (2 * quat_mult(dq_num, quat_conj(q)))[1:]
+    print()
+    print(f'Python: q={q}')
+    print(f'Python: dq={dq_num}')
+    w_actual = trajectory.angular_velocity(t)
+    np.testing.assert_almost_equal(w_actual, w_num)
+

@@ -115,6 +115,12 @@ def quat_mult(q1, q2):
     return np.array([a, b, c, d])
 
 
+def quat_conj(q):
+    qc = q.copy()
+    qc[1:] *= -1
+    return qc
+
+
 def random_quaternion():
     q = np.random.uniform(-1, 1, size=4)
     q /= np.linalg.norm(q)
