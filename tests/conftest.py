@@ -80,7 +80,7 @@ def camera_measurements(request, small_sfm):
 
 @pytest.fixture(params=[PositionMeasurement])
 def simple_measurements(request):
-    times = np.linspace(0, 2, num=10)
+    times = np.linspace(-5, 5, num=20)
     cls = request.param
     if cls == PositionMeasurement:
         return [cls(t, np.random.uniform(-1, 1, size=3)) for t in times]

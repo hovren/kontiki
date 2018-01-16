@@ -3,37 +3,13 @@ from collections import defaultdict, namedtuple
 import numpy as np
 import pytest
 
+from taser.utils import safe_time
 from taser.trajectories import ConstantTrajectory, LinearTrajectory, SimpleMultiTrajectory, UniformR3SplineTrajectory
 from taser.rotations import quat_to_rotation_matrix
 
 ExampleData = namedtuple('ExampleData',
                          ['position', 'velocity', 'acceleration', 'orientation', 'angular_velocity',
                           'min_time', 'max_time'])
-
-
-def safe_time(trajectory):
-    tmin, tmax = trajectory.valid_time
-
-    # Base case: Both finite
-    if np.isfinite(tmin) and np.isfinite(tmax):
-        t = 0.5 * (tmin + tmax)
-
-    else:
-        # At least one is infinite
-        # Make sure tmin is not inf or tmax = -inf
-        assert tmax > tmin
-
-        if np.isfinite(tmin):  # (a, np.inf) -> t >= a OK
-            t = tmin + 1
-        elif np.isfinite(tmax):  # (-inf, b) -> t < b is OK
-            t = tmax - 1
-        else:
-            t = 42.  # (-inf, inf) means any time is valid, pick something non-zero
-
-    # Sanity check
-    assert np.isfinite(t)
-    return t
-
 
 @pytest.fixture
 def trajectory_example(trajectory):
