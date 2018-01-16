@@ -7,6 +7,7 @@ import h5py
 
 from taser.sfm import View, Landmark
 from taser.io import load_structure, save_structure
+from taser.utils import safe_time_span
 
 def project_camera_trajectory(X_world, t0, trajectory, camera):
     def project(t):
@@ -70,7 +71,9 @@ def generate_landmark(views, camera, trajectory, view_probs=None, tries=1000):
 def generate_valid_structure(camera, trajectory):
     fps = 30
     nviews = 8
-    views = [View(i, i/fps) for i in range(nviews)]
+    t1, t2 = safe_time_span(trajectory, nviews/fps)
+    times = t1 + np.arange(nviews) / fps
+    views = [View(i, t) for i, t in enumerate(times)]
     nlandmarks = 5
     start_probs = np.exp(-0.5*np.arange(len(views)))
     start_probs /= np.sum(start_probs)
