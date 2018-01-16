@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from taser.utils import safe_time
-from taser.trajectories import ConstantTrajectory, LinearTrajectory, SimpleMultiTrajectory, \
+from taser.trajectories import LinearTrajectory, SimpleMultiTrajectory, \
     UniformR3SplineTrajectory, UniformSO3SplineTrajectory
 from taser.rotations import quat_to_rotation_matrix
 
@@ -50,16 +50,6 @@ def trajectory_example(trajectory):
             (0, np.array([.1, 0, .4])),
             (1, np.array([.1, 0, .4]))
         ])
-
-    elif cls == ConstantTrajectory:
-        example_data = make_example(-np.inf, np.inf)
-        k = np.array([1, 2, 3])
-        example_data.position.extend([[0, k], [2, k]])
-        example_data.velocity.extend([[0, zero], [1, zero]])
-        example_data.acceleration.extend([[0, zero], [1, zero]])
-        example_data.orientation.extend([[0, q0], [1, q0]])
-        example_data.angular_velocity.extend([[0, zero], [0, zero]])
-
     elif cls == SimpleMultiTrajectory:
         example_data = make_example(-np.inf, np.inf)
         example_data.position.extend([

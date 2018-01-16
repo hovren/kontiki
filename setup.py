@@ -98,7 +98,6 @@ ext_modules = [
     TaserExtension('sfm'),
     TaserExtension('_trajectory_estimator'),
     TaserExtension('_ceres'),
-#    TrajectoryExtension('_constant_trajectory'),
     TrajectoryExtension('_linear_trajectory'),
     TrajectoryExtension('_simple_multi_trajectory'),
     TrajectoryExtension('_uniform_r3_spline_trajectory'),

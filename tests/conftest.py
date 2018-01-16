@@ -5,7 +5,7 @@ import numpy as np
 from fixtures.camera_fixtures import *
 from fixtures.sfm_fixtures import *
 
-from taser.trajectories import LinearTrajectory, ConstantTrajectory, SimpleMultiTrajectory, \
+from taser.trajectories import LinearTrajectory, SimpleMultiTrajectory, \
     UniformR3SplineTrajectory, UniformSO3SplineTrajectory
 from taser.measurements import PositionMeasurement, StaticRsCameraMeasurement
 
@@ -14,7 +14,6 @@ trajectory_classes = [
     # SimpleMultiTrajectory,
     UniformR3SplineTrajectory,
     UniformSO3SplineTrajectory,
-#    ConstantTrajectory,
 ]
 
 @pytest.fixture(params=trajectory_classes)
@@ -26,9 +25,6 @@ def trajectory(request):
         t0 = 2
         k = np.array([0.1, 0, 0.4])
         return cls(t0, k)
-    elif cls == ConstantTrajectory:
-        k = np.array([1, 2, 3])
-        return cls(k)
     elif cls == SimpleMultiTrajectory:
         traj = cls()
         for v in [(1, 1, 1), (10, 10, 10), (100, 100, 100)]:

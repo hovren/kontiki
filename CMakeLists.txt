@@ -73,7 +73,6 @@ endfunction()
 taser_add_module(taser._ceres)
 
 # Trajectories
-#taser_add_module(taser.trajectories._constant_trajectory)
 taser_add_module(taser.trajectories._linear_trajectory)
 taser_add_module(taser.trajectories._simple_multi_trajectory)
 taser_add_module(taser.trajectories._uniform_r3_spline_trajectory)
