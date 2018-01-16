@@ -38,6 +38,24 @@ class UniformSO3SplineView : public SplineViewBase<T> {
   Result Evaluate(T t, int flags) const override {
     auto result = std::make_unique<TrajectoryEvaluation<T>>();
 
+    if (flags & EvalPosition)
+      result->position.setZero();
+    if (flags & EvalVelocity)
+      result->velocity.setZero();
+    if (flags & EvalAcceleration)
+      result->acceleration.setZero();
+
+    const bool do_angular_velocity = flags & EvalAngularVelocity;
+    const bool do_orientation = flags & EvalOrientation;
+
+    // Early return if we shouldn't calculate rotation components
+    if (!(do_orientation || do_angular_velocity)) {
+      return result;
+    }
+
+    // Since angular velocity computations implicitly requires orientation computations
+    // we can henceforth assume do_orientation=true
+
     int i0;
     T u;
     this->CalculateIndexAndInterpolationAmount(t, i0, u);
@@ -51,23 +69,51 @@ class UniformSO3SplineView : public SplineViewBase<T> {
 
     Vector4 U, dU;
     Vector4 B, dB;
-    T u2, u3;
-
-    u2 = ceres::pow(u, 2);
-    u3 = ceres::pow(u, 3);
+    T u2 = ceres::pow(u, 2);
+    T u3 = ceres::pow(u, 3);
+    T dt_inv = T(1) / this->dt();
 
     U = Vector4(T(1), u, u2, u3);
     B = U.transpose() * M_cumul.cast<T>();
 
+    if (do_angular_velocity) {
+      dU = dt_inv * Vector4(T(0), T(1), T(2) * u, T(3) * u2);
+      dB = dU.transpose() * M_cumul.cast<T>();
+    }
+
     Quaternion &q = result->orientation;
 
+    // These parts are updated when computing the derivative
+    Quaternion dq_parts[3] = {{T(1), T(0), T(0), T(0)},
+                              {T(1), T(0), T(0), T(0)},
+                              {T(1), T(0), T(0), T(0)}};
+
     q = ControlPoint(i0);
-    for (int i=(i0 + 1); i < (i0 + 4); ++i) {
+    const int K = (i0 + 4);
+    for (int i=(i0 + 1); i < K; ++i) {
+      // Orientation
       QuaternionMap qa = ControlPoint(i - 1);
       QuaternionMap qb = ControlPoint(i);
       Quaternion omega = math::logq(qa.conjugate() * qb);
       Quaternion eomegab = math::expq(Quaternion(omega.coeffs() * B(i)));
       q *= eomegab;
+
+      // Angular velocity
+      // This iterative scheme follows from the product rule of derivatives
+      if (do_angular_velocity) {
+        for (int j = (i0 + 1); j < K; ++j) {
+          if (i==j) {
+            dq_parts[j - 1] *= Quaternion(omega.coeffs()*dB(i));
+          }
+          dq_parts[j - 1] *= eomegab;
+        }
+      }
+    }
+
+    if (do_angular_velocity) {
+      Quaternion dq = ControlPoint(i0)*Quaternion(dq_parts[0].coeffs() + dq_parts[1].coeffs() + dq_parts[2].coeffs());
+      std::cout << "dq = " << dq.w() << ", " << dq.x() << ", " << dq.y() << ", " << dq.z() << std::endl;
+      result->angular_velocity = math::angular_velocity(q, dq);
     }
 
     return result;

@@ -88,6 +88,12 @@ Eigen::Quaternion<T> expq(const Eigen::Quaternion<T>& q)
   return out;
 }
 
+template<typename T>
+Eigen::Matrix<T, 3, 1> angular_velocity(const Eigen::Quaternion<T> &q, const Eigen::Quaternion<T> &dq) {
+  Eigen::Quaternion<T> w(T(2) * (q.conjugate() * dq).coeffs());
+  return w.vec();
+};
+
 } // namespace math
 } // namespace taser
 #endif //TASERV2_QUATERNION_MATH_H
