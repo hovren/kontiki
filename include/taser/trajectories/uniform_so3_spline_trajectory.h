@@ -152,6 +152,26 @@ class UniformSO3SplineTrajectory : public detail::SplinedTrajectoryBase<detail::
                     std::vector<double*> &parameter_blocks,
                     std::vector<size_t> &parameter_sizes) const override {
 
+    int i1, i2;
+    double u_notused;
+    double t1, t2;
+
+    for (auto tt : times) {
+      t1 = tt.first;
+      t2 = tt.second;
+    }
+
+    // Find control point range
+    AsView().CalculateIndexAndInterpolationAmount(t1, i1, u_notused);
+    AsView().CalculateIndexAndInterpolationAmount(t2, i2, u_notused);
+
+    for (int i=i1; i < i2 + 4; ++i) {
+      auto ptr = this->holder_->Parameter(i);
+      const int size = 4;
+      parameter_blocks.push_back(ptr);
+      parameter_sizes.push_back(size);
+      problem.AddParameterBlock(ptr, size);
+    }
   }
 
  protected:
