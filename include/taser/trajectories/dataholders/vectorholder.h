@@ -3,6 +3,8 @@
 
 #include "dataholder.h"
 
+#include <vector>
+
 namespace taser {
 namespace trajectories {
 namespace dataholders {
@@ -22,7 +24,10 @@ class VectorHolder : public MutableDataHolderBase<T> {
   }
 
   std::shared_ptr<DataHolderBase<T>> Slice(size_t start, size_t size) const {
-    throw std::runtime_error("Not implemented for VectorHolder class");
+    auto slice = std::make_shared<VectorHolder<T>>();
+    // FIXME: bounds checks
+    slice->data_.assign(this->data_.begin() + start, this->data_.begin() + start + size - 1);
+    return slice;
   }
 
   size_t Size() const override {
