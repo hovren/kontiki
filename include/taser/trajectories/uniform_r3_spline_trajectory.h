@@ -208,45 +208,45 @@ class UniformR3SplineTrajectory : public detail::SplinedTrajectoryBase<detail::U
                     Meta& meta,
                     std::vector<double*> &parameter_blocks,
                     std::vector<size_t> &parameter_sizes) const {
-    if (times.size() != 1) {
-      throw std::length_error("Multi times not implemented yet");
-    }
 
-    int i1, i2;
-    double u_notused;
-    double t1, t2;
-    const auto& current_meta = ConcreteSegmentMetaOrError();
+    auto view = AsView();
+    double master_dt = view.dt();
+    double master_t0 = view.t0();
+    int current_segment_start = 0;
+    int current_segment_end = -1; // Negative signals no segment created yet
 
-    int n = 0;
-    double t1_prev, t2_prev;
+    // Times are guaranteed to be sorted correctly and t2 >= t1
     for (auto tt : times) {
-      t1 = tt.first;
-      t2 = tt.second;
 
-      n += 1;
-    }
+      int i1, i2;
+      double u_notused;
+      view.CalculateIndexAndInterpolationAmount(tt.first, i1, u_notused);
+      view.CalculateIndexAndInterpolationAmount(tt.second, i2, u_notused);
 
-    // Find control point range
-    AsView().CalculateIndexAndInterpolationAmount(t1, i1, u_notused);
-    AsView().CalculateIndexAndInterpolationAmount(t2, i2, u_notused);
-    std::cout << "1: " << t1 << ", " << i1 << " --- 2: " << t2 << ", " << i2 << std::endl;
+      // Create new segment, or extend the current one
+      if (i1 > current_segment_end) {
+        double segment_t0 = master_t0 + master_dt * i1;
+        meta.segments.push_back(detail::SplineSegmentMeta(master_dt, segment_t0));
+        current_segment_start = i1;
+      }
+      else {
+        i1 = current_segment_end + 1;
+      }
 
-    double dt = current_meta.dt;
-    double t0 = current_meta.t0 + dt * i1;
+      auto& current_segment_meta = meta.segments.back();
 
-    detail::SplineSegmentMeta segment_meta(dt, t0);
+      // Add parameters and update currently active segment meta
+      for (int i=i1; i < (i2 + 4); ++i) {
+        auto ptr = this->holder_->Parameter(i);
+        size_t size = 3;
+        parameter_blocks.push_back(ptr);
+        parameter_sizes.push_back(size);
+        problem.AddParameterBlock(ptr, size);
+        current_segment_meta.n += 1;
+      }
 
-    for (int i=i1; i < i2 + 4; ++i) {
-      auto ptr = this->holder_->Parameter(i);
-      const int size = 3;
-      parameter_blocks.push_back(ptr);
-      parameter_sizes.push_back(size);
-      problem.AddParameterBlock(ptr, size);
-      segment_meta.n += 1;
-    }
-
-    // Set meta
-    meta.segments.push_back(segment_meta);
+      current_segment_end = current_segment_start + current_segment_meta.n - 1;
+    } // for times
   }
 
   const detail::SplineSegmentMeta& ConcreteSegmentMetaOrError() const {
