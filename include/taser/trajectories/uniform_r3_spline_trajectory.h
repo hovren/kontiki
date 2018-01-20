@@ -17,16 +17,17 @@ namespace trajectories {
 namespace detail {
 
 template<typename T>
-class UniformR3SplineSegmentView : public SplineSegmentViewBase<T, Eigen::Matrix<T, 3, 1>> {
+class UniformR3SplineSegmentView : public SplineSegmentViewBase<T, Eigen::Matrix<T, 3, 1>, 3> {
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
   using Vector3 = Eigen::Matrix<T, 3, 1>;
   using Vector4 = Eigen::Matrix<T, 4, 1>;
   using Vector3Map = Eigen::Map<Vector3>;
+  using BaseType = SplineSegmentViewBase<T, Eigen::Matrix<T, 3, 1>, 3>;
  public:
   using Meta = SplineMeta;
 
   // Import constructor
-  using SplineSegmentViewBase<T, Eigen::Matrix<T, 3, 1>>::SplineSegmentViewBase;
+  using BaseType::SplineSegmentViewBase;
 
   Result Evaluate(T t, int flags) const override {
     auto result = std::make_unique<TrajectoryEvaluation<T>>();

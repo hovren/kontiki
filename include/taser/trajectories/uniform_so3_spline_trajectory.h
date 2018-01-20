@@ -16,24 +16,17 @@ namespace trajectories {
 namespace detail {
 
 template <typename T>
-class UniformSO3SplineView : public SplineViewBase<T> {
+class UniformSO3SplineSegmentView : public SplineSegmentViewBase<T, Eigen::Quaternion<T>, 4> {
   using Quaternion = Eigen::Quaternion<T>;
   using QuaternionMap = Eigen::Map<Quaternion>;
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
-  using Vector3 = Eigen::Matrix<T, 3, 1>;
   using Vector4 = Eigen::Matrix<T, 4, 1>;
+  using BaseType = SplineSegmentViewBase<T, Eigen::Quaternion<T>, 4>;
  public:
-  using SplineViewBase<T>::Meta;
+  using BaseType::Meta;
+
   // Import constructor
-  using SplineViewBase<T>::SplineViewBase;
-
-  const QuaternionMap ControlPoint(int i) const {
-    return QuaternionMap(this->holder_->Parameter(i));
-  }
-
-  QuaternionMap MutableControlPoint(int i) const {
-    return QuaternionMap(this->holder_->Parameter(i));
-  }
+  using BaseType::SplineSegmentViewBase;
 
   Result Evaluate(T t, int flags) const override {
     auto result = std::make_unique<TrajectoryEvaluation<T>>();
@@ -88,12 +81,12 @@ class UniformSO3SplineView : public SplineViewBase<T> {
                               {T(1), T(0), T(0), T(0)},
                               {T(1), T(0), T(0), T(0)}};
 
-    q = ControlPoint(i0);
+    q = this->ControlPoint(i0);
     const int K = (i0 + 4);
     for (int i=(i0 + 1); i < K; ++i) {
       // Orientation
-      QuaternionMap qa = ControlPoint(i - 1);
-      QuaternionMap qb = ControlPoint(i);
+      QuaternionMap qa = this->ControlPoint(i - 1);
+      QuaternionMap qb = this->ControlPoint(i);
       Quaternion omega = math::logq(qa.conjugate() * qb);
       Quaternion eomegab = math::expq(Quaternion(omega.coeffs() * B(i-i0)));
       q *= eomegab;
@@ -112,7 +105,7 @@ class UniformSO3SplineView : public SplineViewBase<T> {
     }
 
     if (do_angular_velocity) {
-      Quaternion dq = ControlPoint(i0)*Quaternion(dq_parts[0].coeffs() + dq_parts[1].coeffs() + dq_parts[2].coeffs());
+      Quaternion dq = this->ControlPoint(i0) * Quaternion(dq_parts[0].coeffs() + dq_parts[1].coeffs() + dq_parts[2].coeffs());
       result->angular_velocity = math::angular_velocity(q, dq);
     }
 
@@ -121,59 +114,20 @@ class UniformSO3SplineView : public SplineViewBase<T> {
 
 };
 
+template<typename T>
+class UniformSO3SplineView : public SplineViewBase<T, UniformSO3SplineSegmentView> {
+ public:
+  // Inherit constructor
+  using SplineViewBase<T, UniformSO3SplineSegmentView>::SplineViewBase;
+
+};
+
 } // namespace detail
 
 class UniformSO3SplineTrajectory : public detail::SplinedTrajectoryBase<detail::UniformSO3SplineView> {
-  using Quaternion = Eigen::Quaterniond;
-  using QuaternionMap = Eigen::Map<Quaternion>;
  public:
   static constexpr const char* CLASS_ID = "UniformSO3Spline";
   using SplinedTrajectoryBase<detail::UniformSO3SplineView>::SplinedTrajectoryBase;
-
-  QuaternionMap ControlPoint(size_t i) {
-    return AsView().MutableControlPoint(i);
-  }
-
-  // FIXME: Should be called AppendControlPoint
-  void AppendKnot(const Quaternion& cp) {
-    if (IsUnitQuaternion(cp)) {
-      auto i = this->holder_->AddParameter(4);
-      AsView().MutableControlPoint(i) = cp;
-      this->meta_.n += 1;
-    }
-    else {
-      throw std::domain_error("Control points must be unit quaternions");
-    }
-  }
-
-  void AddToProblem(ceres::Problem& problem,
-                    const time_init_t &times,
-                    Meta& meta,
-                    std::vector<double*> &parameter_blocks,
-                    std::vector<size_t> &parameter_sizes) const override {
-
-    int i1, i2;
-    double u_notused;
-    double t1, t2;
-
-    for (auto tt : times) {
-      t1 = tt.first;
-      t2 = tt.second;
-    }
-
-    // Find control point range
-    AsView().CalculateIndexAndInterpolationAmount(t1, i1, u_notused);
-    AsView().CalculateIndexAndInterpolationAmount(t2, i2, u_notused);
-
-    for (int i=i1; i < i2 + 4; ++i) {
-      auto ptr = this->holder_->Parameter(i);
-      const int size = 4;
-      parameter_blocks.push_back(ptr);
-      parameter_sizes.push_back(size);
-      problem.AddParameterBlock(ptr, size);
-    }
-  }
-
  protected:
   bool IsUnitQuaternion(const Quaternion& q) {
     auto err = std::abs(q.norm() - 1);

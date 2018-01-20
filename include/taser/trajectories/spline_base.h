@@ -84,11 +84,12 @@ struct SplineMeta : public MetaBase {
 };
 
 
-template<typename T, typename _ControlPointType>
+template<typename T, typename _ControlPointType, int _ControlPointSize>
 class SplineSegmentViewBase : public ViewBase<T, SplineSegmentMeta> {
  public:
   using ControlPointType = _ControlPointType;
   using ControlPointMap = Eigen::Map<ControlPointType>;
+  const static int ControlPointSize = _ControlPointSize;
   // Inherit constructor
   using ViewBase<T, SplineSegmentMeta>::Meta;
   using ViewBase<T, SplineSegmentMeta>::ViewBase;
@@ -146,6 +147,7 @@ class SplineViewBase : public ViewBase<T, SplineMeta> {
  public:
   using ControlPointType = typename SegmentView<T>::ControlPointType;
   using ControlPointMap = typename SegmentView<T>::ControlPointMap;
+  const static int ControlPointSize = SegmentView<T>::ControlPointSize;
 
   // Inherit Constructor
   using ViewBase<T, SplineMeta>::ViewBase;
@@ -210,10 +212,12 @@ class SplineViewBase : public ViewBase<T, SplineMeta> {
 
 template<template<typename> typename ViewTemplate>
 class SplinedTrajectoryBase : public TrajectoryBase<ViewTemplate> {
+//  using ControlPointDims = ViewTemplate<double>::ControlPointType
  public:
   using Meta = typename TrajectoryBase<ViewTemplate>::Meta;
   using ControlPointType = typename ViewTemplate<double>::ControlPointType;
   using ControlPointMap = typename ViewTemplate<double>::ControlPointMap;
+  const static int ControlPointSize = ViewTemplate<double>::ControlPointSize;
 
   SplinedTrajectoryBase(double dt, double t0) :
       TrajectoryBase<ViewTemplate>(new dataholders::VectorHolder<double>()) {
@@ -289,7 +293,7 @@ class SplinedTrajectoryBase : public TrajectoryBase<ViewTemplate> {
   }
 
   void AppendKnot(const ControlPointType& cp) {
-    auto i = this->holder_->AddParameter(3);
+    auto i = this->holder_->AddParameter(ControlPointSize);
     this->AsView().MutableControlPoint(i) = cp;
     // FIXME: Should check for single segment or give error
     this->meta_.segments[0].n += 1;
