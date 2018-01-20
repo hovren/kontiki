@@ -192,4 +192,4 @@ def test_so3_require_unit_quaternion():
     traj = UniformSO3SplineTrajectory()
     traj.append_knot(np.array([1., 0., 0., 0.]))  # OK (norm=1)
     with pytest.raises(ValueError):
-        traj.append_knot(np.array(1., 1., 1., 1.))  # Fail
+        traj.append_knot(np.array([1., 1., 1., 1.]))  # Fail
