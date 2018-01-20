@@ -215,8 +215,16 @@ class SplinedTrajectoryBase : public TrajectoryBase<ViewTemplate> {
   using ControlPointType = typename ViewTemplate<double>::ControlPointType;
   using ControlPointMap = typename ViewTemplate<double>::ControlPointMap;
 
+  SplinedTrajectoryBase(double dt, double t0) :
+      TrajectoryBase<ViewTemplate>(new dataholders::VectorHolder<double>()) {
+    this->meta_.segments.push_back(detail::SplineSegmentMeta(dt, t0));
+  };
+
+  SplinedTrajectoryBase(double dt) :
+      SplinedTrajectoryBase(dt, 0.0) { };
+
   SplinedTrajectoryBase() :
-    TrajectoryBase<ViewTemplate>(new dataholders::VectorHolder<double>()) { };
+      SplinedTrajectoryBase(1.0) { };
 
   double t0() const {
     return this->AsView().t0();

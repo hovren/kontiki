@@ -109,22 +109,9 @@ class UniformR3SplineView : public SplineViewBase<T, detail::UniformR3SplineSegm
 } // namespace detail
 
 class UniformR3SplineTrajectory : public detail::SplinedTrajectoryBase<detail::UniformR3SplineView> {
-  using Vector3 = Eigen::Vector3d;
-  using Vector3Map = Eigen::Map<Vector3>;
  public:
   static constexpr const char* CLASS_ID = "UniformR3Spline";
   using SplinedTrajectoryBase<detail::UniformR3SplineView>::SplinedTrajectoryBase;
-
-  UniformR3SplineTrajectory(double dt, double t0) :
-      SplinedTrajectoryBase() {
-    this->meta_.segments.push_back(detail::SplineSegmentMeta(dt, t0));
-  };
-
-  UniformR3SplineTrajectory(double dt) :
-      UniformR3SplineTrajectory(dt, 0.0) { };
-
-  UniformR3SplineTrajectory() :
-      UniformR3SplineTrajectory(1.0) { };
 
 };
 
