@@ -126,16 +126,6 @@ class UniformR3SplineTrajectory : public detail::SplinedTrajectoryBase<detail::U
   UniformR3SplineTrajectory() :
       UniformR3SplineTrajectory(1.0) { };
 
-  Vector3Map ControlPoint(size_t i) {
-    return AsView().MutableControlPoint(i);
-  }
-
-  void AppendKnot(const Vector3& cp) {
-    auto i = this->holder_->AddParameter(3);
-    AsView().MutableControlPoint(i) = cp;
-    // FIXME: Should check for single segment or give error
-    this->meta_.segments[0].n += 1;
-  }
 };
 
 } // namespace trajectories

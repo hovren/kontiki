@@ -276,6 +276,18 @@ class SplinedTrajectoryBase : public TrajectoryBase<ViewTemplate> {
     } // for times
   }
 
+  ControlPointMap ControlPoint(size_t i) {
+    return this->AsView().MutableControlPoint(i);
+  }
+
+  void AppendKnot(const ControlPointType& cp) {
+    auto i = this->holder_->AddParameter(3);
+    this->AsView().MutableControlPoint(i) = cp;
+    // FIXME: Should check for single segment or give error
+    this->meta_.segments[0].n += 1;
+  }
+
+
   const detail::SplineSegmentMeta& ConcreteSegmentMetaOrError() const {
     if (this->meta_.segments.size() == 1)
       return this->meta_.segments[0];
