@@ -9,6 +9,34 @@ namespace taser {
 namespace trajectories {
 namespace dataholders {
 
+namespace detail {
+
+template<typename T>
+class VectorSliceHolder : public DataHolderBase<T> {
+  using ConstIterator = typename std::vector<T *>::const_iterator;
+ public:
+
+
+  VectorSliceHolder(ConstIterator begin, size_t length) :
+      DataHolderBase<T>(),
+      begin_(begin),
+      length_(length) { }
+
+  T* Parameter(size_t i) const override {
+    return *(begin_ + i);
+  }
+
+  std::shared_ptr<DataHolderBase<T>> Slice(size_t start, size_t size) const {
+    return std::make_shared<VectorSliceHolder<T>>(begin_ + start, size);
+  }
+
+ protected:
+  ConstIterator begin_;
+  size_t length_;
+};
+
+} // namespace detail
+
 // Mutable data holder that wraps a std::vector
 template<typename T>
 class VectorHolder : public MutableDataHolderBase<T> {
@@ -24,10 +52,7 @@ class VectorHolder : public MutableDataHolderBase<T> {
   }
 
   std::shared_ptr<DataHolderBase<T>> Slice(size_t start, size_t size) const {
-    auto slice = std::make_shared<VectorHolder<T>>();
-    // FIXME: bounds checks
-    slice->data_.assign(this->data_.begin() + start, this->data_.begin() + start + size - 1);
-    return slice;
+    return std::make_shared<detail::VectorSliceHolder<T>>(this->data_.begin() + start, size);
   }
 
   size_t Size() const override {
