@@ -17,7 +17,7 @@ namespace trajectories {
 namespace detail {
 
 template<typename T>
-class UniformR3SplineSegmentView : public SplineSegmentViewBase<T> {
+class UniformR3SplineSegmentView : public SplineSegmentViewBase<T, Eigen::Matrix<T, 3, 1>> {
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
   using Vector3 = Eigen::Matrix<T, 3, 1>;
   using Vector4 = Eigen::Matrix<T, 4, 1>;
@@ -26,15 +26,7 @@ class UniformR3SplineSegmentView : public SplineSegmentViewBase<T> {
   using Meta = SplineMeta;
 
   // Import constructor
-  using SplineSegmentViewBase<T>::SplineSegmentViewBase;
-
-  const Vector3Map ControlPoint(int i) const {
-    return Vector3Map(this->holder_->Parameter(i));
-  }
-
-  Vector3Map MutableControlPoint(int i) {
-    return Vector3Map(this->holder_->Parameter(i));
-  }
+  using SplineSegmentViewBase<T, Eigen::Matrix<T, 3, 1>>::SplineSegmentViewBase;
 
   Result Evaluate(T t, int flags) const override {
     auto result = std::make_unique<TrajectoryEvaluation<T>>();
@@ -84,7 +76,7 @@ class UniformR3SplineSegmentView : public SplineSegmentViewBase<T> {
 
 
     for (int i=i0; i < i0 + 4; ++i) {
-      Vector3Map cp = ControlPoint(i);
+      Vector3Map cp = this->ControlPoint(i);
 
       if (flags & EvalPosition)
         p += Bp(i - i0) * cp;
@@ -109,18 +101,9 @@ class UniformR3SplineSegmentView : public SplineSegmentViewBase<T> {
 
 template<typename T>
 class UniformR3SplineView : public SplineViewBase<T, detail::UniformR3SplineSegmentView> {
-  using Vector3 = Eigen::Matrix<T, 3, 1>;
-  using Vector3Map = Eigen::Map<Vector3>;
  public:
+  // Inherit constructor
   using SplineViewBase<T, detail::UniformR3SplineSegmentView>::SplineViewBase;
-
-  const Vector3Map ControlPoint(int i) const {
-    return this->ConcreteSegmentViewOrError().ControlPoint(i);
-  }
-
-  Vector3Map MutableControlPoint(int i) {
-    return this->ConcreteSegmentViewOrError().MutableControlPoint(i);
-  }
 };
 
 } // namespace detail

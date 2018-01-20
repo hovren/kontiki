@@ -84,12 +84,22 @@ struct SplineMeta : public MetaBase {
 };
 
 
-template<typename T>
+template<typename T, typename _ControlPointType>
 class SplineSegmentViewBase : public ViewBase<T, SplineSegmentMeta> {
  public:
+  using ControlPointType = _ControlPointType;
+  using ControlPointMap = Eigen::Map<ControlPointType>;
   // Inherit constructor
   using ViewBase<T, SplineSegmentMeta>::Meta;
   using ViewBase<T, SplineSegmentMeta>::ViewBase;
+
+  const ControlPointMap ControlPoint(int i) const {
+    return ControlPointMap(this->holder_->Parameter(i));
+  }
+
+  ControlPointMap MutableControlPoint(int i) {
+    return ControlPointMap(this->holder_->Parameter(i));
+  }
 
   T t0() const {
     return T(this->meta_.t0);
@@ -134,6 +144,10 @@ template<typename T, template<typename> typename SegmentView>
 class SplineViewBase : public ViewBase<T, SplineMeta> {
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
  public:
+  using ControlPointType = typename SegmentView<T>::ControlPointType;
+  using ControlPointMap = typename SegmentView<T>::ControlPointMap;
+
+  // Inherit Constructor
   using ViewBase<T, SplineMeta>::ViewBase;
 
   Result Evaluate(T t, int flags) const override {
@@ -149,6 +163,14 @@ class SplineViewBase : public ViewBase<T, SplineMeta> {
     }
 
     throw std::range_error("No segment found for time t");
+  }
+
+  const ControlPointMap ControlPoint(int i) const {
+    return this->ConcreteSegmentViewOrError().ControlPoint(i);
+  }
+
+  ControlPointMap MutableControlPoint(int i) {
+    return this->ConcreteSegmentViewOrError().MutableControlPoint(i);
   }
 
   double MinTime() const override{
@@ -190,6 +212,8 @@ template<template<typename> typename ViewTemplate>
 class SplinedTrajectoryBase : public TrajectoryBase<ViewTemplate> {
  public:
   using Meta = typename TrajectoryBase<ViewTemplate>::Meta;
+  using ControlPointType = typename ViewTemplate<double>::ControlPointType;
+  using ControlPointMap = typename ViewTemplate<double>::ControlPointMap;
 
   SplinedTrajectoryBase() :
     TrajectoryBase<ViewTemplate>(new dataholders::VectorHolder<double>()) { };
