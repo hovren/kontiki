@@ -15,13 +15,23 @@ namespace taser {
 namespace trajectories {
 namespace detail {
 
+template<typename T>
+class _UnitQuaternionValidator {
+ public:
+  static void Validate(const Eigen::Quaternion<T> &cp) {
+    if (!math::IsUnitQuaternion(cp)) {
+      throw std::domain_error("Control point must be unit quaternion!");
+    }
+  };
+};
+
 template <typename T>
-class UniformSO3SplineSegmentView : public SplineSegmentViewBase<T, Eigen::Quaternion<T>, 4> {
+class UniformSO3SplineSegmentView : public SplineSegmentViewBase<T, Eigen::Quaternion<T>, 4, _UnitQuaternionValidator<T>> {
   using Quaternion = Eigen::Quaternion<T>;
   using QuaternionMap = Eigen::Map<Quaternion>;
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
   using Vector4 = Eigen::Matrix<T, 4, 1>;
-  using BaseType = SplineSegmentViewBase<T, Eigen::Quaternion<T>, 4>;
+  using BaseType = SplineSegmentViewBase<T, Eigen::Quaternion<T>, 4, _UnitQuaternionValidator<T>>;
  public:
   using BaseType::Meta;
 
@@ -128,12 +138,6 @@ class UniformSO3SplineTrajectory : public detail::SplinedTrajectoryBase<detail::
  public:
   static constexpr const char* CLASS_ID = "UniformSO3Spline";
   using SplinedTrajectoryBase<detail::UniformSO3SplineView>::SplinedTrajectoryBase;
- protected:
-  bool IsUnitQuaternion(const Quaternion& q) {
-    auto err = std::abs(q.norm() - 1);
-    return err < math::eps_unit_check;
-  }
-
 };
 
 } // namespace trajectories

@@ -83,12 +83,22 @@ struct SplineMeta : public MetaBase {
   }
 };
 
+template<typename T>
+class _AlwaysTrueValidator {
+ public:
+  static void Validate(const T&) {};
+};
 
-template<typename T, typename _ControlPointType, int _ControlPointSize>
+template<
+    typename T,
+    typename _ControlPointType,
+    int _ControlPointSize,
+    typename _ControlPointValidator = _AlwaysTrueValidator<_ControlPointType>>
 class SplineSegmentViewBase : public ViewBase<T, SplineSegmentMeta> {
  public:
   using ControlPointType = _ControlPointType;
   using ControlPointMap = Eigen::Map<ControlPointType>;
+  using ControlPointValidator = _ControlPointValidator;
   const static int ControlPointSize = _ControlPointSize;
   // Inherit constructor
   using ViewBase<T, SplineSegmentMeta>::Meta;
@@ -147,6 +157,7 @@ class SplineViewBase : public ViewBase<T, SplineMeta> {
  public:
   using ControlPointType = typename SegmentView<T>::ControlPointType;
   using ControlPointMap = typename SegmentView<T>::ControlPointMap;
+  using ControlPointValidator = typename SegmentView<T>::ControlPointValidator;
   const static int ControlPointSize = SegmentView<T>::ControlPointSize;
 
   // Inherit Constructor
@@ -217,6 +228,7 @@ class SplinedTrajectoryBase : public TrajectoryBase<ViewTemplate> {
   using Meta = typename TrajectoryBase<ViewTemplate>::Meta;
   using ControlPointType = typename ViewTemplate<double>::ControlPointType;
   using ControlPointMap = typename ViewTemplate<double>::ControlPointMap;
+  using ControlPointValidator = typename ViewTemplate<double>::ControlPointValidator;
   const static int ControlPointSize = ViewTemplate<double>::ControlPointSize;
 
   SplinedTrajectoryBase(double dt, double t0) :
@@ -277,7 +289,7 @@ class SplinedTrajectoryBase : public TrajectoryBase<ViewTemplate> {
       // Add parameters and update currently active segment meta
       for (int i=i1; i < (i2 + 4); ++i) {
         auto ptr = this->holder_->Parameter(i);
-        size_t size = 3;
+        size_t size = ControlPointSize;
         parameter_blocks.push_back(ptr);
         parameter_sizes.push_back(size);
         problem.AddParameterBlock(ptr, size);
@@ -293,6 +305,7 @@ class SplinedTrajectoryBase : public TrajectoryBase<ViewTemplate> {
   }
 
   void AppendKnot(const ControlPointType& cp) {
+    ControlPointValidator::Validate(cp); // Or throw exception
     auto i = this->holder_->AddParameter(ControlPointSize);
     this->AsView().MutableControlPoint(i) = cp;
     // FIXME: Should check for single segment or give error
