@@ -84,7 +84,7 @@ struct SplineMeta : public MetaBase {
 };
 
 template<typename T>
-class _AlwaysTrueValidator {
+class AlwaysTrueValidator {
  public:
   static void Validate(const T&) {};
 };
@@ -93,7 +93,7 @@ template<
     typename T,
     typename _ControlPointType,
     int _ControlPointSize,
-    typename _ControlPointValidator = _AlwaysTrueValidator<_ControlPointType>>
+    typename _ControlPointValidator = AlwaysTrueValidator<_ControlPointType>>
 class SplineSegmentViewBase : public ViewBase<T, SplineSegmentMeta> {
  public:
   using ControlPointType = _ControlPointType;

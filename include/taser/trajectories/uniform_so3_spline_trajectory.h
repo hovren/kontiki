@@ -16,7 +16,7 @@ namespace trajectories {
 namespace detail {
 
 template<typename T>
-class _UnitQuaternionValidator {
+class UnitQuaternionValidator {
  public:
   static void Validate(const Eigen::Quaternion<T> &cp) {
     if (!math::IsUnitQuaternion(cp)) {
@@ -26,12 +26,12 @@ class _UnitQuaternionValidator {
 };
 
 template <typename T>
-class UniformSO3SplineSegmentView : public SplineSegmentViewBase<T, Eigen::Quaternion<T>, 4, _UnitQuaternionValidator<T>> {
+class UniformSO3SplineSegmentView : public SplineSegmentViewBase<T, Eigen::Quaternion<T>, 4, UnitQuaternionValidator<T>> {
   using Quaternion = Eigen::Quaternion<T>;
   using QuaternionMap = Eigen::Map<Quaternion>;
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
   using Vector4 = Eigen::Matrix<T, 4, 1>;
-  using BaseType = SplineSegmentViewBase<T, Eigen::Quaternion<T>, 4, _UnitQuaternionValidator<T>>;
+  using BaseType = SplineSegmentViewBase<T, Eigen::Quaternion<T>, 4, UnitQuaternionValidator<T>>;
  public:
   using BaseType::Meta;
 
