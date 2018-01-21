@@ -38,3 +38,10 @@ def test_solve_simple_nocrash(estimator, simple_measurements):
     summary = estimator.solve()
     print(summary.FullReport())
     assert summary.num_parameters > 0
+
+
+def test_solve_camera_nocrash(estimator, camera_measurements):
+    _test_add_measurement(estimator, camera_measurements)
+    summary = estimator.solve()
+    print(summary.FullReport())
+    assert summary.num_parameters > 0
