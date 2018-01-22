@@ -4,8 +4,7 @@ import numpy as np
 import pytest
 
 from taser.utils import safe_time
-from taser.trajectories import LinearTrajectory, SimpleMultiTrajectory, \
-    UniformR3SplineTrajectory, UniformSO3SplineTrajectory, SplitTrajectory
+from taser.trajectories import LinearTrajectory, UniformR3SplineTrajectory, UniformSO3SplineTrajectory, SplitTrajectory
 from taser.rotations import quat_to_rotation_matrix
 
 ExampleData = namedtuple('ExampleData',
@@ -50,17 +49,6 @@ def trajectory_example(trajectory):
             (0, np.array([.1, 0, .4])),
             (1, np.array([.1, 0, .4]))
         ])
-    elif cls == SimpleMultiTrajectory:
-        example_data = make_example(-np.inf, np.inf)
-        example_data.position.extend([
-            (0.1, np.array([1,5,1])),
-            (1.1, np.array([7, 61, 557])),
-            (2.2, np.array([17, 71, 567])),
-            (3.3, np.array([117, 171, 667])),
-            (4.3, np.array([117, 171, 667]))
-        ])
-        example_data.velocity.extend([])
-
     elif cls == UniformR3SplineTrajectory:
         from test_spline_trajectories import scipy_bspline_for_trajectory, scipy_bspline_valid_time_interval
         bspline = scipy_bspline_for_trajectory(trajectory)

@@ -74,7 +74,6 @@ taser_add_module(taser._ceres)
 
 # Trajectories
 taser_add_module(taser.trajectories._linear_trajectory)
-taser_add_module(taser.trajectories._simple_multi_trajectory)
 taser_add_module(taser.trajectories._uniform_r3_spline_trajectory)
 taser_add_module(taser.trajectories._uniform_so3_spline_trajectory)
 taser_add_module(taser.trajectories._split_trajectory)
@@ -92,9 +91,6 @@ taser_add_module(taser._trajectory_estimator)
 # Measurements
 taser_add_module(taser.measurements._position_measurement)
 taser_add_module(taser.measurements._static_rscamera_measurement)
-
-add_executable(debug_constructor src/debug_constructor.cc)
-target_link_libraries(debug_constructor PRIVATE ${CERES_LIBRARIES})
 
 add_executable(spline_devel src/spline_devel.cc)
 target_link_libraries(spline_devel PRIVATE ${CERES_LIBRARIES})

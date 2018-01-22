@@ -5,13 +5,11 @@ import numpy as np
 from fixtures.camera_fixtures import *
 from fixtures.sfm_fixtures import *
 
-from taser.trajectories import LinearTrajectory, SimpleMultiTrajectory, \
-    UniformR3SplineTrajectory, UniformSO3SplineTrajectory, SplitTrajectory
+from taser.trajectories import LinearTrajectory, UniformR3SplineTrajectory, UniformSO3SplineTrajectory, SplitTrajectory
 from taser.measurements import PositionMeasurement, StaticRsCameraMeasurement
 
 trajectory_classes = [
     LinearTrajectory,
-    # SimpleMultiTrajectory,
     UniformR3SplineTrajectory,
     UniformSO3SplineTrajectory,
     SplitTrajectory,
@@ -26,15 +24,6 @@ def trajectory(request):
         t0 = 2
         k = np.array([0.1, 0, 0.4])
         return cls(t0, k)
-    elif cls == SimpleMultiTrajectory:
-        traj = cls()
-        for v in [(1, 1, 1), (10, 10, 10), (100, 100, 100)]:
-            traj.foo_a.add_vector(np.array(v))
-        traj.foo_b.add_vector(np.array([1, 11, 111]))
-        traj.wa = 1
-        traj.wb = 5
-
-        return traj
     elif cls == UniformR3SplineTrajectory:
         dt = 2.3
         t0 = 1.22
