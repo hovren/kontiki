@@ -148,7 +148,8 @@ class SplitTrajectory : public TrajectoryBase<detail::SplitView> {
                     Meta& meta,
                     std::vector<double*> &parameter_blocks,
                     std::vector<size_t> &parameter_sizes) const override {
-    // Pass
+    r3_trajectory_->AddToProblem(problem, times, meta.r3_meta, parameter_blocks, parameter_sizes);
+    so3_trajectory_->AddToProblem(problem, times, meta.so3_meta, parameter_blocks, parameter_sizes);
   }
 
  protected:
