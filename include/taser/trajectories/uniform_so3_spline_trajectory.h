@@ -39,20 +39,17 @@ class UniformSO3SplineSegmentView : public SplineSegmentViewBase<T, Eigen::Quate
   using BaseType::SplineSegmentViewBase;
 
   Result Evaluate(T t, int flags) const override {
-    auto result = std::make_unique<TrajectoryEvaluation<T>>();
+    auto result = std::make_unique<TrajectoryEvaluation<T>>(flags);
 
-    if (flags & EvalPosition)
+    if (result->needs.Position())
       result->position.setZero();
-    if (flags & EvalVelocity)
+    if (result->needs.Velocity())
       result->velocity.setZero();
-    if (flags & EvalAcceleration)
+    if (result->needs.Acceleration())
       result->acceleration.setZero();
 
-    const bool do_angular_velocity = flags & EvalAngularVelocity;
-    const bool do_orientation = flags & EvalOrientation;
-
     // Early return if we shouldn't calculate rotation components
-    if (!(do_orientation || do_angular_velocity)) {
+    if (!result->needs.AnyRotation()) {
       return result;
     }
 
@@ -79,7 +76,7 @@ class UniformSO3SplineSegmentView : public SplineSegmentViewBase<T, Eigen::Quate
     U = Vector4(T(1), u, u2, u3);
     B = U.transpose() * M_cumul.cast<T>();
 
-    if (do_angular_velocity) {
+    if (result->needs.AngularVelocity()) {
       dU = dt_inv * Vector4(T(0), T(1), T(2) * u, T(3) * u2);
       dB = dU.transpose() * M_cumul.cast<T>();
     }
@@ -103,7 +100,7 @@ class UniformSO3SplineSegmentView : public SplineSegmentViewBase<T, Eigen::Quate
 
       // Angular velocity
       // This iterative scheme follows from the product rule of derivatives
-      if (do_angular_velocity) {
+      if (result->needs.AngularVelocity()) {
         for (int j = (i0 + 1); j < K; ++j) {
           const int m = j - i0 - 1;
           if (i==j) {
@@ -114,7 +111,7 @@ class UniformSO3SplineSegmentView : public SplineSegmentViewBase<T, Eigen::Quate
       }
     }
 
-    if (do_angular_velocity) {
+    if (result->needs.AngularVelocity()) {
       Quaternion dq = this->ControlPoint(i0) * Quaternion(dq_parts[0].coeffs() + dq_parts[1].coeffs() + dq_parts[2].coeffs());
       result->angular_velocity = math::angular_velocity(q, dq);
     }

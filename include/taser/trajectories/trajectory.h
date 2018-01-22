@@ -22,22 +22,83 @@ struct MetaBase {
   virtual int NumParameters() const = 0;
 };
 
-template<typename T>
-struct TrajectoryEvaluation {
-  using Vector3 = Eigen::Matrix<T, 3, 1>;
-  Vector3 position;
-  Vector3 velocity;
-  Vector3 acceleration;
-  Eigen::Quaternion<T> orientation;
-  Vector3 angular_velocity;
-};
-
 enum {
   EvalPosition = 1,
   EvalVelocity = 2,
   EvalAcceleration = 4,
   EvalOrientation = 8,
   EvalAngularVelocity = 16
+};
+
+template<typename T>
+struct TrajectoryEvaluation {
+  TrajectoryEvaluation(int flags) :
+      needs(flags) { };
+
+  using Vector3 = Eigen::Matrix<T, 3, 1>;
+  Vector3 position;
+  Vector3 velocity;
+  Vector3 acceleration;
+  Eigen::Quaternion<T> orientation;
+  Vector3 angular_velocity;
+
+  // Struct to simplify lookup of what needs to be computed
+  struct Needs {
+    Needs(int flags) : flags(flags) { };
+
+    bool Position() const {
+      return flags & EvalPosition;
+    }
+
+    bool Velocity() const {
+      return flags & EvalVelocity;
+    }
+
+    bool Acceleration() const {
+      return flags & EvalAcceleration;
+    }
+
+    bool Orientation() const {
+      return flags & EvalOrientation;
+    }
+
+    bool AngularVelocity() const {
+      return flags & EvalAngularVelocity;
+    }
+
+    bool AnyLinear() const {
+      return (
+        (flags & EvalPosition) ||
+        (flags & EvalVelocity) ||
+        (flags & EvalAcceleration)
+      );
+    }
+
+    bool AnyRotation() const {
+      return (
+          (flags & EvalOrientation) ||
+          (flags & EvalAngularVelocity)
+      );
+    }
+
+   protected:
+    int flags;
+  } needs;
+};
+
+struct EvaluationNeeds {
+  EvaluationNeeds(int flags) :
+    flags(flags) { };
+
+  bool Position() const {
+    return flags & EvalPosition;
+  }
+
+  bool Velocity() const {
+    return flags & EvalVelocity;
+  }
+
+  const int flags;
 };
 
 using time_span_t = std::pair<double, double>;

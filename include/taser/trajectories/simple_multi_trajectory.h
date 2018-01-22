@@ -57,7 +57,7 @@ class FooView : public ViewBase<T, FooMeta> {
 
 
   Result Evaluate(T t, int flags) const {
-    auto r = std::make_unique<TrajectoryEvaluation<T>>();
+    auto r = std::make_unique<TrajectoryEvaluation<T>>(flags);
     r->position.setZero();
 
     int i=0;
@@ -137,7 +137,7 @@ class SimpleMultiView : public ViewBase<T, SimpleMultiMeta> {
     Vector3 pos_a = view_a_.Position(t);
     Vector3 pos_b = view_b_.Position(t);
 
-    auto r = std::make_unique<TrajectoryEvaluation<T>>();
+    auto r = std::make_unique<TrajectoryEvaluation<T>>(flags);
     T wa = AWeight();
     T wb = BWeight();
     r->position = wa * pos_a + wb * pos_b + Vector3(wa, wb, T(1.));

@@ -50,18 +50,16 @@ class LinearView  : public ViewBase<T, LinearMeta> {
 
   Result Evaluate(const T t, const int flags) const override {
 //    std::cout << "t="<<t<<", t0=" << t0() << ", c=" << constant().transpose() << std::endl;
-    auto result = std::make_unique<TrajectoryEvaluation<T>>();
-    if (!flags)
-      throw std::logic_error("Evaluate() called with flags=0");
-    if (flags & EvalPosition)
+    auto result = std::make_unique<TrajectoryEvaluation<T>>(flags);
+    if (result->needs.Position())
       result->position = constant() * (t - t0());
-    if (flags & EvalVelocity)
+    if (result->needs.Velocity())
       result->velocity = constant();
-    if (flags & EvalAcceleration)
+    if (result->needs.Acceleration())
       result->acceleration.setZero();
-    if (flags & EvalOrientation)
+    if (result->needs.Orientation())
       result->orientation = this->calculate_orientation(t);
-    if (flags & EvalAngularVelocity)
+    if (result->needs.AngularVelocity())
       result->angular_velocity = constant();
     return result;
   }

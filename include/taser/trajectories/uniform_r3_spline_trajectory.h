@@ -30,7 +30,7 @@ class UniformR3SplineSegmentView : public SplineSegmentViewBase<T, Eigen::Matrix
   using BaseType::SplineSegmentViewBase;
 
   Result Evaluate(T t, int flags) const override {
-    auto result = std::make_unique<TrajectoryEvaluation<T>>();
+    auto result = std::make_unique<TrajectoryEvaluation<T>>(flags);
 
     int i0;
     T u;
@@ -52,24 +52,24 @@ class UniformR3SplineSegmentView : public SplineSegmentViewBase<T, Eigen::Matrix
     Vector3 &a = result->acceleration;
     T dt_inv = T(1) / this->dt();
 
-    if ((flags & EvalPosition) || (flags & EvalVelocity))
+    if (result->needs.Position() || result->needs.Velocity())
       u2 = ceres::pow(u, 2);
     if (flags & EvalPosition)
       u3 = ceres::pow(u, 3);
 
-    if (flags & EvalPosition) {
+    if (result->needs.Position()) {
       Up = Vector4(T(1), u, u2, u3);
       Bp = Up.transpose() * M.cast<T>();
       p.setZero();
     }
 
-    if (flags & EvalVelocity) {
+    if (result->needs.Velocity()) {
       Uv = dt_inv * Vector4(T(0), T(1), T(2) * u, T(3) * u2);
       Bv = Uv.transpose() * M.cast<T>();
       v.setZero();
     }
 
-    if (flags & EvalAcceleration) {
+    if (result->needs.Acceleration()) {
       Ua = ceres::pow(dt_inv, 2) *  Vector4(T(0), T(0), T(2), T(6) * u);
       Ba = Ua.transpose() * M.cast<T>();
       a.setZero();
@@ -91,9 +91,9 @@ class UniformR3SplineSegmentView : public SplineSegmentViewBase<T, Eigen::Matrix
     }
 
     // This trajectory is not concerned with orientations, so just return identity/zero if requested
-    if (flags & EvalOrientation)
+    if (result->needs.Orientation())
       result->orientation.setIdentity();
-    if (flags & EvalAngularVelocity)
+    if (result->needs.AngularVelocity())
       result->angular_velocity.setZero();
 
     return result;
