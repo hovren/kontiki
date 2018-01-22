@@ -43,11 +43,19 @@ struct SplineSegmentMeta : public MetaBase {
   }
 
   double MinTime() const {
-    return t0;
+      Validate();
+      return t0;
   }
 
   double MaxTime() const {
+    Validate();
     return t0 + (n-3) * dt;
+  }
+
+  void Validate() const {
+    if (n < 4) {
+      throw std::range_error("Spline had too few control points");
+    }
   }
 };
 

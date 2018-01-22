@@ -143,6 +143,17 @@ def test_set_control_point(random_spline):
         np.testing.assert_equal(traj[i], new_cp)
 
 
+@pytest.mark.parametrize("cls", spline_classes)
+def test_empty_spline_invalid_times(cls):
+    instance = cls()
+    assert len(instance) == 0
+    with pytest.raises(ValueError):
+        t1 = instance.min_time
+
+    with pytest.raises(ValueError):
+        t2 = instance.max_time
+
+
 # ---- Specific UniformR3Spline tests -------------------------------- #
 
 def test_r3_position(random_r3_spline):
