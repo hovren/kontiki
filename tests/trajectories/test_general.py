@@ -5,7 +5,7 @@ import pytest
 
 from taser.utils import safe_time
 from taser.trajectories import LinearTrajectory, SimpleMultiTrajectory, \
-    UniformR3SplineTrajectory, UniformSO3SplineTrajectory
+    UniformR3SplineTrajectory, UniformSO3SplineTrajectory, SplitTrajectory
 from taser.rotations import quat_to_rotation_matrix
 
 ExampleData = namedtuple('ExampleData',
@@ -103,6 +103,17 @@ def trajectory_example(trajectory):
         example_data.position.extend([(t, zero) for t in times])
         example_data.velocity.extend([(t, zero) for t in times])
         example_data.acceleration.extend([(t, zero) for t in times])
+    elif cls == SplitTrajectory:
+        _, r3_example = trajectory_example(trajectory.R3_spline)
+        _, so3_example = trajectory_example(trajectory.SO3_spline)
+        tmin = max(r3_example.min_time, so3_example.min_time)
+        tmax = min(r3_example.max_time, so3_example.max_time)
+        example_data = make_example(tmin, tmax)
+        example_data.position.extend(r3_example.position)
+        example_data.velocity.extend(r3_example.velocity)
+        example_data.acceleration.extend(r3_example.acceleration)
+        example_data.orientation.extend(so3_example.orientation)
+        example_data.angular_velocity.extend(so3_example.angular_velocity)
     else:
         raise NotImplementedError(f"No example data for {cls} available")
 

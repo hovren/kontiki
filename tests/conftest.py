@@ -84,7 +84,15 @@ def trajectory(request):
 
         return instance
     elif cls == SplitTrajectory:
-        instance = SplitTrajectory()
+        class DummyRequest:
+            def __init__(self, cls):
+                self.param = cls
+
+        # Get examples for R3 and SO3
+        r3_traj = trajectory(DummyRequest(UniformR3SplineTrajectory))
+        so3_traj = trajectory(DummyRequest(UniformSO3SplineTrajectory))
+
+        instance = SplitTrajectory(r3_traj, so3_traj)
         return instance
     else:
         raise ValueError(f"Fixture simple_trajectory not available for {cls}")
