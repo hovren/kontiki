@@ -6,7 +6,7 @@ from fixtures.camera_fixtures import *
 from fixtures.sfm_fixtures import *
 
 from taser.trajectories import LinearTrajectory, SimpleMultiTrajectory, \
-    UniformR3SplineTrajectory, UniformSO3SplineTrajectory
+    UniformR3SplineTrajectory, UniformSO3SplineTrajectory, SplitTrajectory
 from taser.measurements import PositionMeasurement, StaticRsCameraMeasurement
 
 trajectory_classes = [
@@ -14,6 +14,7 @@ trajectory_classes = [
     # SimpleMultiTrajectory,
     UniformR3SplineTrajectory,
     UniformSO3SplineTrajectory,
+    SplitTrajectory,
 ]
 
 @pytest.fixture(params=trajectory_classes)
@@ -81,6 +82,9 @@ def trajectory(request):
         for cp in control_points:
             instance.append_knot(cp)
 
+        return instance
+    elif cls == SplitTrajectory:
+        instance = SplitTrajectory()
         return instance
     else:
         raise ValueError(f"Fixture simple_trajectory not available for {cls}")
