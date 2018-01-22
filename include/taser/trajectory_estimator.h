@@ -17,9 +17,16 @@ namespace taser {
 template <typename TrajectoryModel>
 class TrajectoryEstimator {
   using Meta = typename TrajectoryModel::Meta;
-
+  static ceres::Problem::Options DefaultProblemOptions() {
+    ceres::Problem::Options options;
+    options.loss_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
+    options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
+    return options;
+  }
  public:
-  TrajectoryEstimator(std::shared_ptr<TrajectoryModel> trajectory) : trajectory_(trajectory) {};
+  TrajectoryEstimator(std::shared_ptr<TrajectoryModel> trajectory) :
+      trajectory_(trajectory),
+      problem_(DefaultProblemOptions()) { };
 
   auto trajectory() const {
     return trajectory_;

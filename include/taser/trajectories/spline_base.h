@@ -231,7 +231,14 @@ class SplineViewBase : public ViewBase<T, SplineMeta> {
 
 template<template<typename> typename ViewTemplate>
 class SplinedTrajectoryBase : public TrajectoryBase<ViewTemplate> {
-//  using ControlPointDims = ViewTemplate<double>::ControlPointType
+ protected:
+  // Hidden constructor, not intended for user code
+  SplinedTrajectoryBase(double dt, double t0, std::unique_ptr<ceres::LocalParameterization> local_parameterization) :
+      TrajectoryBase<ViewTemplate>(new dataholders::VectorHolder<double>()),
+      local_parameterization_(std::move(local_parameterization)) {
+    this->meta_.segments.push_back(detail::SplineSegmentMeta(dt, t0));
+  };
+
  public:
   using Meta = typename TrajectoryBase<ViewTemplate>::Meta;
   using ControlPointType = typename ViewTemplate<double>::ControlPointType;
@@ -240,9 +247,7 @@ class SplinedTrajectoryBase : public TrajectoryBase<ViewTemplate> {
   const static int ControlPointSize = ViewTemplate<double>::ControlPointSize;
 
   SplinedTrajectoryBase(double dt, double t0) :
-      TrajectoryBase<ViewTemplate>(new dataholders::VectorHolder<double>()) {
-    this->meta_.segments.push_back(detail::SplineSegmentMeta(dt, t0));
-  };
+    SplinedTrajectoryBase(dt, t0, nullptr) { };
 
   SplinedTrajectoryBase(double dt) :
       SplinedTrajectoryBase(dt, 0.0) { };
@@ -300,7 +305,7 @@ class SplinedTrajectoryBase : public TrajectoryBase<ViewTemplate> {
         size_t size = ControlPointSize;
         parameter_blocks.push_back(ptr);
         parameter_sizes.push_back(size);
-        problem.AddParameterBlock(ptr, size);
+        problem.AddParameterBlock(ptr, size, this->local_parameterization_.get());
         current_segment_meta.n += 1;
       }
 
@@ -336,6 +341,9 @@ class SplinedTrajectoryBase : public TrajectoryBase<ViewTemplate> {
     else
       throw std::logic_error("Concrete spline had multiple segments. This should not happen!");
   }
+
+ protected:
+  std::unique_ptr<ceres::LocalParameterization> local_parameterization_;
 };
 
 

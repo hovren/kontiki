@@ -135,6 +135,9 @@ class UniformSO3SplineTrajectory : public detail::SplinedTrajectoryBase<detail::
  public:
   static constexpr const char* CLASS_ID = "UniformSO3Spline";
   using SplinedTrajectoryBase<detail::UniformSO3SplineView>::SplinedTrajectoryBase;
+  UniformSO3SplineTrajectory(double dt, double t0) :
+      SplinedTrajectoryBase<detail::UniformSO3SplineView>::SplinedTrajectoryBase(dt, t0,
+                                                                                 std::make_unique<ceres::EigenQuaternionParameterization>()) {};
 };
 
 } // namespace trajectories
