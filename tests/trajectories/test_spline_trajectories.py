@@ -154,6 +154,27 @@ def test_empty_spline_invalid_times(cls):
         t2 = instance.max_time
 
 
+@pytest.mark.parametrize("cls", spline_classes)
+def test_extend_to_fill(cls):
+    dt = np.random.uniform(0.05, 2.0)
+    t0 = np.random.uniform(-3, 3)
+    instance = cls(dt, t0)
+    N = np.random.randint(6, 12)
+    new_tmax = t0 + (N-3) * dt
+
+    if cls == UniformR3SplineTrajectory:
+        fill_value = np.zeros(3)
+    elif cls == UniformSO3SplineTrajectory:
+        from taser.rotations import identity_quaternion
+        fill_value = identity_quaternion()
+    else:
+        raise NotImplementedError(f"Test case not implemented for {cls}")
+
+    instance.extend_to(new_tmax, fill_value)
+    assert len(instance) == N
+    np.testing.assert_almost_equal(instance.max_time, new_tmax)
+
+
 # ---- Specific UniformR3Spline tests -------------------------------- #
 
 def test_r3_position(random_r3_spline):

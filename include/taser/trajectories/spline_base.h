@@ -104,12 +104,12 @@ template<
     typename _ControlPointValidator = AlwaysTrueValidator<_ControlPointType>>
 class SplineSegmentViewBase : public ViewBase<T, SplineSegmentMeta> {
  public:
+  using ViewBase<T, SplineSegmentMeta>::Meta;
   using ControlPointType = _ControlPointType;
   using ControlPointMap = Eigen::Map<ControlPointType>;
   using ControlPointValidator = _ControlPointValidator;
   const static int ControlPointSize = _ControlPointSize;
   // Inherit constructor
-  using ViewBase<T, SplineSegmentMeta>::Meta;
   using ViewBase<T, SplineSegmentMeta>::ViewBase;
 
   const ControlPointMap ControlPoint(int i) const {
@@ -324,6 +324,11 @@ class SplinedTrajectoryBase : public TrajectoryBase<ViewTemplate> {
     this->meta_.segments[0].n += 1;
   }
 
+  void ExtendTo(double t, const ControlPointType& fill_value) {
+    while ((this->NumKnots() < 4) || (this->MaxTime() < t)) {
+      this->AppendKnot(fill_value);
+    }
+  }
 
   const detail::SplineSegmentMeta& ConcreteSegmentMetaOrError() const {
     if (this->meta_.segments.size() == 1)
