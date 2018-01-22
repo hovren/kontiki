@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from taser.measurements import StaticRsCameraMeasurement, PositionMeasurement
+from taser.measurements import StaticRsCameraMeasurement, PositionMeasurement, GyroscopeMeasurement
 from taser.rotations import quat_to_rotation_matrix
 from taser.sfm import Landmark, View
 
@@ -51,3 +51,11 @@ def test_position_measurements(trajectory_example):
         m = PositionMeasurement(t, x)
         xhat = m.measure(trajectory)
         np.testing.assert_almost_equal(xhat, x)
+
+def test_gyroscope_measurements(trajectory_example):
+    trajectory, example_data = trajectory_example
+
+    for t, w in example_data.angular_velocity:
+        m = GyroscopeMeasurement(t, w)
+        w_hat m.measure(trajectory)
+        np.testing.assert_almost_equal(w_hat, w)
