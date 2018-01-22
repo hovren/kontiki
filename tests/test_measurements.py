@@ -57,5 +57,5 @@ def test_gyroscope_measurements(trajectory_example):
 
     for t, w in example_data.angular_velocity:
         m = GyroscopeMeasurement(t, w)
-        w_hat m.measure(trajectory)
+        w_hat = m.measure(trajectory)
         np.testing.assert_almost_equal(w_hat, w)

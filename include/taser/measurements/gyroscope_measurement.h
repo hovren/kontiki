@@ -36,7 +36,7 @@ class GyroscopeMeasurement {
  protected:
   template<typename TrajectoryModel>
   struct Residual {
-    Residual(const PositionMeasurement &m) : measurement(m) {};
+    Residual(const GyroscopeMeasurement &m) : measurement(m) {};
 
     template <typename T>
     bool operator()(T const* const* params, T* residual) const {
@@ -46,7 +46,7 @@ class GyroscopeMeasurement {
       return true;
     }
 
-    const PositionMeasurement& measurement;
+    const GyroscopeMeasurement& measurement;
     typename TrajectoryModel::Meta meta;
   }; // Residual;
 
@@ -68,6 +68,10 @@ class GyroscopeMeasurement {
     cost_function->SetNumResiduals(3);
     estimator.problem().AddResidualBlock(cost_function, nullptr, parameter_blocks);
   }
+
+  // TrajectoryEstimator must be a friend to access protected members
+  template<template<typename> typename TrajectoryModel>
+  friend class taser::TrajectoryEstimator;
 };
 
 } // namespace measurement

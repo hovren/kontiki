@@ -18,6 +18,7 @@ namespace hana = boost::hana;
 
 #include "measurements/static_rscamera_measurement.h"
 #include "measurements/position_measurement.h"
+#include "measurements/gyroscope_measurement.h"
 
 // Add template-of-template support to hana
 // Thanks to Jason Rice!
@@ -87,7 +88,7 @@ static auto camera_measurements = hana::ap(
 // Final list of measurement types
 static auto measurement_types = hana::concat(
   camera_measurements,
-  hana::tuple_t<TM::PositionMeasurement>
+  hana::tuple_t<TM::PositionMeasurement, TM::GyroscopeMeasurement>
 );
 
 #endif //TASERV2_TYPE_HELPERS_H

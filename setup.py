@@ -106,6 +106,7 @@ ext_modules = [
     CameraExtension('_atan_camera'),
     MeasurementExtension('_position_measurement'),
     MeasurementExtension('_static_rscamera_measurement'),
+    MeasurementExtension('_gyroscope_measurement'),
 ]
 
 

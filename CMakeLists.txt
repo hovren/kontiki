@@ -90,6 +90,7 @@ taser_add_module(taser._trajectory_estimator)
 
 # Measurements
 taser_add_module(taser.measurements._position_measurement)
+taser_add_module(taser.measurements._gyroscope_measurement)
 taser_add_module(taser.measurements._static_rscamera_measurement)
 
 add_executable(spline_devel src/spline_devel.cc)

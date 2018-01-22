@@ -6,7 +6,7 @@ from fixtures.camera_fixtures import *
 from fixtures.sfm_fixtures import *
 
 from taser.trajectories import LinearTrajectory, UniformR3SplineTrajectory, UniformSO3SplineTrajectory, SplitTrajectory
-from taser.measurements import PositionMeasurement, StaticRsCameraMeasurement
+from taser.measurements import PositionMeasurement, StaticRsCameraMeasurement, GyroscopeMeasurement
 
 trajectory_classes = [
     LinearTrajectory,
@@ -89,6 +89,7 @@ def trajectory(request):
 
 measurement_classes = [
     PositionMeasurement,
+    GyroscopeMeasurement,
     StaticRsCameraMeasurement,
 ]
 
@@ -107,7 +108,7 @@ def camera_measurements(request, small_sfm):
                 measurements.append(m)
     return measurements
 
-@pytest.fixture(params=[PositionMeasurement])
+@pytest.fixture(params=[PositionMeasurement, GyroscopeMeasurement])
 def simple_measurements(request, trajectory):
     from taser.utils import safe_time_span
     length = 5.
@@ -116,3 +117,7 @@ def simple_measurements(request, trajectory):
     cls = request.param
     if cls == PositionMeasurement:
         return [cls(t, np.random.uniform(-1, 1, size=3)) for t in times]
+    elif cls == GyroscopeMeasurement:
+        return [cls(t, np.random.uniform(-1, 1, size=3)) for t in times]
+    else:
+        raise NotImplementedError(f"simple_measurements fixture not implemented for {cls}")
