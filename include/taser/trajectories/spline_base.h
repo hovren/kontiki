@@ -308,8 +308,12 @@ class SplinedTrajectoryBase : public TrajectoryBase<ViewTemplate> {
     } // for times
   }
 
-  ControlPointMap ControlPoint(size_t i) {
+  ControlPointMap MutableControlPoint(size_t i) {
     return this->AsView().MutableControlPoint(i);
+  }
+
+  const ControlPointMap ControlPoint(size_t i) const {
+    return this->AsView().ControlPoint(i);
   }
 
   void AppendKnot(const ControlPointType& cp) {
