@@ -13,14 +13,16 @@ namespace sensors {
 using Flags = trajectories::EvaluationFlags;
 using trajectories::TrajectoryView;
 using trajectories::TrajectoryMap;
+using trajectories::time_span_t;
+using trajectories::time_init_t;
 
-template<typename ImuModel, typename TrajectoryModel, typename T>
-using ImuView = typename ImuModel::template View<TrajectoryModel, T>;
+template<typename ImuModel, typename T>
+using ImuView = typename ImuModel::template View<T>;
 
-template<typename ImuModel, typename TrajectoryModel, typename T>
-ImuView<ImuModel, TrajectoryModel, T> ImuMap(T const* const* params,
-                                             const typename ImuModel::Meta& meta) {
-  return ImuModel::template Map<TrajectoryModel, T>(params, meta);
+template<typename ImuModel, typename T>
+ImuView<ImuModel, T> ImuMap(T const* const* params,
+                            const typename ImuModel::Meta& meta) {
+  return ImuModel::template Map<T>(params, meta);
 };
 
 namespace detail {
@@ -31,7 +33,7 @@ struct BasicImuMeta : public trajectories::MetaBase { // FIXME: Move MetaBase fr
   }
 };
 
-template<typename TrajectoryModel, typename T, typename MetaType>
+template<typename T, typename MetaType>
 class ImuViewBase {
   static_assert(
       std::is_base_of<trajectories::MetaBase, MetaType>::value,
@@ -45,35 +47,48 @@ class ImuViewBase {
   ImuViewBase(std::shared_ptr<trajectories::dataholders::DataHolderBase<T>> data_holder, const Meta& meta) :
       meta_(meta), holder_(data_holder) { };
 
-  virtual Vector3 Gyroscope(const TrajectoryView<TrajectoryModel, T> &trajectory, T t) const = 0;
+  // Standard Gyroscope function
+  template<typename TrajectoryModel>
+  Vector3 DefaultGyroscope(const TrajectoryView<TrajectoryModel, T> &trajectory, T t) const {
+    auto result = trajectory.Evaluate(t, Flags::EvalOrientation | Flags::EvalAngularVelocity);
+    // Rotate from world to body coordinate frame
+    return result->orientation.conjugate()*result->angular_velocity;
+  }
 
+  template<typename TrajectoryModel>
+  Vector3 Gyroscope(const TrajectoryView<TrajectoryModel, T> &trajectory, T t) const {
+    return DefaultGyroscope<TrajectoryModel>(trajectory, t);
+  }
 
  protected:
   std::shared_ptr<trajectories::dataholders::DataHolderBase<T>> holder_;
   const Meta& meta_;
 };
 
-template<typename TrajectoryModel, typename T>
-class BasicImuView : public ImuViewBase<TrajectoryModel, T, BasicImuMeta> {
+template<typename T>
+class BasicImuView : public ImuViewBase<T, BasicImuMeta> {
   using Vector3 = Eigen::Matrix<T, 3, 1>;
 
  public:
-  using ImuViewBase<TrajectoryModel, T, BasicImuMeta>::ImuViewBase;
+  using ImuViewBase<T, BasicImuMeta>::ImuViewBase;
 
-  Vector3 Gyroscope(const TrajectoryView<TrajectoryModel, T> &trajectory, T t) const override {
-    auto result = trajectory.Evaluate(t, Flags::EvalOrientation | Flags::EvalAngularVelocity);
-    // Rotate from world to body coordinate frame
-    return result->orientation.conjugate()*result->angular_velocity;
-  }
+  // We could override (redefine) the Gyroscope and Accelerometer template methods here
+  // If we don't, the methods in ImuViewBase will be used
+
+//  template<typename TrajectoryModel>
+//  Vector3 Gyroscope(const TrajectoryView<TrajectoryModel, T> &trajectory, T t) const {
+//    Vector3 base_gyro = this->template DefaultGyroscope<TrajectoryModel>(trajectory, t);
+//    return base_gyro + Vector3(666, 666, 666);
+//  }
 };
 
-template<template<typename, typename> typename ViewTemplate, typename MetaType>
+template<template<typename> typename ViewTemplate>
 class ImuBase {
   using Vector3 = Eigen::Vector3d;
  public:
-  template<typename TrajectoryModel, typename T>
-  using View = ViewTemplate<TrajectoryModel, T>;
-  using Meta = MetaType;
+  template<typename T>
+  using View = ViewTemplate<T>;
+  using Meta = typename View<double>::Meta;
 
   ImuBase(trajectories::dataholders::MutableDataHolderBase<double>* holder, const Meta& meta) :
     holder_(holder),
@@ -82,20 +97,29 @@ class ImuBase {
   ImuBase(trajectories::dataholders::MutableDataHolderBase<double>* holder) :
     ImuBase(holder, Meta()) { };
 
-  template<typename TrajectoryModel>
-  View<TrajectoryModel, double> AsView() const {
-    return View<TrajectoryModel, double>(holder_, meta_);
+  View<double> AsView() const {
+    return View<double>(holder_, meta_);
   }
 
-  template<typename TrajectoryModel, typename T>
-  static View<TrajectoryModel, T> Map(T const* const* params, const Meta &meta) {
+  template<typename T>
+  static View<T> Map(T const* const* params, const Meta &meta) {
     auto ptr_holder = std::make_shared<trajectories::dataholders::PointerHolder<T>>(params);
-    return View<TrajectoryModel, T>(ptr_holder, meta);
+    return View<T>(ptr_holder, meta);
   };
 
   template<typename TrajectoryModel>
-  Vector3 Gyroscope(std::shared_ptr<TrajectoryModel> trajectory, double t) {
-    return AsView<TrajectoryModel>().Gyroscope(trajectory->AsView(), t);
+  Vector3 Gyroscope(std::shared_ptr<TrajectoryModel> trajectory, double t) const {
+    return AsView().template Gyroscope<TrajectoryModel>(trajectory->AsView(), t);
+  }
+
+  // Add trajectory to problem for a set of time spans
+  // Implementers can assume that the the list of time spans is ordered
+  virtual void AddToProblem(ceres::Problem& problem,
+                            const time_init_t &times,
+                            Meta& meta,
+                            std::vector<double*> &parameter_blocks,
+                            std::vector<size_t> &parameter_sizes) const {
+    // By default, do nothing
   }
 
  protected:
@@ -103,14 +127,12 @@ class ImuBase {
   const std::shared_ptr<trajectories::dataholders::MutableDataHolderBase<double>> holder_;
 };
 
-
-
 } // namespace detail
 
-class BasicImu : public detail::ImuBase<detail::BasicImuView, detail::BasicImuMeta> {
+class BasicImu : public detail::ImuBase<detail::BasicImuView> {
  public:
   BasicImu() :
-      detail::ImuBase<detail::BasicImuView, detail::BasicImuMeta>(new trajectories::dataholders::VectorHolder<double>()) { };
+      detail::ImuBase<detail::BasicImuView>(new trajectories::dataholders::VectorHolder<double>()) { };
 };
 
 } // namespace sensors

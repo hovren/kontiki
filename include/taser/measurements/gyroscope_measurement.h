@@ -28,16 +28,16 @@ class GyroscopeMeasurement {
       GyroscopeMeasurement(imu, t, w, 1.0) { };
 
   template<typename TrajectoryModel, typename T>
-  Eigen::Matrix<T, 3, 1> Measure(const ImuView<ImuModel, TrajectoryModel, T> &imu, const TrajectoryView<TrajectoryModel, T> &trajectory) const {
+  Eigen::Matrix<T, 3, 1> Measure(const ImuView<ImuModel, T> &imu, const TrajectoryView<TrajectoryModel, T> &trajectory) const {
 //    using Flags = taser::trajectories::EvaluationFlags;
 //    auto result = trajectory.Evaluate(T(t), Flags::EvalOrientation | Flags::EvalAngularVelocity);
 //    // Rotate angular velocity to body coordinate frame
 //    return result->orientation * result->angular_velocity;
-    return imu.Gyroscope(trajectory, T(t));
+    return imu.template Gyroscope<TrajectoryModel>(trajectory, T(t));
   };
 
   template<typename TrajectoryModel, typename T>
-  Eigen::Matrix<T, 3, 1> Error(const ImuView<ImuModel, TrajectoryModel, T> &imu, const TrajectoryView<TrajectoryModel, T> &trajectory) const {
+  Eigen::Matrix<T, 3, 1> Error(const ImuView<ImuModel, T> &imu, const TrajectoryView<TrajectoryModel, T> &trajectory) const {
     return w.cast<T>() - Measure<TrajectoryModel, T>(imu, trajectory);
   }
 
@@ -59,10 +59,10 @@ class GyroscopeMeasurement {
       size_t offset = 0;
       const auto trajectory = TrajectoryMap<TrajectoryModel, T>(&params[offset], trajectory_meta);
       offset += trajectory_meta.NumParameters();
-      const auto imu = ImuMap<ImuModel, TrajectoryModel, T>(&params[offset], imu_meta);
+      const auto imu = ImuMap<ImuModel, T>(&params[offset], imu_meta);
 
       Eigen::Map<Eigen::Matrix<T,3,1>> r(residual);
-      r = measurement.Error<T, TrajectoryModel>(trajectory, imu);
+      r = measurement.Error<TrajectoryModel, T>(imu, trajectory);
       return true;
     }
 
@@ -80,7 +80,12 @@ class GyroscopeMeasurement {
     std::vector<size_t> parameter_sizes;
 
     // Add trajectory to problem
-    estimator.AddTrajectoryForTimes({{t,t}}, residual->meta, parameter_blocks, parameter_sizes);
+    estimator.AddTrajectoryForTimes({{t,t}}, residual->trajectory_meta, parameter_blocks, parameter_sizes);
+
+    // Add IMU to problem
+    imu_->AddToProblem(estimator.problem(), {{t, t}}, residual->imu_meta, parameter_blocks, parameter_sizes);
+
+    // Let cost function know about the number and sizes of parameters dynamically added
     for (auto ndims : parameter_sizes) {
       cost_function->AddParameterBlock(ndims);
     }
