@@ -119,12 +119,38 @@ class ImuBase {
                             Meta& meta,
                             std::vector<double*> &parameter_blocks,
                             std::vector<size_t> &parameter_sizes) const {
-    // By default, do nothing
   }
 
  protected:
   Meta meta_;
   const std::shared_ptr<trajectories::dataholders::MutableDataHolderBase<double>> holder_;
+};
+
+
+struct ConstantBiasImuMeta : public trajectories::MetaBase {
+  int NumParameters() const override {
+    return 2;
+  }
+};
+
+template<typename T>
+class ConstantBiasImuView : public ImuViewBase<T, ConstantBiasImuMeta> {
+  using Vector3 = Eigen::Matrix<T, 3, 1>;
+  using Vector3Map = Eigen::Map<Vector3>;
+  using BaseType = ImuViewBase<T, ConstantBiasImuMeta>;
+ public:
+  using BaseType::ImuViewBase;
+
+  Vector3Map GyroscopeBias() const {
+    return Vector3Map(this->holder_->Parameter(1));
+  }
+
+  template<typename TrajectoryModel>
+  Vector3 Gyroscope(const TrajectoryView<TrajectoryModel, T> &trajectory, T t) const {
+    Vector3 base = this->template DefaultGyroscope<TrajectoryModel>(trajectory, t);
+    return  base + GyroscopeBias();
+  }
+
 };
 
 } // namespace detail
@@ -133,6 +159,43 @@ class BasicImu : public detail::ImuBase<detail::BasicImuView> {
  public:
   BasicImu() :
       detail::ImuBase<detail::BasicImuView>(new trajectories::dataholders::VectorHolder<double>()) { };
+};
+
+class ConstantBiasImu : public detail::ImuBase<detail::ConstantBiasImuView> {
+  using Vector3 = Eigen::Vector3d;
+  using Vector3Map = Eigen::Map<Vector3>;
+ public:
+  ConstantBiasImu() :
+    detail::ImuBase<detail::ConstantBiasImuView>(new trajectories::dataholders::VectorHolder<double>()) {
+    this->holder_->AddParameter(3); // 0: Accelerometer bias
+    this->holder_->AddParameter(3); // 1: Gyroscope bias
+  };
+
+  Vector3 GyroscopeBias() const {
+    return AsView().GyroscopeBias();
+  }
+
+  void set_GyroscopeBias(const Vector3 &b) {
+    AsView().GyroscopeBias() = b;
+  }
+
+  // Add trajectory to problem for a set of time spans
+  // Implementers can assume that the the list of time spans is ordered
+  void AddToProblem(ceres::Problem& problem,
+                            const time_init_t &times,
+                            Meta& meta,
+                            std::vector<double*> &parameter_blocks,
+                            std::vector<size_t> &parameter_sizes) const override {
+
+    for (auto i : {0, 1}) {
+      auto ptr = this->holder_->Parameter(i);
+      int size = 3;
+      problem.AddParameterBlock(ptr, size);
+      parameter_blocks.push_back(ptr);
+      parameter_sizes.push_back(size);
+    }
+  }
+
 };
 
 } // namespace sensors

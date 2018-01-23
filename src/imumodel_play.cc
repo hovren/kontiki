@@ -11,11 +11,21 @@ using namespace taser::measurements;
 
 int main() {
 
-  auto trajectory = std::make_shared<LinearTrajectory>();
-  auto imu = std::make_shared<BasicImu>();
-  auto m1 = std::make_shared<GyroscopeMeasurement<BasicImu>>(imu, 2.0, Eigen::Vector3d(1, 2, 3));
+  using ImuModel = ConstantBiasImu;
+//  using ImuModel = BasicImu;
 
-  std::vector<std::shared_ptr<GyroscopeMeasurement<BasicImu>>> meas = {m1};
+  auto trajectory = std::make_shared<LinearTrajectory>(0.0, Eigen::Vector3d(2, 4, 6));
+  auto imu = std::make_shared<ImuModel>();
+
+  std::cout << "Constant: " << trajectory->constant().transpose() << std::endl;
+
+  std::cout << "BEFORE: " << imu->GyroscopeBias().transpose() << std::endl;
+  imu->set_GyroscopeBias(Eigen::Vector3d(6, 6, 6));
+  std::cout << "AFTER: " << imu->GyroscopeBias().transpose() << std::endl;
+
+  auto m1 = std::make_shared<GyroscopeMeasurement<ImuModel>>(imu, 2.0, Eigen::Vector3d(1, 2, 3));
+
+  std::vector<std::shared_ptr<GyroscopeMeasurement<ImuModel>>> meas = {m1};
 
   double t = 10.;
   std::cout << "Position: " << trajectory->Position(t).transpose() << std::endl;
@@ -38,6 +48,9 @@ int main() {
               << m->Measure<LinearTrajectory, double>(imu->AsView(), trajectory->AsView()).transpose()
               << " err=" << m->Error<LinearTrajectory, double>(imu->AsView(), trajectory->AsView()).transpose() << std::endl;
   }
+
+  std::cout << "Bias: " << imu->GyroscopeBias().transpose() << std::endl;
+  std::cout << "constant: " << trajectory->constant().transpose() << std::endl;
 
   std::cout << "DONE" << std::endl;
   return 0;
