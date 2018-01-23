@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include <taser/trajectories/trajectory.h>
+//#include <taser/sensors/imu.h>
 #include "trajectory_estimator.h"
 
 namespace taser {
@@ -13,28 +14,35 @@ namespace measurements {
 
 using trajectories::TrajectoryView;
 using trajectories::TrajectoryMap;
+using sensors::ImuView;
+using sensors::ImuMap;
 
+template<typename ImuModel>
 class GyroscopeMeasurement {
   using Vector3 = Eigen::Vector3d;
  public:
-  GyroscopeMeasurement(double t, const Vector3& w, double weight) :
-    t(t), w(w), weight(weight) { };
+  GyroscopeMeasurement(std::shared_ptr<ImuModel> imu, double t, const Vector3& w, double weight) :
+    imu_(imu), t(t), w(w), weight(weight) { };
 
-  GyroscopeMeasurement(double t, const Vector3& w) :
-      GyroscopeMeasurement(t, w, 1.0) { };
+  GyroscopeMeasurement(std::shared_ptr<ImuModel> imu, double t, const Vector3& w) :
+      GyroscopeMeasurement(imu, t, w, 1.0) { };
 
-  template<typename T, typename TrajectoryModel>
-  Eigen::Matrix<T, 3, 1> Measure(const TrajectoryView<TrajectoryModel, T> &trajectory) const {
-    using Flags = taser::trajectories::EvaluationFlags;
-    auto result = trajectory.Evaluate(T(t), Flags::EvalOrientation | Flags::EvalAngularVelocity);
-    // Rotate angular velocity to body coordinate frame
-    return result->orientation * result->angular_velocity;
+  template<typename TrajectoryModel, typename T>
+  Eigen::Matrix<T, 3, 1> Measure(const ImuView<ImuModel, TrajectoryModel, T> &imu, const TrajectoryView<TrajectoryModel, T> &trajectory) const {
+//    using Flags = taser::trajectories::EvaluationFlags;
+//    auto result = trajectory.Evaluate(T(t), Flags::EvalOrientation | Flags::EvalAngularVelocity);
+//    // Rotate angular velocity to body coordinate frame
+//    return result->orientation * result->angular_velocity;
+    return imu.Gyroscope(trajectory, T(t));
   };
 
-  template<typename T, typename TrajectoryModel>
-  Eigen::Matrix<T, 3, 1> Error(const TrajectoryView<TrajectoryModel, T> &trajectory) const {
-    return w.cast<T>() - Measure<T, TrajectoryModel>(trajectory);
+  template<typename TrajectoryModel, typename T>
+  Eigen::Matrix<T, 3, 1> Error(const ImuView<ImuModel, TrajectoryModel, T> &imu, const TrajectoryView<TrajectoryModel, T> &trajectory) const {
+    return w.cast<T>() - Measure<TrajectoryModel, T>(imu, trajectory);
   }
+
+  // Data
+  std::shared_ptr<ImuModel> imu_;
 
   // Measurement data
   double t;  // Time
@@ -48,14 +56,19 @@ class GyroscopeMeasurement {
 
     template <typename T>
     bool operator()(T const* const* params, T* residual) const {
-      auto trajectory = TrajectoryMap<TrajectoryModel, T>(params, meta);
+      size_t offset = 0;
+      const auto trajectory = TrajectoryMap<TrajectoryModel, T>(&params[offset], trajectory_meta);
+      offset += trajectory_meta.NumParameters();
+      const auto imu = ImuMap<ImuModel, TrajectoryModel, T>(&params[offset], imu_meta);
+
       Eigen::Map<Eigen::Matrix<T,3,1>> r(residual);
-      r = measurement.Error<T, TrajectoryModel>(trajectory);
+      r = measurement.Error<T, TrajectoryModel>(trajectory, imu);
       return true;
     }
 
     const GyroscopeMeasurement& measurement;
-    typename TrajectoryModel::Meta meta;
+    typename ImuModel::Meta imu_meta;
+    typename TrajectoryModel::Meta trajectory_meta;
   }; // Residual;
 
   template<typename TrajectoryModel>

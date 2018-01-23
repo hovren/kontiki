@@ -93,5 +93,5 @@ taser_add_module(taser.measurements._position_measurement)
 taser_add_module(taser.measurements._gyroscope_measurement)
 taser_add_module(taser.measurements._static_rscamera_measurement)
 
-add_executable(spline_devel src/spline_devel.cc)
-target_link_libraries(spline_devel PRIVATE ${CERES_LIBRARIES})
+add_executable(imumodel_play src/imumodel_play.cc)
+target_link_libraries(imumodel_play PRIVATE ${CERES_LIBRARIES})
