@@ -8,10 +8,14 @@
 #include <Eigen/Dense>
 
 #include <iostream>
+#include <taser/trajectories/trajectory.h>
 #include "trajectory_estimator.h"
 
 namespace taser {
 namespace measurements {
+
+using trajectories::TrajectoryView;
+using trajectories::TrajectoryMap;
 
 class PositionMeasurement {
   using Vector3 = Eigen::Vector3d;
@@ -19,12 +23,12 @@ class PositionMeasurement {
   PositionMeasurement(double t, const Vector3 &p) : t(t), p(p) {};
 
   template<typename T, typename TrajectoryModel>
-  Eigen::Matrix<T, 3, 1> Measure(const typename TrajectoryModel::template View<T> &trajectory) const {
+  Eigen::Matrix<T, 3, 1> Measure(const TrajectoryView<TrajectoryModel, T> &trajectory) const {
     return trajectory.Position(T(t));
   };
 
   template<typename T, typename TrajectoryModel>
-  Eigen::Matrix<T, 3, 1> Error(const typename TrajectoryModel::template View<T> &trajectory) const {
+  Eigen::Matrix<T, 3, 1> Error(const TrajectoryView<TrajectoryModel, T> &trajectory) const {
 //    Eigen::Matrix<T,3,1> p_hat = trajectory.Position(T(t));
     return p.cast<T>() - Measure<T, TrajectoryModel>(trajectory);
   }
@@ -42,7 +46,7 @@ class PositionMeasurement {
 
     template <typename T>
     bool operator()(T const* const* params, T* residual) const {
-      auto trajectory = TrajectoryModel::template Map<T>(params, meta);
+      auto trajectory = TrajectoryMap<TrajectoryModel, T>(params, meta);
       Eigen::Map<Eigen::Matrix<T,3,1>> r(residual);
       r = measurement.Error<T, TrajectoryModel>(trajectory);
       return true;

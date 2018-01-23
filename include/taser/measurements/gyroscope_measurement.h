@@ -11,6 +11,9 @@
 namespace taser {
 namespace measurements {
 
+using trajectories::TrajectoryView;
+using trajectories::TrajectoryMap;
+
 class GyroscopeMeasurement {
   using Vector3 = Eigen::Vector3d;
  public:
@@ -21,7 +24,7 @@ class GyroscopeMeasurement {
       GyroscopeMeasurement(t, w, 1.0) { };
 
   template<typename T, typename TrajectoryModel>
-  Eigen::Matrix<T, 3, 1> Measure(const typename TrajectoryModel::template View<T> &trajectory) const {
+  Eigen::Matrix<T, 3, 1> Measure(const TrajectoryView<TrajectoryModel, T> &trajectory) const {
     using Flags = taser::trajectories::EvaluationFlags;
     auto result = trajectory.Evaluate(T(t), Flags::EvalOrientation | Flags::EvalAngularVelocity);
     // Rotate angular velocity to body coordinate frame
@@ -29,7 +32,7 @@ class GyroscopeMeasurement {
   };
 
   template<typename T, typename TrajectoryModel>
-  Eigen::Matrix<T, 3, 1> Error(const typename TrajectoryModel::template View<T> &trajectory) const {
+  Eigen::Matrix<T, 3, 1> Error(const TrajectoryView<TrajectoryModel, T> &trajectory) const {
     return w.cast<T>() - Measure<T, TrajectoryModel>(trajectory);
   }
 
@@ -45,7 +48,7 @@ class GyroscopeMeasurement {
 
     template <typename T>
     bool operator()(T const* const* params, T* residual) const {
-      auto trajectory = TrajectoryModel::template Map<T>(params, meta);
+      auto trajectory = TrajectoryMap<TrajectoryModel, T>(params, meta);
       Eigen::Map<Eigen::Matrix<T,3,1>> r(residual);
       r = measurement.Error<T, TrajectoryModel>(trajectory);
       return true;

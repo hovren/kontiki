@@ -14,6 +14,17 @@
 namespace taser {
 namespace trajectories {
 
+// Wrapper to get a view from a trajectory model
+template<typename TrajectoryModel, typename T>
+using TrajectoryView = typename TrajectoryModel::template View<T>;
+
+// Wrapper to map pointer data to a view
+template<typename TrajectoryModel, typename T>
+TrajectoryView<TrajectoryModel, T> TrajectoryMap(T const* const* params,
+                                                 const typename TrajectoryModel::Meta& meta) {
+  return TrajectoryModel::template Map<T>(params, meta);
+};
+
 // Base class for trajectory metadata
 // The metadata should contain everything that is needed to use a trajectory given
 // a data holder instance
