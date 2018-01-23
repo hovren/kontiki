@@ -24,7 +24,7 @@ struct LinearMeta : public taser::trajectories::MetaBase {
   double t0; // Time origin
 
   int NumParameters() const override {
-    return 0;
+    return 1;
   }
 };
 
