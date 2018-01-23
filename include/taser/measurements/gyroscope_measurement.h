@@ -4,6 +4,8 @@
 #include <Eigen/Dense>
 
 #include <iostream>
+
+#include <taser/trajectories/trajectory.h>
 #include "trajectory_estimator.h"
 
 namespace taser {
@@ -20,7 +22,10 @@ class GyroscopeMeasurement {
 
   template<typename T, typename TrajectoryModel>
   Eigen::Matrix<T, 3, 1> Measure(const typename TrajectoryModel::template View<T> &trajectory) const {
-    return trajectory.AngularVelocity(T(t));
+    using Flags = taser::trajectories::EvaluationFlags;
+    auto result = trajectory.Evaluate(T(t), Flags::EvalOrientation | Flags::EvalAngularVelocity);
+    // Rotate angular velocity to body coordinate frame
+    return result->orientation * result->angular_velocity;
   };
 
   template<typename T, typename TrajectoryModel>

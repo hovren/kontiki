@@ -22,7 +22,7 @@ struct MetaBase {
   virtual int NumParameters() const = 0;
 };
 
-enum {
+enum EvaluationFlags {
   EvalPosition = 1,
   EvalVelocity = 2,
   EvalAcceleration = 4,
@@ -36,11 +36,11 @@ struct TrajectoryEvaluation {
       needs(flags) { };
 
   using Vector3 = Eigen::Matrix<T, 3, 1>;
-  Vector3 position;
-  Vector3 velocity;
-  Vector3 acceleration;
-  Eigen::Quaternion<T> orientation;
-  Vector3 angular_velocity;
+  Vector3 position; // Position in world coordinates
+  Vector3 velocity; // Velocity relative to world coordinates
+  Vector3 acceleration; // Acceleration relative to world coordinates
+  Eigen::Quaternion<T> orientation; // Orientation in world coordinates. x_world = orientation * x_body
+  Vector3 angular_velocity; // Angular velocity in world coordinate frame
 
   // Struct to simplify lookup of what needs to be computed
   struct Needs {
