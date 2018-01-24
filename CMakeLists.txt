@@ -102,5 +102,6 @@ target_link_libraries(imumodel_play PRIVATE ${CERES_LIBRARIES})
 
 # CLion requires projects to use CMake, and this tells it about our headers
 # Please reload the project within CLion when adding new sources
-file(GLOB_RECURSE my_headers include/*.h)
-add_custom_target(ide_clion_dummy SOURCES ${my_headers})
+file(GLOB_RECURSE our_lib_headers include/*.h)
+file(GLOB_RECURSE our_srcs src/*.*)
+add_custom_target(ide_clion_dummy SOURCES ${our_lib_headers} ${our_srcs})
