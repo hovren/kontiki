@@ -33,6 +33,10 @@ def test_add_simple_measurements(estimator, simple_measurements):
     _test_add_measurement(estimator, simple_measurements)
 
 
+def test_add_imu_measurements(estimator, imu_measurements):
+    _test_add_measurement(estimator, imu_measurements)
+
+
 def test_solve_simple_nocrash(estimator, simple_measurements):
     _test_add_measurement(estimator, simple_measurements)
     summary = estimator.solve()

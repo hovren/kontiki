@@ -93,6 +93,11 @@ class CameraExtension(TaserExtension):
     def __init__(self, module):
         super().__init__('cameras.' + module)
 
+
+class SensorExtension(TaserExtension):
+    def __init__(self, module):
+        super().__init__('sensors.' + module)
+
 ext_modules = [
 #    TaserExtension('dummy'),
     TaserExtension('sfm'),
@@ -104,6 +109,8 @@ ext_modules = [
     TrajectoryExtension('_split_trajectory'),
     CameraExtension('_pinhole_camera'),
     CameraExtension('_atan_camera'),
+    SensorExtension('_basic_imu'),
+    SensorExtension('_constant_bias_imu'),
     MeasurementExtension('_position_measurement'),
     MeasurementExtension('_static_rscamera_measurement'),
     MeasurementExtension('_gyroscope_measurement'),

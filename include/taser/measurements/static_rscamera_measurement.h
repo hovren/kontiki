@@ -65,30 +65,30 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref, const Observatio
     // Measurement data
     std::shared_ptr<taser::Observation> observation;
 
-    template<typename T, typename TrajectoryModel>
+    template<typename TrajectoryModel, typename T>
     Eigen::Matrix<T, 2, 1> Project(const TrajectoryView<TrajectoryModel, T> &trajectory, const T inverse_depth) const {
       return reproject_static(*observation->landmark()->reference(), *observation, inverse_depth, trajectory, *camera);
     };
 
-    template<typename T, typename TrajectoryModel>
+    template<typename TrajectoryModel, typename T>
     Eigen::Matrix<T, 2, 1> Project(const TrajectoryView<TrajectoryModel, T> &trajectory) const {
-      return Project<T, TrajectoryModel>(trajectory, T(observation->landmark()->inverse_depth()));
+      return Project<TrajectoryModel, T>(trajectory, T(observation->landmark()->inverse_depth()));
     };
 
-    template<typename T, typename TrajectoryModel>
+    template<typename TrajectoryModel, typename T>
     Eigen::Matrix<T, 2, 1> Measure(const TrajectoryView<TrajectoryModel, T> &trajectory) const {
-      return Project<T, TrajectoryModel>(trajectory);
+      return Project<TrajectoryModel, T>(trajectory);
     };
 
-    template<typename T, typename TrajectoryModel>
+    template<typename TrajectoryModel, typename T>
     Eigen::Matrix<T, 2, 1> Error(const TrajectoryView<TrajectoryModel, T> &trajectory, const T inverse_depth) const {
-      Eigen::Matrix<T,2,1> y_hat = this->Project<T, TrajectoryModel>(trajectory, inverse_depth);
+      Eigen::Matrix<T,2,1> y_hat = this->Project<TrajectoryModel, T>(trajectory, inverse_depth);
       return observation->uv().cast<T>() - y_hat;
     }
 
-    template<typename T, typename TrajectoryModel>
+    template<typename TrajectoryModel, typename T>
     Eigen::Matrix<T, 2, 1> Error(const TrajectoryView<TrajectoryModel, T> &trajectory) const {
-      return Error<T, TrajectoryModel>(trajectory, T(observation->landmark()->inverse_depth()));
+      return Error<TrajectoryModel, T>(trajectory, T(observation->landmark()->inverse_depth()));
     }
 
    protected:
@@ -102,7 +102,7 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref, const Observatio
         auto trajectory = TrajectoryMap<TrajectoryModel, T>(params, meta);
         T inverse_depth = params[meta.NumParameters()][0];
         Eigen::Map<Eigen::Matrix<T,2,1>> r(residual);
-        r = measurement.Error<T, TrajectoryModel>(trajectory, inverse_depth);
+        r = measurement.Error<TrajectoryModel, T>(trajectory, inverse_depth);
         return true;
       }
 

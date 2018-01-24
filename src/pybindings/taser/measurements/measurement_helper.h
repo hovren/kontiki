@@ -16,12 +16,12 @@ static void declare_measurement_common(PyClass &cls) {
 
     cls.def("error", [](Class &self, const TrajectoryModel& trajectory){
       const auto view = trajectory.AsView();
-      return self.template Error<double, TrajectoryModel>(view);
+      return self.template Error<TrajectoryModel, double>(view);
     });
 
     cls.def("measure", [](Class &self, const TrajectoryModel& trajectory){
       const auto view = trajectory.AsView();
-      return self.template Measure<double, TrajectoryModel>(view);
+      return self.template Measure<TrajectoryModel, double>(view);
     });
   });
 };

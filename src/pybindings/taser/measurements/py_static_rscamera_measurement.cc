@@ -36,7 +36,7 @@ PYBIND11_MODULE(_static_rscamera_measurement, m) {
 
       // Use temporary to extract TrajectoryModel from TrajectoryImpl
       cls.def("project", [](Class &self, const TrajectoryModel& trajectory) {
-        return self.template Project<double, TrajectoryModel>(trajectory.AsView());
+        return self.template Project<TrajectoryModel, double>(trajectory.AsView());
         });
 
     }); // for_each(trajectory_types)

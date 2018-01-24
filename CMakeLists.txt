@@ -82,6 +82,10 @@ taser_add_module(taser.trajectories._split_trajectory)
 taser_add_module(taser.cameras._pinhole_camera)
 taser_add_module(taser.cameras._atan_camera)
 
+# IMUs
+taser_add_module(taser.sensors._basic_imu)
+taser_add_module(taser.sensors._constant_bias_imu)
+
 # Structire from motion
 taser_add_module(taser.sfm)
 

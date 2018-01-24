@@ -6,7 +6,7 @@
 #include <iostream>
 
 #include <taser/trajectories/trajectory.h>
-//#include <taser/sensors/imu.h>
+#include <taser/sensors/imu.h>
 #include "trajectory_estimator.h"
 
 namespace taser {
@@ -29,10 +29,6 @@ class GyroscopeMeasurement {
 
   template<typename TrajectoryModel, typename T>
   Eigen::Matrix<T, 3, 1> Measure(const ImuView<ImuModel, T> &imu, const TrajectoryView<TrajectoryModel, T> &trajectory) const {
-//    using Flags = taser::trajectories::EvaluationFlags;
-//    auto result = trajectory.Evaluate(T(t), Flags::EvalOrientation | Flags::EvalAngularVelocity);
-//    // Rotate angular velocity to body coordinate frame
-//    return result->orientation * result->angular_velocity;
     return imu.template Gyroscope<TrajectoryModel>(trajectory, T(t));
   };
 

@@ -52,10 +52,10 @@ def test_position_measurements(trajectory_example):
         xhat = m.measure(trajectory)
         np.testing.assert_almost_equal(xhat, x)
 
-def test_gyroscope_measurements(trajectory_example):
+def test_gyroscope_measurements(trajectory_example, imu):
     trajectory, example_data = trajectory_example
 
     for t, w in example_data.angular_velocity:
-        m = GyroscopeMeasurement(t, w)
-        w_hat = m.measure(trajectory)
+        m = GyroscopeMeasurement(imu, t, w)
+        w_hat = m.measure(imu, trajectory)
         np.testing.assert_almost_equal(w_hat, w)

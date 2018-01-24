@@ -7,6 +7,8 @@ from fixtures.sfm_fixtures import *
 
 from taser.trajectories import LinearTrajectory, UniformR3SplineTrajectory, UniformSO3SplineTrajectory, SplitTrajectory
 from taser.measurements import PositionMeasurement, StaticRsCameraMeasurement, GyroscopeMeasurement
+from taser.sensors import BasicImu, ConstantBiasImu
+from taser.utils import safe_time_span
 
 trajectory_classes = [
     LinearTrajectory,
@@ -87,6 +89,16 @@ def trajectory(request):
         raise ValueError(f"Fixture simple_trajectory not available for {cls}")
 
 
+imu_classes = [
+    BasicImu,
+    ConstantBiasImu,
+]
+
+@pytest.fixture(params=imu_classes)
+def imu(request):
+    cls = request.param
+    return cls()
+
 measurement_classes = [
     PositionMeasurement,
     GyroscopeMeasurement,
@@ -108,16 +120,23 @@ def camera_measurements(request, small_sfm):
                 measurements.append(m)
     return measurements
 
-@pytest.fixture(params=[PositionMeasurement, GyroscopeMeasurement])
+
+@pytest.fixture(params=[GyroscopeMeasurement])
+def imu_measurements(request, imu, trajectory):
+    cls = request.param
+    length = 5.
+    n = int(length * 3)
+    times = np.linspace(*safe_time_span(trajectory, length), num=n)
+    return [cls(imu, t, np.random.uniform(-1, 1, size=3)) for t in times]
+
+
+@pytest.fixture(params=[PositionMeasurement])
 def simple_measurements(request, trajectory):
-    from taser.utils import safe_time_span
     length = 5.
     n = int(length * 3)
     times = np.linspace(*safe_time_span(trajectory, length), num=n)
     cls = request.param
     if cls == PositionMeasurement:
-        return [cls(t, np.random.uniform(-1, 1, size=3)) for t in times]
-    elif cls == GyroscopeMeasurement:
         return [cls(t, np.random.uniform(-1, 1, size=3)) for t in times]
     else:
         raise NotImplementedError(f"simple_measurements fixture not implemented for {cls}")

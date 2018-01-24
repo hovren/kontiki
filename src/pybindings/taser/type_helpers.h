@@ -53,6 +53,7 @@ constexpr auto template_template = template_template_t<F>{};
 namespace TT = taser::trajectories;
 namespace TM = taser::measurements;
 namespace TC = taser::cameras;
+namespace TS = taser::sensors;
 
 static constexpr auto trajectory_types = hana::tuple_t<
     TT::LinearTrajectory,
@@ -65,6 +66,12 @@ static constexpr auto trajectory_types = hana::tuple_t<
 static constexpr auto camera_types = hana::tuple_t<
   TC::AtanCamera,
   TC::PinholeCamera
+>;
+
+// Define IMU types
+static constexpr auto imu_types = hana::tuple_t<
+    TS::ConstantBiasImu,
+    TS::BasicImu
 >;
 
 // Define Camera measurements
@@ -85,10 +92,29 @@ static auto camera_measurements = hana::ap(
     camera_types
     );
 
+// Define IMU measurements
+static auto imu_meas_templates = hana::tuple_t<
+    hana::template_t<TM::GyroscopeMeasurement>
+>;
+
+
+static auto make_imu_meas = [](auto mtype, auto imutype) {
+  using MeasType = typename decltype(mtype)::type;
+  auto mclass = MeasType();
+  return mclass(imutype);
+};
+
+static auto imu_measurements = hana::ap(
+    hana::make_tuple(make_imu_meas),
+    imu_meas_templates,
+    imu_types
+);
+
 // Final list of measurement types
 static auto measurement_types = hana::concat(
-  camera_measurements,
-  hana::tuple_t<TM::PositionMeasurement, TM::GyroscopeMeasurement>
+  hana::concat(camera_measurements,
+               imu_measurements),
+  hana::tuple_t<TM::PositionMeasurement>
 );
 
 #endif //TASERV2_TYPE_HELPERS_H

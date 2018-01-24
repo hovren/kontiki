@@ -157,6 +157,8 @@ class ConstantBiasImuView : public ImuViewBase<T, ConstantBiasImuMeta> {
 
 class BasicImu : public detail::ImuBase<detail::BasicImuView> {
  public:
+  static constexpr const char* CLASS_ID = "BasicImu";
+
   BasicImu() :
       detail::ImuBase<detail::BasicImuView>(new trajectories::dataholders::VectorHolder<double>()) { };
 };
@@ -165,6 +167,8 @@ class ConstantBiasImu : public detail::ImuBase<detail::ConstantBiasImuView> {
   using Vector3 = Eigen::Vector3d;
   using Vector3Map = Eigen::Map<Vector3>;
  public:
+  static constexpr const char* CLASS_ID = "ConstantBiasImu";
+
   ConstantBiasImu() :
     detail::ImuBase<detail::ConstantBiasImuView>(new trajectories::dataholders::VectorHolder<double>()) {
     this->holder_->AddParameter(3); // 0: Accelerometer bias
