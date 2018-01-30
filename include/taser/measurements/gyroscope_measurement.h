@@ -12,11 +12,6 @@
 namespace taser {
 namespace measurements {
 
-using trajectories::TrajectoryView;
-using trajectories::TrajectoryMap;
-using sensors::ImuView;
-using sensors::ImuMap;
-
 template<typename ImuModel>
 class GyroscopeMeasurement {
   using Vector3 = Eigen::Vector3d;
@@ -28,12 +23,12 @@ class GyroscopeMeasurement {
       GyroscopeMeasurement(imu, t, w, 1.0) { };
 
   template<typename TrajectoryModel, typename T>
-  Eigen::Matrix<T, 3, 1> Measure(const ImuView<ImuModel, T> &imu, const TrajectoryView<TrajectoryModel, T> &trajectory) const {
+  Eigen::Matrix<T, 3, 1> Measure(const type::Imu<ImuModel, T> &imu, const type::Trajectory<TrajectoryModel, T> &trajectory) const {
     return imu.template Gyroscope<TrajectoryModel>(trajectory, T(t));
   };
 
   template<typename TrajectoryModel, typename T>
-  Eigen::Matrix<T, 3, 1> Error(const ImuView<ImuModel, T> &imu, const TrajectoryView<TrajectoryModel, T> &trajectory) const {
+  Eigen::Matrix<T, 3, 1> Error(const type::Imu<ImuModel, T> &imu, const type::Trajectory<TrajectoryModel, T> &trajectory) const {
     return w.cast<T>() - Measure<TrajectoryModel, T>(imu, trajectory);
   }
 
@@ -53,9 +48,9 @@ class GyroscopeMeasurement {
     template <typename T>
     bool operator()(T const* const* params, T* residual) const {
       size_t offset = 0;
-      const auto trajectory = TrajectoryMap<TrajectoryModel, T>(&params[offset], trajectory_meta);
+      const auto trajectory = entity::Map<TrajectoryModel, T>(&params[offset], trajectory_meta);
       offset += trajectory_meta.NumParameters();
-      const auto imu = ImuMap<ImuModel, T>(&params[offset], imu_meta);
+      const auto imu = entity::Map<ImuModel, T>(&params[offset], imu_meta);
 
       Eigen::Map<Eigen::Matrix<T,3,1>> r(residual);
       r = measurement.Error<TrajectoryModel, T>(imu, trajectory);
@@ -72,23 +67,22 @@ class GyroscopeMeasurement {
     using ResidualImpl = Residual<TrajectoryModel>;
     auto residual = new ResidualImpl(*this);
     auto cost_function = new ceres::DynamicAutoDiffCostFunction<ResidualImpl>(residual);
-    std::vector<double*> parameter_blocks;
-    std::vector<size_t> parameter_sizes;
+    std::vector<entity::ParameterInfo<double>> parameter_info;
 
     // Add trajectory to problem
-    estimator.AddTrajectoryForTimes({{t,t}}, residual->trajectory_meta, parameter_blocks, parameter_sizes);
+    estimator.AddTrajectoryForTimes({{t,t}}, residual->trajectory_meta, parameter_info);
 
     // Add IMU to problem
-    imu_->AddToProblem(estimator.problem(), {{t, t}}, residual->imu_meta, parameter_blocks, parameter_sizes);
+    imu_->AddToProblem(estimator.problem(), {{t, t}}, residual->imu_meta, parameter_info);
 
     // Let cost function know about the number and sizes of parameters dynamically added
-    for (auto ndims : parameter_sizes) {
-      cost_function->AddParameterBlock(ndims);
+    for (auto& pi : parameter_info) {
+      cost_function->AddParameterBlock(pi.size);
     }
 
     // Add measurement
     cost_function->SetNumResiduals(3);
-    estimator.problem().AddResidualBlock(cost_function, nullptr, parameter_blocks);
+    estimator.problem().AddResidualBlock(cost_function, nullptr, entity::ParameterInfo<double>::ToParameterBlocks(parameter_info));
   }
 
   // TrajectoryEstimator must be a friend to access protected members

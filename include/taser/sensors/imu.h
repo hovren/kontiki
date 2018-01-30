@@ -14,6 +14,8 @@ namespace sensors {
 
 namespace internal {
 
+// FIXME: Split the IMU models into different files
+
 struct BasicImuMeta : public entity::MetaData {
   size_t NumParameters() const override {
     return 0;
@@ -81,7 +83,6 @@ class BasicImuEntity : public ImuEntity<ViewTemplate, MetaType, StoreType> {
  public:
   using ImuEntity<ViewTemplate, MetaType, StoreType>::ImuEntity;
 
- private:
   void AddToProblem(ceres::Problem &problem,
                     time_init_t times,
                     MetaType &meta,
@@ -119,6 +120,7 @@ class ConstantBiasImuView : public ImuView<T, MetaType, ConstantBiasImuView<T, M
 
 template<template<typename...> typename ViewTemplate, typename MetaType, typename StoreType>
 class ConstantBiasImuEntity : public BasicImuEntity<ViewTemplate, MetaType, StoreType> {
+  using Base = BasicImuEntity<ViewTemplate, MetaType, StoreType>;
  public:
   ConstantBiasImuEntity(const Eigen::Vector3d &gbias, const Eigen::Vector3d &abias) {
     // Define parameters
@@ -126,6 +128,18 @@ class ConstantBiasImuEntity : public BasicImuEntity<ViewTemplate, MetaType, Stor
     this->holder_->AddParameter(3); // 1: Gyroscope bias
 
     this->set_gyro_bias(gbias);
+  }
+
+  void AddToProblem(ceres::Problem &problem,
+                    time_init_t times,
+                    MetaType &meta,
+                    std::vector<entity::ParameterInfo<double>> &parameters) const override {
+    Base::AddToProblem(problem, times, meta, parameters);
+    for (auto i : {0 , 1}) {
+      auto pi = this->holder_->Parameter(i);
+      problem.AddParameterBlock(pi.data, pi.size, pi.parameterization);
+      parameters.push_back(pi);
+    }
   }
 };
 

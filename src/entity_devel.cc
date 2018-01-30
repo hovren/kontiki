@@ -10,6 +10,7 @@
 
 #include <taser/trajectory_estimator.h>
 #include <taser/measurements/position_measurement.h>
+#include <taser/measurements/gyroscope_measurement.h>
 #include <taser/sensors/imu.h>
 
 using namespace taser;
@@ -60,6 +61,25 @@ int main() {
 
   gyroscope<LinearTrajectory, BasicImu>(*linear, *basic_imu);
   gyroscope<LinearTrajectory, ConstantBiasImu>(*linear, *constant_imu);
+
+  auto mg1 = std::make_shared<measurements::GyroscopeMeasurement<BasicImu>>(basic_imu, 4.0, Eigen::Vector3d(2, 2, 2));
+
+  estimator.AddMeasurement(mg1);
+
+  std::cout << "BEFORE: constant=" << linear->constant().transpose() << std::endl;
+  summary = estimator.Solve();
+  std::cout << summary.BriefReport() << std::endl;
+  std::cout << "AFTER: constant=" << linear->constant().transpose() << std::endl;
+
+  auto mg2 = std::make_shared<measurements::GyroscopeMeasurement<ConstantBiasImu>>(constant_imu, 3.0, Eigen::Vector3d(2, 2, 2));
+  estimator.AddMeasurement(mg2);
+
+  std::cout << "BEFORE: constant=" << linear->constant().transpose() << std::endl;
+  std::cout << "BEFORE: gbias=" << constant_imu->gyro_bias().transpose() << std::endl;
+  summary = estimator.Solve();
+  std::cout << summary.BriefReport() << std::endl;
+  std::cout << "AFTER: constant=" << linear->constant().transpose() << std::endl;
+  std::cout << "AFTER: gbias=" << constant_imu->gyro_bias().transpose() << std::endl;
 
   return 0;
 }
