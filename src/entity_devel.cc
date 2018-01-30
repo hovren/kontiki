@@ -10,10 +10,11 @@
 
 #include <taser/trajectory_estimator.h>
 #include <taser/measurements/position_measurement.h>
-#include <taser/measurements/position_measurement.h>
+#include <taser/sensors/imu.h>
 
 using namespace taser;
 using namespace taser::trajectories;
+using namespace taser::sensors;
 
 template<typename TrajectoryType>
 void do_things(const entity::type::base::ForView<TrajectoryType, TrajectoryView, double> &trajectory) {
@@ -26,6 +27,13 @@ void do_things2(const type::Trajectory<TrajectoryType, double> &trajectory) {
   double t = 6;
   std::cout << "func2 pos: " << trajectory.Position(t).transpose() << std::endl;
 }
+
+template<typename TrajectoryType, typename ImuType>
+void gyroscope(const type::Trajectory<TrajectoryType, double> &trajectory, const type::Imu<ImuType, double> &imu) {
+  double t = 3.0;
+  Eigen::Vector3d w = imu.template Gyroscope<TrajectoryType>(trajectory, t);
+  std::cout << "Gyro at t="<<t<< " is " << w.transpose() << std::endl;
+};
 
 int main() {
   auto linear = std::make_shared<LinearTrajectory>(1.0, Eigen::Vector3d(1, 2, 4));
@@ -46,6 +54,12 @@ int main() {
   auto summary = estimator.Solve();
   std::cout << summary.BriefReport() << std::endl;
   std::cout << "AFTER: constant=" << linear->constant().transpose() << std::endl;
+
+  auto basic_imu = std::make_shared<BasicImu>();
+  auto constant_imu = std::make_shared<ConstantBiasImu>(Eigen::Vector3d(1, 2, 3), Eigen::Vector3d(1, 1, 1));
+
+//  gyroscope<LinearTrajectory, BasicImu>(*linear, *basic_imu);
+  gyroscope<LinearTrajectory, ConstantBiasImu>(*linear, *constant_imu);
 
   return 0;
 }
