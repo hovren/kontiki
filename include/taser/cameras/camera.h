@@ -59,7 +59,7 @@ class CameraView : public entity::EntityView<T, MetaType> {
   virtual Vector3 Unproject(const Vector2& y) const = 0;
 
   size_t rows() const {
-    return T(this->meta_.rows);
+    return this->meta_.rows;
   }
 
   void set_rows(size_t r) {
@@ -82,7 +82,7 @@ class CameraView : public entity::EntityView<T, MetaType> {
     this->meta_.readout = r;
   }
 
-  const RelativePose<T>& relative_pose() const {
+  const RelativePose<T> relative_pose() const {
     return this->meta_.relative_pose.template cast<T>();
   }
 

@@ -11,37 +11,41 @@
 #include "sfm/view.h"
 #include "trajectory_estimator.h"
 #include "cameras/camera.h"
-
-namespace TT = taser::trajectories;
+#include <taser/types.h>
 
 namespace taser {
 namespace measurements {
 
-using trajectories::TrajectoryView;
-using trajectories::TrajectoryMap;
-
 template<
-    typename T,
-    template<typename> typename TrajectoryModel,
-    typename CameraModel>
-Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref, const Observation& obs, T inverse_depth,
-                                 const TrajectoryModel<T>& trajectory, const CameraModel& camera) {
+    typename TrajectoryModel,
+    typename CameraModel,
+    typename T>
+Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref,
+                                        const Observation& obs,
+                                        T inverse_depth,
+                                        const type::Trajectory<TrajectoryModel, T>& trajectory,
+                                        const type::Camera<CameraModel, T>& camera) {
   using Vector3 = Eigen::Matrix<T, 3, 1>;
   using Vector2 = Eigen::Matrix<T, 2, 1>;
+  using Flags = trajectories::EvaluationFlags;
 
-  T row_delta = T(camera.readout() / camera.rows());
+  T row_delta = camera.readout() / T(camera.rows());
   T t_ref = ref.view()->t0() + ref.v() * row_delta;
   T t_obs = obs.view()->t0() + obs.v() * row_delta;
 
-  auto eval_ref = trajectory.Evaluate(t_ref, TT::EvalPosition | TT::EvalOrientation);
-  auto eval_obs = trajectory.Evaluate(t_obs, TT::EvalPosition | TT::EvalOrientation);
+  int flags = Flags::EvalPosition | Flags::EvalOrientation;
+  auto eval_ref = trajectory.Evaluate(t_ref, flags);
+  auto eval_obs = trajectory.Evaluate(t_obs, flags);
 
-  const taser::cameras::RelativePose &rel_pose = camera.relative_pose();
-  const Vector3 p_ct = rel_pose.translation.cast<T>();
-  const Eigen::Quaternion<T> q_ct = rel_pose.orientation.cast<T>();
+  // FIXME: We have a ToTrajectory/FromTrajectory function
+  const taser::cameras::RelativePose<T> &rel_pose = camera.relative_pose();
+  const Vector3 p_ct = rel_pose.translation;
+  const Eigen::Quaternion<T> q_ct = rel_pose.orientation;
 
   Vector2 y = ref.uv().cast<T>();
   Vector3 yh = camera.Unproject(y);
+
+//  std::cout << "y=" << y.transpose() << "\nyh=" << yh.transpose() << std::endl;
 
   // fixme: It might be faster to make this a single expression (Eigen optimizations)
   Vector3 X_ref = q_ct.conjugate() * (yh - inverse_depth * p_ct);
@@ -53,61 +57,54 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref, const Observatio
 }
 
 
-  template<typename CameraImpl>
+  template<typename CameraModel>
   class StaticRsCameraMeasurement {
     using Vector2 = Eigen::Vector2d;
-    using ThisType = StaticRsCameraMeasurement<CameraImpl>;
    public:
-    StaticRsCameraMeasurement(std::shared_ptr<CameraImpl> camera, std::shared_ptr<Observation> obs)
+    StaticRsCameraMeasurement(std::shared_ptr<CameraModel> camera, std::shared_ptr<Observation> obs)
         : camera(camera), observation(obs) {};
 
-    std::shared_ptr<CameraImpl> camera;
+    std::shared_ptr<CameraModel> camera;
     // Measurement data
     std::shared_ptr<taser::Observation> observation;
 
     template<typename TrajectoryModel, typename T>
-    Eigen::Matrix<T, 2, 1> Project(const TrajectoryView<TrajectoryModel, T> &trajectory, const T inverse_depth) const {
-      return reproject_static(*observation->landmark()->reference(), *observation, inverse_depth, trajectory, *camera);
+    Eigen::Matrix<T, 2, 1> Project(const type::Trajectory<TrajectoryModel, T> &trajectory,
+                                   const type::Camera<CameraModel, T> &camera,
+                                   const T inverse_depth) const {
+      return reproject_static<TrajectoryModel, CameraModel>(*observation->landmark()->reference(), *observation, inverse_depth, trajectory, camera);
     };
 
     template<typename TrajectoryModel, typename T>
-    Eigen::Matrix<T, 2, 1> Project(const TrajectoryView<TrajectoryModel, T> &trajectory) const {
-      return Project<TrajectoryModel, T>(trajectory, T(observation->landmark()->inverse_depth()));
-    };
-
-    template<typename TrajectoryModel, typename T>
-    Eigen::Matrix<T, 2, 1> Measure(const TrajectoryView<TrajectoryModel, T> &trajectory) const {
-      return Project<TrajectoryModel, T>(trajectory);
-    };
-
-    template<typename TrajectoryModel, typename T>
-    Eigen::Matrix<T, 2, 1> Error(const TrajectoryView<TrajectoryModel, T> &trajectory, const T inverse_depth) const {
-      Eigen::Matrix<T,2,1> y_hat = this->Project<TrajectoryModel, T>(trajectory, inverse_depth);
+    Eigen::Matrix<T, 2, 1> Error(const type::Trajectory<TrajectoryModel, T> &trajectory,
+                                 const type::Camera<CameraModel, T> &camera,
+                                 const T inverse_depth) const {
+      Eigen::Matrix<T,2,1> y_hat = this->Project<TrajectoryModel, T>(trajectory, camera, inverse_depth);
       return observation->uv().cast<T>() - y_hat;
-    }
-
-    template<typename TrajectoryModel, typename T>
-    Eigen::Matrix<T, 2, 1> Error(const TrajectoryView<TrajectoryModel, T> &trajectory) const {
-      return Error<TrajectoryModel, T>(trajectory, T(observation->landmark()->inverse_depth()));
     }
 
    protected:
 
     template<typename TrajectoryModel>
     struct Residual {
-      Residual(const ThisType &m) : measurement(m) {};
+      Residual(const StaticRsCameraMeasurement<CameraModel> &m) : measurement(m) {};
 
       template <typename T>
       bool operator()(T const* const* params, T* residual) const {
-        auto trajectory = TrajectoryMap<TrajectoryModel, T>(params, meta);
-        T inverse_depth = params[meta.NumParameters()][0];
+        size_t offset = 0;
+        auto trajectory = entity::Map<TrajectoryModel, T>(&params[offset], trajectory_meta);
+        offset += trajectory_meta.NumParameters();
+        auto camera = entity::Map<CameraModel, T>(&params[offset], camera_meta);
+        offset += camera_meta.NumParameters();
+        T inverse_depth = params[offset][0];
         Eigen::Map<Eigen::Matrix<T,2,1>> r(residual);
-        r = measurement.Error<TrajectoryModel, T>(trajectory, inverse_depth);
+        r = measurement.Error<TrajectoryModel, T>(trajectory, camera, inverse_depth);
         return true;
       }
 
-      const ThisType &measurement;
-      typename TrajectoryModel::Meta meta;
+      const StaticRsCameraMeasurement<CameraModel> &measurement;
+      typename TrajectoryModel::Meta trajectory_meta;
+      typename CameraModel::Meta camera_meta;
     }; // Residual;
 
     template<typename TrajectoryModel>
@@ -115,8 +112,7 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref, const Observatio
       using ResidualImpl = Residual<TrajectoryModel>;
       auto residual = new ResidualImpl(*this);
       auto cost_function = new ceres::DynamicAutoDiffCostFunction<ResidualImpl>(residual);
-      std::vector<double*> parameter_blocks;
-      std::vector<size_t> parameter_sizes;
+      std::vector<entity::ParameterInfo<double>> parameters;
 
       // Add trajectory to problem
       const auto landmark = observation->landmark();
@@ -126,22 +122,36 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref, const Observatio
                                           {t0_ref, t0_ref + camera->readout()},
                                           {t0_obs, t0_obs + camera->readout()}
                                       },
-                                      residual->meta, parameter_blocks, parameter_sizes);
-      for (auto ndims : parameter_sizes) {
-        cost_function->AddParameterBlock(ndims);
+                                      residual->trajectory_meta,
+                                      parameters);
+
+      // Add camera to proble
+      camera->AddToProblem(estimator.problem(), {
+                               {t0_ref, t0_ref + camera->readout()},
+                               {t0_obs, t0_obs + camera->readout()}
+                           },
+                           residual->camera_meta,
+                           parameters);
+
+      // Add Landmark inverse depth
+      // FIXME: Landmarks should be an entity
+      double *p_rho = landmark->inverse_depth_ptr();
+      estimator.problem().AddParameterBlock(p_rho, 1);
+      estimator.problem().SetParameterLowerBound(p_rho, 0, 0.); // Only positive inverse depths please
+      parameters.push_back(entity::ParameterInfo<double>(p_rho, 1));
+
+      // Add parameters to cost function
+      for (auto& pi : parameters) {
+        cost_function->AddParameterBlock(pi.size);
       }
 
       // Add measurement info
       cost_function->SetNumResiduals(2);
 
-      // Landmark inverse depth is the only extra parameter
-      double *p_rho = landmark->inverse_depth_ptr();
-      estimator.problem().AddParameterBlock(p_rho, 1);
-      parameter_blocks.push_back(p_rho);
-      cost_function->AddParameterBlock(1);
-
       // Give residual block to Problem
-      estimator.problem().AddResidualBlock(cost_function, nullptr, parameter_blocks);
+      estimator.problem().AddResidualBlock(cost_function,
+                                           nullptr,
+                                           entity::ParameterInfo<double>::ToParameterBlocks(parameters));
     }
 
     template<template<typename> typename TrajectoryModel>

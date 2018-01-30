@@ -47,6 +47,7 @@ class PinholeView : public CameraView<T, MetaType> {
   }
   Vector3 Unproject(const Vector2 &y) const override {
     Vector3 xh(y(0), y(1), T(1));
+    CameraMatrix K = camera_matrix();
     return camera_matrix().inverse() * xh;
   }
 };
@@ -65,7 +66,7 @@ class PinholeEntity : public CameraEntity<ViewTemplate, MetaType, StoreType> {
                     time_init_t times,
                     MetaType &meta,
                     std::vector<entity::ParameterInfo<double>> &parameters) const override {
-    // Nothing to do
+    meta = this->meta_;
   }
 };
 
