@@ -100,6 +100,10 @@ taser_add_module(taser.measurements._static_rscamera_measurement)
 add_executable(imumodel_play src/imumodel_play.cc)
 target_link_libraries(imumodel_play PRIVATE ${CERES_LIBRARIES})
 
+add_executable(entity_devel src/entity_devel.cc)
+target_link_libraries(entity_devel PRIVATE ${CERES_LIBRARIES})
+
+
 # CLion requires projects to use CMake, and this tells it about our headers
 # Please reload the project within CLion when adding new sources
 file(GLOB_RECURSE our_lib_headers include/*.h)

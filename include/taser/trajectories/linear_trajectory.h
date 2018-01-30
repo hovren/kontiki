@@ -6,46 +6,50 @@
 #define TASERV2_LINEAR_TRAJECTORY_H
 
 #include "trajectory.h"
-#include "trajectory_estimator.h"
-#include "dataholders/vectorholder.h"
 
 #include <Eigen/Dense>
 #include <ceres/ceres.h>
+#include <entity/entity.h>
+#include <entity/paramstore/dynamic_pstore.h>
+
 
 namespace taser {
 namespace trajectories {
 
-namespace detail {
+namespace internal {
 
-struct LinearMeta : public taser::trajectories::MetaBase {
+struct LinearMeta : public entity::MetaData {
   LinearMeta() {};
   LinearMeta(double t0) : t0(t0) {};
 
   double t0; // Time origin
-
-  int NumParameters() const override {
-    return 1;
-  }
 };
 
 
-template<typename T>
-class LinearView  : public ViewBase<T, LinearMeta> {
+template<typename T, typename MetaType>
+class LinearView  : public TrajectoryView<T, MetaType> {
   using Vector3 = Eigen::Matrix<T, 3, 1>;
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
  public:
-  using Meta = LinearMeta;
-
-  // Inherit ViewBase constructor
-  using ViewBase<T, LinearMeta>::ViewBase;
+  // Inherit constructors
+  using TrajectoryView<T, MetaType>::TrajectoryView;
 
   T t0() const {
     return T(this->meta_.t0);
   }
 
+  void set_t0(double t0) {
+    this->meta_.t0 = t0;
+  }
+
   const Vector3 constant() const {
-    const Vector3 v = Eigen::Map<const Vector3>(this->holder_->Parameter(0));
+    const Vector3 v = Eigen::Map<const Vector3>(this->holder_->ParameterData(0));
     return v;
+  }
+
+  void set_constant(const Vector3 &k) {
+    Eigen::Map<Vector3> kmap(this->holder_->ParameterData(0));
+    kmap = k;
   }
 
   Result Evaluate(const T t, const int flags) const override {
@@ -83,63 +87,49 @@ class LinearView  : public ViewBase<T, LinearMeta> {
   }
 }; // ::View
 
+// Entity (in case someone wants to subclass this entity
+template<template <typename...> typename ViewTemplate, typename MetaType, typename StoreType>
+class LinearEntity : public TrajectoryEntity<ViewTemplate, MetaType, StoreType> {
+ public:
+  LinearEntity(double t0, const Eigen::Vector3d& k) {
+    size_t i = this->holder_->AddParameter(3); // Add the constant
+    this->set_t0(t0);
+    this->set_constant(k);
+  }
 
-} // namespace detail
+ private:
+  void AddToProblem(ceres::Problem &problem,
+                    time_init_t times,
+                    MetaType &meta,
+                    std::vector<entity::ParameterInfo<double>> &parameters) const override {
+    // Copy meta as it is
+    meta = this->meta_;
+
+    // Add constant to list of parameters
+    auto param_constant = this->holder_->Parameter(0);
+    parameters.push_back(param_constant);
+  }
+};
+
+
+} // namespace internal
 
 
 // Linear trajectory such that we have
 // position p(t) = c * (t - t0)
 // angular velocity w(t) = c
 // Here c is a 3D vector parameter and t0 is the time origin (metadata)
-class LinearTrajectory : public TrajectoryBase<detail::LinearView> {
-  using Vector3 = Eigen::Vector3d;
+class LinearTrajectory : public internal::LinearEntity<internal::LinearView,
+                                                       internal::LinearMeta,
+                                                       entity::DynamicParameterStore<double>> {
  public:
-  static constexpr const char* CLASS_ID = "Linear";
+  // import constructor
+  using internal::LinearEntity<internal::LinearView,
+                               internal::LinearMeta,
+                               entity::DynamicParameterStore<double>>::LinearEntity;
 
-  LinearTrajectory(double t0, const Vector3& k) : TrajectoryBase(new dataholders::VectorHolder<double>()) {
-    // One 3D parameter: the constant
-    this->holder_->AddParameter(3); // Parameter(0)
+  static constexpr const char* ENTITY_ID = "Linear";
 
-    set_t0(t0);
-    set_constant(k);
-  }
-
-  LinearTrajectory() : LinearTrajectory(0, Eigen::Vector3d(1, 1, 1)) {};
-
-
-  Vector3 constant() const {
-    return AsView().constant();
-  }
-
-  void set_constant(const Vector3 &k) {
-    Eigen::Map<Vector3> c(holder_->Parameter(0));
-    c = k;
-  }
-
-  double t0() const {
-    return AsView().t0();
-  }
-
-  void set_t0(double x) {
-    this->meta_.t0 = x;
-  }
-
-  // Add to problem, fill Meta struct, return parameter blocks
-  void AddToProblem(ceres::Problem& problem,
-                      const time_init_t &times,
-                      Meta& meta,
-                      std::vector<double*> &parameter_blocks,
-                      std::vector<size_t> &parameter_sizes) const override {
-    // Fill meta
-    meta = meta_;
-
-    // Define/add parameter blocks and add to problem
-    // In this case we have only one: the constant slope parameter
-    auto ptr = holder_->Parameter(0);
-    problem.AddParameterBlock(ptr, 3);
-    parameter_blocks.push_back(ptr);
-    parameter_sizes.push_back(3);
-  }
 };
 
 } // namespace trajectories
