@@ -11,6 +11,7 @@
 #include <taser/trajectory_estimator.h>
 #include <taser/measurements/position_measurement.h>
 #include <taser/cameras/pinhole.h>
+#include <taser/cameras/atan.h>
 
 using namespace taser;
 using namespace taser::trajectories;
@@ -18,7 +19,7 @@ using namespace taser::cameras;
 
 template<typename CameraType>
 void do_camera(const type::Camera<CameraType, double> &camera) {
-  Eigen::Vector3d X(1, 2, 3);
+  Eigen::Vector3d X(1, 2, 30);
   Eigen::Vector2d y = camera.Project(X);
   std::cout << "Project " << X.transpose() << " -> " << y.transpose() << std::endl;
 }
@@ -36,8 +37,10 @@ int main() {
   estimator.AddMeasurement(m1);
 
   auto pinhole = std::make_shared<PinholeCamera>(1920, 1080, 0.02);
-
   do_camera<PinholeCamera>(*pinhole);
+
+  auto atan = std::make_shared<AtanCamera>(1920, 1080, 0.02, 0.8, Eigen::Vector2d(0.5, 0.5));
+  do_camera<AtanCamera>(*atan);
 
   return 0;
 }

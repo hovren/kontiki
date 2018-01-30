@@ -9,66 +9,100 @@
 
 #include <Eigen/Core>
 #include <ceres/ceres.h>
+#include <entity/paramstore/dynamic_pstore.h>
 
 namespace taser {
 namespace cameras {
 
-class AtanCamera : public PinholeCamera {
+namespace internal {
+
+struct AtanMeta : public PinholeMeta {
+  double gamma;
+  Eigen::Vector2d wc;
+
+  size_t NumParameters() const override {
+    return PinholeMeta::NumParameters();
+  }
+};
+
+template<typename T, typename MetaType>
+class AtanView : public PinholeView<T, MetaType> {
+  using Base = PinholeView<T, MetaType>;
+  using Vector2 = Eigen::Matrix<T, 2, 1>;
+  using Vector3 = Eigen::Matrix<T, 3, 1>;
  public:
-  static constexpr const char *CLASS_ID = "Atan";
-  using CameraMatrix = PinholeCamera::CameraMatrix;
+  // Inherit constructors
+  using Base::PinholeView;
 
-  AtanCamera(int rows, int cols, double readout, const CameraMatrix &K, const Eigen::Vector2d &wc, double gamma)
-      : PinholeCamera(rows, cols, readout, K),
-        wc_(wc), gamma_(gamma) {};
+  Vector2 wc() const {
+    return this->meta_.wc.template cast<T>();
+  }
 
-  AtanCamera(int rows, int cols, double readout)
-      : PinholeCamera(rows, cols, readout),
-        wc_(0, 0), gamma_(0) {};
+  void set_wc(const Vector2& wc) {
+    this->meta_.wc = wc.template cast<double>();
+  }
 
-  template<typename T>
-  Eigen::Matrix<T, 2, 1> Project(const Eigen::Matrix<T, 3, 1> &X) const {
+  T gamma() const {
+    return T(this->meta_.gamma);
+  }
+
+  void set_gamma(T gamma) {
+    this->meta_.gamma = (double) gamma;
+  }
+
+  Vector2 Project(const Vector3 &X) const override {
     const T eps = T(1e-32);
 
     // Common parts
-    Eigen::Matrix<T, 2, 1> A = X.head(2)/(X(2) + eps);
-    Eigen::Matrix<T, 2, 1> L = A - this->wc_.cast<T>();
+    Vector2 A = X.head(2)/(X(2) + eps);
+    Vector2 L = A - wc();
     T r = ceres::sqrt(L.squaredNorm() + eps);
-    T f = ceres::atan(r*T(gamma_))/T(gamma_);
+    T f = ceres::atan(r*gamma())/gamma();
 
-    Eigen::Matrix<T, 3, 1> Y(T(0), T(0), T(1));
-    Y.head(2) = this->wc_.cast<T>() + f*L/r;
+    Vector3 Y(T(0), T(0), T(1));
+    Y.head(2) = wc() + f*L/r;
 
     // Apply camera matrix
     // Normalization not needed since Y(2) == 1
-    return (this->camera_matrix_.cast<T>()*Y).head(2);
+    return (this->camera_matrix() * Y).head(2);
   }
-
-  template<typename T>
-  Eigen::Matrix<T, 3, 1> Unproject(const Eigen::Matrix<T, 2, 1> &x) const {
+  Vector3 Unproject(const Vector2 &y) const override {
     const T eps = T(1e-32);
-    Eigen::Matrix<T, 3, 1> ph(x(0), x(1), T(1.0));
-    Eigen::Matrix<T, 3, 1> phn = this->camera_matrix_inverse_.cast<T>()*ph;
-    Eigen::Matrix<T, 2, 1> L = phn.head(2) - wc_.cast<T>();
+    Vector3 ph(y(0), y(1), T(1.0));
+    Vector3 phn = this->camera_matrix().inverse() * ph;
+    Vector2 L = phn.head(2) - wc();
 
     T r = ceres::sqrt(L.squaredNorm() + eps);
-    T f = ceres::tan(r*T(gamma_))/T(gamma_);
+    T f = ceres::tan(r*gamma())/gamma();
 
-    Eigen::Matrix<T, 3, 1> Y(T(0), T(0), T(1));
-    Y.head(2) = wc_.cast<T>() + f*L/r;
+    Vector3 Y(T(0), T(0), T(1));
+    Y.head(2) = wc() + f*L/r;
     return Y;
   }
+};
 
-  Eigen::Vector2d wc() const { return wc_; }
-  void set_wc(Eigen::Vector2d &wc) { wc_ = wc; }
+template<template<typename...> typename ViewTemplate, typename MetaType, typename StoreType>
+class AtanEntity : public PinholeEntity<ViewTemplate, MetaType, StoreType> {
+  using Base = PinholeEntity<ViewTemplate, MetaType, StoreType>;
 
-  double gamma() const { return gamma_; }
-  void set_gamma(double gamma) { gamma_ = gamma; }
+ public:
+  AtanEntity(size_t cols, size_t rows, double readout, double gamma, const Eigen::Vector2d& wc) :
+      Base(cols, rows, readout) {
+    this->set_gamma(gamma);
+    this->set_wc(wc);
+  }
+};
+} // namespace internal
 
- protected:
-  Eigen::Vector2d wc_; // Distortion center
-  double gamma_; // Distortion parameter
+class AtanCamera : public internal::AtanEntity<internal::AtanView,
+                                               internal::AtanMeta,
+                                               entity::DynamicParameterStore<double>> {
+ public:
+  using internal::AtanEntity<internal::AtanView,
+                             internal::AtanMeta,
+                             entity::DynamicParameterStore<double>>::AtanEntity;
 
+  static constexpr const char *ENTITY_ID = "Atan";
 };
 
 } // namespace cameras
