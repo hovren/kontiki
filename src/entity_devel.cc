@@ -8,6 +8,10 @@
 #include <entity/entity.h>
 #include <taser/trajectories/linear_trajectory.h>
 
+#include <taser/trajectory_estimator.h>
+#include <taser/measurements/position_measurement.h>
+#include <taser/measurements/position_measurement.h>
+
 using namespace taser;
 using namespace taser::trajectories;
 
@@ -31,6 +35,17 @@ int main() {
 
   do_things<LinearTrajectory>(*linear);
   do_things2<LinearTrajectory>(*linear);
+
+  TrajectoryEstimator<LinearTrajectory> estimator(linear);
+
+  auto m1 = std::make_shared<measurements::PositionMeasurement>(3, Eigen::Vector3d(5, 1, 3));
+
+  estimator.AddMeasurement(m1);
+
+  std::cout << "BEFORE: constant=" << linear->constant().transpose() << std::endl;
+  auto summary = estimator.Solve();
+  std::cout << summary.BriefReport() << std::endl;
+  std::cout << "AFTER: constant=" << linear->constant().transpose() << std::endl;
 
   return 0;
 }

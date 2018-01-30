@@ -9,13 +9,10 @@
 
 #include <iostream>
 #include <taser/trajectories/trajectory.h>
-#include "trajectory_estimator.h"
+#include <taser/trajectory_estimator.h>
 
 namespace taser {
 namespace measurements {
-
-using trajectories::TrajectoryView;
-using trajectories::TrajectoryMap;
 
 class PositionMeasurement {
   using Vector3 = Eigen::Vector3d;
@@ -23,13 +20,12 @@ class PositionMeasurement {
   PositionMeasurement(double t, const Vector3 &p) : t(t), p(p) {};
 
   template<typename TrajectoryModel, typename T>
-  Eigen::Matrix<T, 3, 1> Measure(const TrajectoryView<TrajectoryModel, T> &trajectory) const {
+  Eigen::Matrix<T, 3, 1> Measure(const type::Trajectory<TrajectoryModel, T> &trajectory) const {
     return trajectory.Position(T(t));
   };
 
   template<typename TrajectoryModel, typename T>
-  Eigen::Matrix<T, 3, 1> Error(const TrajectoryView<TrajectoryModel, T> &trajectory) const {
-//    Eigen::Matrix<T,3,1> p_hat = trajectory.Position(T(t));
+  Eigen::Matrix<T, 3, 1> Error(const type::Trajectory<TrajectoryModel, T> &trajectory) const {
     return p.cast<T>() - Measure<TrajectoryModel, T>(trajectory);
   }
 
@@ -46,7 +42,7 @@ class PositionMeasurement {
 
     template <typename T>
     bool operator()(T const* const* params, T* residual) const {
-      auto trajectory = TrajectoryMap<TrajectoryModel, T>(params, meta);
+      auto trajectory = entity::Map<TrajectoryModel, T>(params, meta);
       Eigen::Map<Eigen::Matrix<T,3,1>> r(residual);
       r = measurement.Error<TrajectoryModel, T>(trajectory);
       return true;
@@ -61,14 +57,13 @@ class PositionMeasurement {
     using ResidualImpl = Residual<TrajectoryModel>;
     auto residual = new ResidualImpl(*this);
     auto cost_function = new ceres::DynamicAutoDiffCostFunction<ResidualImpl>(residual);
-    std::vector<double*> parameter_blocks;
-    std::vector<size_t> parameter_sizes;
+    std::vector<entity::ParameterInfo<double>> parameter_info;
 
     // Add trajectory to problem
     //estimator.trajectory()->AddToProblem(estimator.problem(), residual->meta, parameter_blocks, parameter_sizes);
-    estimator.AddTrajectoryForTimes({{t,t}}, residual->meta, parameter_blocks, parameter_sizes);
-    for (auto ndims : parameter_sizes) {
-      cost_function->AddParameterBlock(ndims);
+    estimator.AddTrajectoryForTimes({{t,t}}, residual->meta, parameter_info);
+    for (auto& pi : parameter_info) {
+      cost_function->AddParameterBlock(pi.size);
     }
 
     // Add measurement
@@ -76,7 +71,9 @@ class PositionMeasurement {
     // If we had any measurement parameters to set, this would be the place
 
     // Give residual block to estimator problem
-    estimator.problem().AddResidualBlock(cost_function, nullptr, parameter_blocks);
+    estimator.problem().AddResidualBlock(cost_function,
+                                         nullptr,
+                                         entity::ParameterInfo<double>::ToParameterBlocks(parameter_info));
   }
 
   // TrajectoryEstimator must be a friend to access protected members

@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <vector>
+#include <memory>
 
 #include <ceres/ceres.h>
 
@@ -55,12 +56,11 @@ class TrajectoryEstimator {
     return problem_;
   }
 
-  bool AddTrajectoryForTimes(const trajectories::time_init_t &times,
+  bool AddTrajectoryForTimes(const time_init_t &times,
                              Meta &meta,
-                             std::vector<double *> &parameter_blocks,
-                             std::vector<size_t> &parameter_sizes) {
+                             std::vector<entity::ParameterInfo<double>> &parameter_info) {
     CheckTimeSpans(times);
-    trajectory_->AddToProblem(problem_, times, meta, parameter_blocks, parameter_sizes);
+    trajectory_->AddToProblem(problem_, times, meta, parameter_info);
     return true;
   }
 
@@ -70,7 +70,7 @@ class TrajectoryEstimator {
   // 1) All time spans are valid for the current trajectory
   // 2) Time spans are ordered (ascending)
   // Throw std::range_error on failure
-  void CheckTimeSpans(const trajectories::time_init_t &times) {
+  void CheckTimeSpans(const time_init_t &times) {
     int i=0;
     double t1_prev;
 

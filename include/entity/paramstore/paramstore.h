@@ -17,6 +17,16 @@ struct ParameterInfo {
   ParameterInfo(T *data, size_t size) :
     ParameterInfo(data, size, nullptr) { };
 
+  static std::vector<T*> ToParameterBlocks(const std::vector<ParameterInfo<T>> &infolist) {
+    std::vector<T*> param_blocks;
+
+    for (auto& pi : infolist)
+      param_blocks.push_back(pi.data);
+
+    return param_blocks;
+  }
+
+
   T* data;     // Pointer to data
   size_t size;      // Size of data
   ceres::LocalParameterization* parameterization;

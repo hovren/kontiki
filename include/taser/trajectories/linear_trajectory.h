@@ -97,7 +97,6 @@ class LinearEntity : public TrajectoryEntity<ViewTemplate, MetaType, StoreType> 
     this->set_constant(k);
   }
 
- private:
   void AddToProblem(ceres::Problem &problem,
                     time_init_t times,
                     MetaType &meta,
@@ -107,6 +106,7 @@ class LinearEntity : public TrajectoryEntity<ViewTemplate, MetaType, StoreType> 
 
     // Add constant to list of parameters
     auto param_constant = this->holder_->Parameter(0);
+    problem.AddParameterBlock(param_constant.data, param_constant.size, param_constant.parameterization);
     parameters.push_back(param_constant);
   }
 };
