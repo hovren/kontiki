@@ -14,39 +14,74 @@
 namespace taser {
 namespace cameras {
 
-class PinholeCamera : public CameraBase<PinholeCamera> {
+namespace internal {
+
+struct PinholeMeta : public CameraMeta {
+  size_t NumParameters() const override {
+    return CameraMeta::NumParameters();
+  }
+
+  Eigen::Matrix3d camera_matrix; // FIXME: This should be a set of parameters
+};
+
+template<typename T, typename MetaType>
+class PinholeView : public CameraView<T, MetaType> {
+  using CameraMatrix = Eigen::Matrix<T, 3, 3>;
+  using Vector3 = Eigen::Matrix<T, 3, 1>;
+  using Vector2 = Eigen::Matrix<T, 2, 1>;
  public:
-  static constexpr const char *CLASS_ID = "Pinhole";
-  using CameraMatrix = Eigen::Matrix3d;
+  // Inherit constructors
+  using CameraView<T, MetaType>::CameraView;
 
-  PinholeCamera(int rows, int cols, double readout, const CameraMatrix &K)
-      : CameraBase(rows, cols, readout),
-        camera_matrix_(K), camera_matrix_inverse_(K.inverse()) {};
+  CameraMatrix camera_matrix() const {
+    return this->meta_.camera_matrix.template cast<T>();
+  }
 
-  PinholeCamera(int rows, int cols, double readout)
-      : PinholeCamera{rows, cols, readout, CameraMatrix::Identity()} {};
+  void set_camera_matrix(const CameraMatrix& K) {
+    this->meta_.camera_matrix = K.template cast<double>();
+  }
 
-  template<typename T>
-  Eigen::Matrix<T, 2, 1> Project(const Eigen::Matrix<T, 3, 1> &X) const {
-    Eigen::Matrix<T, 3, 1> y = camera_matrix_.cast<T>()*X;
+  Vector2 Project(const Vector3 &X) const override {
+    Vector3 y = camera_matrix() * X;
     return y.head(2)/y(2);
   }
+  Vector3 Unproject(const Vector2 &y) const override {
+    Vector3 xh(y(0), y(1), T(1));
+    return camera_matrix().inverse() * xh;
+  }
+};
 
-  template<typename T>
-  Eigen::Matrix<T, 3, 1> Unproject(const Eigen::Matrix<T, 2, 1> &x) const {
-    Eigen::Matrix<T, 3, 1> xh(x(0), x(1), T(1));
-    return camera_matrix_inverse_.cast<T>()*xh;
+template<template<typename...> typename ViewTemplate, typename MetaType, typename StoreType>
+class PinholeEntity : public CameraEntity<ViewTemplate, MetaType, StoreType> {
+  using Base = CameraEntity<ViewTemplate, MetaType, StoreType>;
+ public:
+  // Inherit constructors
+  PinholeEntity(size_t cols, size_t rows, double readout) :
+      Base(cols, rows, readout) {
+    this->set_camera_matrix(Eigen::Matrix3d::Identity());
   }
 
-  CameraMatrix camera_matrix() const { return camera_matrix_; };
-  void set_camera_matrix(const CameraMatrix &K) {
-    camera_matrix_ = K;
-    camera_matrix_inverse_ = K.inverse();
+  void AddToProblem(ceres::Problem &problem,
+                    time_init_t times,
+                    MetaType &meta,
+                    std::vector<entity::ParameterInfo<double>> &parameters) const override {
+    // Nothing to do
   }
+};
 
- protected:
-  CameraMatrix camera_matrix_;
-  CameraMatrix camera_matrix_inverse_;
+} // namespace internal
+
+
+
+class PinholeCamera : public internal::PinholeEntity<internal::PinholeView,
+                                                     internal::PinholeMeta,
+                                                     entity::DynamicParameterStore<double>> {
+ public:
+  using internal::PinholeEntity< internal::PinholeView,
+                                 internal::PinholeMeta,
+                                 entity::DynamicParameterStore<double>>::PinholeEntity;
+
+  static constexpr const char *ENTITY_ID = "Pinhole";
 };
 
 } // namespace cameras

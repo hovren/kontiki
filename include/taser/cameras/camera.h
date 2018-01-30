@@ -9,56 +9,121 @@
 
 #include <Eigen/Dense>
 
+#include <entity/entity.h>
+#include <taser/types.h>
+
 #include "sfm/landmark.h"
 
 namespace taser {
 namespace cameras {
 
+template<typename T>
 struct RelativePose {
-  Eigen::Quaterniond orientation;
-  Eigen::Vector3d translation;
-  RelativePose() : orientation(Eigen::Quaterniond::Identity()), translation(Eigen::Vector3d::Zero()) {};
-  RelativePose(const Eigen::Quaterniond &q, const Eigen::Vector3d &p) : orientation(q), translation(p) {};
+  using Quaternion = Eigen::Quaternion<T>;
+  using Vector3 = Eigen::Matrix<T, 3, 1>;
+
+  Quaternion orientation;
+  Vector3 translation;
+  RelativePose() : orientation(Quaternion::Identity()), translation(Vector3::Zero()) {};
+  RelativePose(const Quaternion &q, const Vector3 &p) : orientation(q), translation(p) {};
+
+  template<typename U>
+  RelativePose<U> cast() const {
+    return RelativePose<U>(orientation.template cast<U>(), translation.template cast<U>());
+  }
+
 };
 
-template <typename Derived>
-class CameraBase {
+// Base view for all cameras
+namespace internal {
+
+struct CameraMeta : public entity::MetaData {
+  size_t NumParameters() const override {
+    return 0;  // No parameters
+  }
+
+  double readout;
+  size_t rows;
+  size_t cols;
+  RelativePose<double> relative_pose;
+};
+
+template<typename T, typename MetaType>
+class CameraView : public entity::EntityView<T, MetaType> {
+  using Vector2 = Eigen::Matrix<T, 2, 1>;
+  using Vector3 = Eigen::Matrix<T, 3, 1>;
  public:
-  CameraBase(int rows, int cols, double readout)
-      : rows_(rows), cols_(cols), readout_(readout) {};
+  using entity::EntityView<T, MetaType>::EntityView;
 
-  auto rows() const { return rows_; }
-  void set_rows(int r) { rows_ = r; }
-  auto cols() const { return cols_; }
-  void set_cols(int c) { cols_ = c; }
-  double readout() const { return readout_; }
-  void set_readout(double r) { readout_ = r; }
+  virtual Vector2 Project(const Vector3 &X) const = 0;
+  virtual Vector3 Unproject(const Vector2& y) const = 0;
 
-  const RelativePose& relative_pose() const {
-    return relative_pose_;
+  size_t rows() const {
+    return T(this->meta_.rows);
   }
 
-  void set_relative_pose(const RelativePose &pose) {
-    relative_pose_ = pose;
+  void set_rows(size_t r) {
+    this->meta_.rows = r;
   }
 
-  template <typename T>
-  Eigen::Matrix<T, 3, 1> FromTrajectory(const Eigen::Matrix<T, 3, 1> &X_trajectory) const {
-    return relative_pose_.orientation.cast<T>() * X_trajectory + relative_pose_.translation.cast<T>();
+  size_t cols() const {
+    return this->meta_.cols;
+  }
+
+  void set_cols(size_t c) {
+    this->meta_.cols = c;
+  }
+
+  T readout() const {
+    return T(this->meta_.readout);
+  }
+
+  void set_readout(T r) {
+    this->meta_.readout = r;
+  }
+
+  const RelativePose<T>& relative_pose() const {
+    return this->meta_.relative_pose.template cast<T>();
+  }
+
+  void set_relative_pose(const RelativePose<T> &pose) {
+    this->meta_.relative_pose = pose;
+  }
+
+  Vector3 FromTrajectory(const Vector3 &X_trajectory) const {
+    auto rel_pose = relative_pose();
+    return rel_pose.orientation * X_trajectory + rel_pose.translation;
   };
 
-  template<typename T>
-  Eigen::Matrix<T, 3, 1> ToTrajectory(const Eigen::Matrix<T, 3, 1> &X_camera) const {
-    return relative_pose_.orientation.conjugate().cast<T>() * (X_camera - relative_pose_.translation.cast<T>());
+  Vector3 ToTrajectory(const Vector3 &X_camera) const {
+    auto rel_pose = relative_pose();
+    return rel_pose.orientation.conjugate() * (X_camera - rel_pose.translation);
   };
 
- protected:
-  int rows_;
-  int cols_;
-  double readout_;
-  RelativePose relative_pose_; // Trajectory->Camera
 };
 
+// Base class for camera entities
+template<template<typename...> typename ViewTemplate, typename MetaType, typename StoreType>
+class CameraEntity : public type::Entity<ViewTemplate, MetaType, StoreType> {
+ public:
+  CameraEntity(size_t cols, size_t rows, double readout) {
+    this->set_cols(cols);
+    this->set_rows(rows);
+    this->set_readout(readout);
+  }
+
+
+
+};
+
+} // namespace internal
 } // namespace cameras
+
+namespace type {
+template<typename _Entity, typename T>
+using Camera = typename entity::type::base::ForView<_Entity, cameras::internal::CameraView, T>;
+} // namespace type
+
+
 } // namespace taser
 #endif //TASER_CAMERA_H
