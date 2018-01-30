@@ -15,10 +15,16 @@ namespace sensors {
 namespace internal {
 
 struct BasicImuMeta : public entity::MetaData {
-
+  size_t NumParameters() const override {
+    return 0;
+  }
 };
 
-struct ConstantBiasImuMeta : public BasicImuMeta { };
+struct ConstantBiasImuMeta : public BasicImuMeta {
+  size_t NumParameters() const override {
+    return 2;
+  }
+};
 
 // Base Imu view using CRTP to access the correct Gyroscope()/Accelerometer() methods
 // All IMU views must inherit from this one directly, and not through subclasses.

@@ -8,7 +8,9 @@ namespace entity {
 
 // Each entity type should define its own metadata struct which
 // paramstore any data that is not part of the optimization problem.
-struct MetaData { };
+struct MetaData {
+  virtual size_t NumParameters() const = 0;
+};
 
 // Views define methods and member accessors.
 // The data can come from either the metadata object, or a parameter from the dataholder.

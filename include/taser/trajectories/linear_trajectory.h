@@ -23,6 +23,10 @@ struct LinearMeta : public entity::MetaData {
   LinearMeta(double t0) : t0(t0) {};
 
   double t0; // Time origin
+
+  size_t NumParameters() const override {
+    return 1;
+  }
 };
 
 
