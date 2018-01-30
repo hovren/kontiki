@@ -58,7 +58,7 @@ int main() {
   auto basic_imu = std::make_shared<BasicImu>();
   auto constant_imu = std::make_shared<ConstantBiasImu>(Eigen::Vector3d(1, 2, 3), Eigen::Vector3d(1, 1, 1));
 
-//  gyroscope<LinearTrajectory, BasicImu>(*linear, *basic_imu);
+  gyroscope<LinearTrajectory, BasicImu>(*linear, *basic_imu);
   gyroscope<LinearTrajectory, ConstantBiasImu>(*linear, *constant_imu);
 
   return 0;

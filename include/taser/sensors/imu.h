@@ -20,22 +20,32 @@ struct BasicImuMeta : public entity::MetaData {
 
 struct ConstantBiasImuMeta : public BasicImuMeta { };
 
-template<typename T, typename MetaType>
+// Base Imu view using CRTP to access the correct Gyroscope()/Accelerometer() methods
+// All IMU views must inherit from this one directly, and not through subclasses.
+template<typename T, typename MetaType, typename Derived>
 class ImuView : public entity::EntityView<T, MetaType> {
   using Vector3 = Eigen::Matrix<T, 3, 1>;
   using Flags = trajectories::EvaluationFlags;
  public:
-  // Impot constructor
+  // Import constructor
   using entity::EntityView<T, MetaType>::EntityView;
 
-  // Standard Gyroscope function
+  // Gyroscope measurement (exploits CRTP)
   template<typename TrajectoryModel>
-  Vector3 DefaultGyroscope(const type::Trajectory<TrajectoryModel, T> &trajectory, T t) const {
-    std::cout << "ImuView::Gyroscope" << std::endl;
+  Vector3 Gyroscope(const type::Trajectory<TrajectoryModel, T> &trajectory, T t) const {
+    return static_cast<const Derived*>(this)->template Gyroscope<TrajectoryModel>(trajectory, t);
+  }
+
+ protected:
+  // Standard gyroscope function
+  template<typename TrajectoryModel>
+  Vector3 StandardGyroscope(const type::Trajectory<TrajectoryModel, T> &trajectory, T t) const {
+    std::cout << "ImuView::StandardGyroscope" << std::endl;
     auto result = trajectory.Evaluate(t, Flags::EvalOrientation | Flags::EvalAngularVelocity);
     // Rotate from world to body coordinate frame
     return result->orientation.conjugate()*result->angular_velocity;
   }
+
 };
 
 template<template<typename...> typename ViewTemplate, typename MetaType, typename StoreType>
@@ -47,15 +57,16 @@ class ImuEntity : public type::Entity<ViewTemplate, MetaType, StoreType> {
 };
 
 template<typename T, typename MetaType>
-class BasicImuView : public ImuView<T, MetaType> {
+class BasicImuView : public ImuView<T, MetaType, BasicImuView<T, MetaType>> {
   using Vector3 = Eigen::Matrix<T, 3, 1>;
-  using Base = ImuView<T, MetaType>;
+  using Base = ImuView<T, MetaType, BasicImuView<T, MetaType>>;
  public:
   using Base::ImuView;
 
   template<typename TrajectoryModel>
   Vector3 Gyroscope(const type::Trajectory<TrajectoryModel, T> &trajectory, T t) const {
-    return this->template DefaultGyroscope<TrajectoryModel>(trajectory, t);
+    std::cout << "BasicImu::Gyroscope" << std::endl;
+    return Base::template StandardGyroscope<TrajectoryModel>(trajectory, t);
   }
 };
 
@@ -76,12 +87,12 @@ class BasicImuEntity : public ImuEntity<ViewTemplate, MetaType, StoreType> {
 
 
 template<typename T, typename MetaType>
-class ConstantBiasImuView : public BasicImuView<T, MetaType> {
+class ConstantBiasImuView : public ImuView<T, MetaType, ConstantBiasImuView<T, MetaType>> {
   using Vector3 = Eigen::Matrix<T, 3, 1>;
   using Vector3Map = Eigen::Map<Vector3>;
-  using Base = BasicImuView<T, MetaType>;
+  using Base = ImuView<T, MetaType, ConstantBiasImuView<T, MetaType>>;
  public:
-  using Base::BasicImuView;
+  using Base::ImuView;
 
   Vector3Map gyro_bias() const {
     return Vector3Map(this->holder_->ParameterData(1));
@@ -95,7 +106,7 @@ class ConstantBiasImuView : public BasicImuView<T, MetaType> {
   template<typename TrajectoryModel>
   Vector3 Gyroscope(const type::Trajectory<TrajectoryModel, T> &trajectory, T t) const {
     std::cout << "ConstantBiasImuView::Gyroscope" << std::endl;
-    Vector3 base = Base::template DefaultGyroscope<TrajectoryModel>(trajectory, t);
+    Vector3 base = Base::template StandardGyroscope<TrajectoryModel>(trajectory, t);
     return  base + gyro_bias();
   }
 };
@@ -130,51 +141,14 @@ class ConstantBiasImu : public internal::ConstantBiasImuEntity<internal::Constan
                                         internal::ConstantBiasImuMeta,
                                         entity::DynamicParameterStore<double>>::ConstantBiasImuEntity;
 };
-
-//class ConstantBiasImu : public detail::ImuBase<detail::ConstantBiasImuView> {
-//  using Vector3 = Eigen::Vector3d;
-//  using Vector3Map = Eigen::Map<Vector3>;
-// public:
-//  static constexpr const char* CLASS_ID = "ConstantBiasImu";
-//
-//  ConstantBiasImu() :
-//    detail::ImuBase<detail::ConstantBiasImuView>(new trajectories::dataholders::VectorHolder<double>()) {
-//    this->holder_->AddParameter(3); // 0: Accelerometer bias
-//    this->holder_->AddParameter(3); // 1: Gyroscope bias
-//  };
-//
-//  Vector3 GyroscopeBias() const {
-//    return AsView().GyroscopeBias();
-//  }
-//
-//  void set_GyroscopeBias(const Vector3 &b) {
-//    AsView().GyroscopeBias() = b;
-//  }
-//
-//  // Add trajectory to problem for a set of time spans
-//  // Implementers can assume that the the list of time spans is ordered
-//  void AddToProblem(ceres::Problem& problem,
-//                            const time_init_t &times,
-//                            Meta& meta,
-//                            std::vector<double*> &parameter_blocks,
-//                            std::vector<size_t> &parameter_sizes) const override {
-//
-//    for (auto i : {0, 1}) {
-//      auto ptr = this->holder_->Parameter(i);
-//      int size = 3;
-//      problem.AddParameterBlock(ptr, size);
-//      parameter_blocks.push_back(ptr);
-//      parameter_sizes.push_back(size);
-//    }
-//  }
-//
-//};
-
 } // namespace sensors
 
+// Type specifier to get an Imu instance
 namespace type {
-template<typename _Entity, typename T>
-using Imu = typename entity::type::base::ForView<_Entity, sensors::internal::ImuView, T>;
+template<typename E, typename T>
+using Imu = typename sensors::internal::ImuView<T,
+                                                typename E::Meta,
+                                                typename E::template View<T, typename E::Meta>>;
 }
 
 } // namespace taser
