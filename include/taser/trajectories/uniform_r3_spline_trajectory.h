@@ -9,25 +9,22 @@
 #include "trajectory.h"
 #include "spline_base.h"
 #include "../trajectory_estimator.h"
-#include "dataholders/vectorholder.h"
 
 namespace taser {
 namespace trajectories {
 
-namespace detail {
+namespace internal {
 
 template<typename T>
-class UniformR3SplineSegmentView : public SplineSegmentViewBase<T, Eigen::Matrix<T, 3, 1>, 3> {
+class UniformR3SplineSegmentView : public SplineSegmentView<T, Eigen::Matrix<T, 3, 1>, 3> {
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
   using Vector3 = Eigen::Matrix<T, 3, 1>;
   using Vector4 = Eigen::Matrix<T, 4, 1>;
   using Vector3Map = Eigen::Map<Vector3>;
-  using BaseType = SplineSegmentViewBase<T, Eigen::Matrix<T, 3, 1>, 3>;
+  using Base = SplineSegmentView<T, Eigen::Matrix<T, 3, 1>, 3>;
  public:
-  using Meta = SplineMeta;
-
   // Import constructor
-  using BaseType::SplineSegmentViewBase;
+  using Base::SplineSegmentView;
 
   Result Evaluate(T t, int flags) const override {
     auto result = std::make_unique<TrajectoryEvaluation<T>>(flags);
@@ -100,20 +97,20 @@ class UniformR3SplineSegmentView : public SplineSegmentViewBase<T, Eigen::Matrix
   }
 };
 
-template<typename T>
-class UniformR3SplineView : public SplineViewBase<T, detail::UniformR3SplineSegmentView> {
+//template<typename T, typename MetaType>
+//class UniformR3SplineView : public SplineView<T, MetaType, UniformR3SplineSegmentView> {
+//  using Base = SplineView<T, MetaType, UniformR3SplineSegmentView>;
+// public:
+//  // Inherit constructor
+//  using Base::SplineView;
+//};
+
+} // namespace internal
+
+class UniformR3SplineTrajectory : public internal::SplineEntity<internal::UniformR3SplineSegmentView> {
  public:
-  // Inherit constructor
-  using SplineViewBase<T, detail::UniformR3SplineSegmentView>::SplineViewBase;
-};
-
-} // namespace detail
-
-class UniformR3SplineTrajectory : public detail::SplinedTrajectoryBase<detail::UniformR3SplineView> {
- public:
-  static constexpr const char* CLASS_ID = "UniformR3Spline";
-  using SplinedTrajectoryBase<detail::UniformR3SplineView>::SplinedTrajectoryBase;
-
+  static constexpr const char* ENTITY_ID = "UniformR3Spline";
+  using internal::SplineEntity<internal::UniformR3SplineSegmentView>::SplineEntity;
 };
 
 } // namespace trajectories
