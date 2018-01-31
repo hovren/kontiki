@@ -339,6 +339,12 @@ class SplineEntity : public TrajectoryEntity<SplineFactory<SegmentViewTemplate>:
     segment_entity_->AppendKnot(cp);
   }
 
+  void ExtendTo(double t, const ControlPointType& fill_value) {
+    while ((this->NumKnots() < 4) || (this->MaxTime() < t)) {
+      this->AppendKnot(fill_value);
+    }
+  }
+
   void AddToProblem(ceres::Problem &problem,
                     time_init_t times,
                     SplineMeta &meta,

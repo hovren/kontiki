@@ -42,9 +42,9 @@ void declare_spline_common(PyClass& cls) {
   cls.def("append_knot", [&](Class& self, PyCPType& cp) {
     return self.AppendKnot(Helper::ConvertPyToCpp(cp));
   });
-//  cls.def("extend_to", [&](Class& self, double t, const PyCPType& fill_value) {
-//    return self.ExtendTo(t, Helper::ConvertPyToCpp(fill_value));
-//  });
+  cls.def("extend_to", [&](Class& self, double t, const PyCPType& fill_value) {
+    return self.ExtendTo(t, Helper::ConvertPyToCpp(fill_value));
+  });
 };
 
 #endif //TASERV2_SPLINE_HELPERS_H
