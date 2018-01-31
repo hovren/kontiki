@@ -25,8 +25,12 @@ class BasicImuView : public ImuView<T, MetaType, BasicImuView<T, MetaType>> {
   using Base::ImuView;
 
   template<typename TrajectoryModel>
+  Vector3 Accelerometer(const type::Trajectory<TrajectoryModel, T> &trajectory, T t) const {
+    return Base::template StandardAccelerometer<TrajectoryModel>(trajectory, t);
+  }
+
+  template<typename TrajectoryModel>
   Vector3 Gyroscope(const type::Trajectory<TrajectoryModel, T> &trajectory, T t) const {
-    std::cout << "BasicImu::Gyroscope" << std::endl;
     return Base::template StandardGyroscope<TrajectoryModel>(trajectory, t);
   }
 };

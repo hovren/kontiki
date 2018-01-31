@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 
 #include <taser/sensors/basic_imu.h>
+#include "sensors_helper.h"
 
 namespace py = pybind11;
 
@@ -14,4 +15,6 @@ PYBIND11_MODULE(_basic_imu, m) {
   auto cls = py::class_<Class, std::shared_ptr<Class>>(m, "BasicImu");
 
   cls.def(py::init<>());
+
+  declare_imu_common<Class>(cls);
 }
