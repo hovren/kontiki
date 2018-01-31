@@ -9,6 +9,7 @@
 #include <taser/trajectories/linear_trajectory.h>
 #include <taser/trajectories/uniform_r3_spline_trajectory.h>
 #include <taser/trajectories/uniform_so3_spline_trajectory.h>
+#include <taser/trajectories/split_trajectory.h>
 
 #include <taser/trajectory_estimator.h>
 #include <taser/measurements/position_measurement.h>
@@ -31,22 +32,21 @@ void do_trajectory(const type::Trajectory<TrajectoryModel, double> &trajectory) 
 }
 
 int main() {
-  auto so3_spline = std::make_shared<UniformSO3SplineTrajectory>(1.0, 0.0);
+  auto split = std::make_shared<SplitTrajectory>(0.4, 0.25);
+
+  auto so3_spline = split->SO3Spline();
+  auto r3_spline = split->R3Spline();
 
   for (int i=0; i < 12; ++i) {
-    Eigen::Quaterniond q = Eigen::Quaterniond::UnitRandom();
-    so3_spline->AppendKnot(q);
+    r3_spline->AppendKnot(Eigen::Vector3d::Random());
+    so3_spline->AppendKnot(Eigen::Quaterniond::UnitRandom());
   }
 
-  std::cout << "AFTER: nknots=" << so3_spline->NumKnots() << std::endl;
-  std::cout << "Valid time: " << so3_spline->MinTime() << " to " << so3_spline->MaxTime() << std::endl;
   double t = 0.3;
-  std::cout << "pos: " << so3_spline->Position(t).transpose() << std::endl;
-  std::cout << "orientation: " << so3_spline->Orientation(t).coeffs().transpose() << std::endl;
+  std::cout << "Pos: " << split->Position(t).transpose() << std::endl;
+  std::cout << "orientation: " << split->Orientation(t).coeffs().transpose() << std::endl;
 
-  do_trajectory<UniformSO3SplineTrajectory>(*so3_spline);
-
-  TrajectoryEstimator<UniformSO3SplineTrajectory> estimator(so3_spline);
+  TrajectoryEstimator<SplitTrajectory> estimator(split);
 
   auto camera = std::make_shared<PinholeCamera>(1920, 1080, 0.2);
   auto v1 = std::make_shared<View>(0, 0.);
@@ -69,6 +69,5 @@ int main() {
   auto summary = estimator.Solve();
 
   std::cout << summary.FullReport() << std::endl;
-
   return 0;
 }
