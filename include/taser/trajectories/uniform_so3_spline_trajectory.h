@@ -130,7 +130,7 @@ class UniformSO3SplineSegmentView : public SplineSegmentView<T, SO3SplineControl
 
 class UniformSO3SplineTrajectory : public internal::SplineEntity<internal::UniformSO3SplineSegmentView> {
  public:
-  static constexpr const char* ENTITY_ID = "UniformSO3Spline";
+  static constexpr const char* CLASS_ID = "UniformSO3Spline";
   using internal::SplineEntity<internal::UniformSO3SplineSegmentView>::SplineEntity;
 };
 

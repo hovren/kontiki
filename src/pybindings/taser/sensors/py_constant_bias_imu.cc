@@ -13,5 +13,5 @@ PYBIND11_MODULE(_constant_bias_imu, m) {
   using Class = TS::ConstantBiasImu;
   auto cls = py::class_<Class, std::shared_ptr<Class>>(m, "ConstantBiasImu");
 
-  cls.def(py::init<>());
+  cls.def(py::init<Eigen::Vector3d, Eigen::Vector3d>());
 }

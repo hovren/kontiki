@@ -22,8 +22,8 @@ void declare_common(PyClass &cls) {
 
 
   cls.def(py::init<int, int, double>());
-  cls.def("project", &Class::template Project<double>, "Project");
-  cls.def("unproject", &Class::template Unproject<double>, "Unproject");
+  cls.def("project", &Class::Project, "Project");
+  cls.def("unproject", &Class::Unproject, "Unproject");
   cls.def_property("readout",
                    &Class::readout,
                    &Class::set_readout,
@@ -37,7 +37,7 @@ void declare_common(PyClass &cls) {
                    &Class::set_cols,
                    "Image cols");
   cls.def_property("relative_pose", [](Class &self) {
-    const C::RelativePose &pose_struct = self.relative_pose();
+    const C::RelativePose<double> &pose_struct = self.relative_pose();
     const Eigen::Quaterniond &q = pose_struct.orientation;
     Eigen::Vector4d pyq(q.w(), q.x(), q.y(), q.z());
     return PyRelPosePair(pyq, pose_struct.translation);
@@ -45,12 +45,12 @@ void declare_common(PyClass &cls) {
   [](Class &self, const PyRelPosePair &pose) {
     //Eigen::Quaterniond q(pose.first.data());
     const Eigen::Vector4d &q = pose.first;
-   self.set_relative_pose(C::RelativePose(Eigen::Quaterniond(q(0), q(1), q(2), q(3)),
+   self.set_relative_pose(C::RelativePose<double>(Eigen::Quaterniond(q(0), q(1), q(2), q(3)),
                                           pose.second));
   });
 
-  cls.def("from_trajectory", &Class::template FromTrajectory<double>);
-  cls.def("to_trajectory", &Class::template ToTrajectory<double>);
+  cls.def("from_trajectory", &Class::FromTrajectory);
+  cls.def("to_trajectory", &Class::ToTrajectory);
 }
 
 #endif //TASERV2_CAMERA_HELP_H

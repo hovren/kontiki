@@ -86,8 +86,11 @@ class AtanEntity : public PinholeEntity<ViewTemplate, MetaType, StoreType> {
   using Base = PinholeEntity<ViewTemplate, MetaType, StoreType>;
 
  public:
-  AtanEntity(size_t cols, size_t rows, double readout, double gamma, const Eigen::Vector2d& wc) :
-      Base(cols, rows, readout) {
+  // Import constructors
+  using Base::PinholeEntity;
+
+  AtanEntity(size_t rows, size_t cols, double readout, const Eigen::Matrix3d &camera_matrix, const Eigen::Vector2d& wc, double gamma) :
+      Base(rows, cols, readout, camera_matrix) {
     this->set_gamma(gamma);
     this->set_wc(wc);
   }
@@ -102,7 +105,7 @@ class AtanCamera : public internal::AtanEntity<internal::AtanView,
                              internal::AtanMeta,
                              entity::DynamicParameterStore<double>>::AtanEntity;
 
-  static constexpr const char *ENTITY_ID = "Atan";
+  static constexpr const char *CLASS_ID = "Atan";
 };
 
 } // namespace cameras

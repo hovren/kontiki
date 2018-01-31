@@ -74,13 +74,19 @@ class SplitEntity : public TrajectoryEntity<ViewTemplate, MetaType, StoreType> {
   using Base = TrajectoryEntity<ViewTemplate, MetaType, StoreType>;
  public:
 
-  SplitEntity(double r3_dt, double so3_dt, double r3_t0, double so3_t0) :
-    r3_trajectory_(std::make_shared<UniformR3SplineTrajectory>(r3_dt, r3_t0)),
-    so3_trajectory_(std::make_shared<UniformSO3SplineTrajectory>(so3_dt, so3_t0)) {
+  SplitEntity(std::shared_ptr<UniformR3SplineTrajectory> r3_trajectory,
+              std::shared_ptr<UniformSO3SplineTrajectory> so3_trajectory) :
+    r3_trajectory_(r3_trajectory),
+    so3_trajectory_(so3_trajectory) {
+
     // Bind view to concrete entities
     this->r3_view_ = r3_trajectory_;
     this->so3_view_ = so3_trajectory_;
-  }
+  };
+
+  SplitEntity(double r3_dt, double so3_dt, double r3_t0, double so3_t0) :
+    SplitEntity(std::make_shared<UniformR3SplineTrajectory>(r3_dt, r3_t0),
+                std::make_shared<UniformSO3SplineTrajectory>(so3_dt, so3_t0)) { }
 
   SplitEntity(double r3_dt, double so3_dt) :
     SplitEntity(r3_dt, so3_dt, 0.0, 0.0) { };
@@ -114,9 +120,11 @@ class SplitEntity : public TrajectoryEntity<ViewTemplate, MetaType, StoreType> {
 class SplitTrajectory : public internal::SplitEntity<internal::SplitView,
                                                      internal::SplitMeta,
                                                      entity::EmptyParameterStore<double>> {
+ public:
   using internal::SplitEntity<internal::SplitView,
                               internal::SplitMeta,
                               entity::EmptyParameterStore<double>>::SplitEntity;
+  static constexpr const char* CLASS_ID = "Split";
 };
 
 } // namespace trajectories

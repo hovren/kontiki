@@ -4,12 +4,14 @@
 #include <Eigen/Dense>
 #include <boost/hana/for_each.hpp>
 
+#include <taser/types.h>
 #include "measurements/static_rscamera_measurement.h"
 #include "sfm/landmark.h"
 #include "sfm/observation.h"
 
 #include "../type_helpers.h"
 #include "measurement_helper.h"
+
 
 namespace py = pybind11;
 
@@ -35,8 +37,8 @@ PYBIND11_MODULE(_static_rscamera_measurement, m) {
       using TrajectoryModel = typename decltype(tt)::type;
 
       // Use temporary to extract TrajectoryModel from TrajectoryImpl
-      cls.def("project", [](Class &self, const TrajectoryModel& trajectory) {
-        return self.template Project<TrajectoryModel, double>(trajectory.AsView());
+      cls.def("project", [](Class &self, const taser::type::Trajectory<TrajectoryModel, double> &trajectory) {
+        return self.template Project<TrajectoryModel>(trajectory);
         });
 
     }); // for_each(trajectory_types)

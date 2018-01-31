@@ -125,6 +125,10 @@ class TrajectoryView : public entity::EntityView<T, MetaType> {
     Result result = this->Evaluate(t, EvalPosition | EvalOrientation);
     return result->orientation * Xt + result->position;
   }
+
+  std::pair<double, double> ValidTime() const {
+    return std::make_pair(this->MinTime(), this->MaxTime());
+  };
 };
 
 

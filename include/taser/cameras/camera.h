@@ -106,7 +106,7 @@ class CameraView : public entity::EntityView<T, MetaType> {
 template<template<typename...> typename ViewTemplate, typename MetaType, typename StoreType>
 class CameraEntity : public type::Entity<ViewTemplate, MetaType, StoreType> {
  public:
-  CameraEntity(size_t cols, size_t rows, double readout) {
+  CameraEntity(size_t rows, size_t cols, double readout) {
     this->set_cols(cols);
     this->set_rows(rows);
     this->set_readout(readout);

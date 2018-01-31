@@ -24,8 +24,8 @@ PYBIND11_MODULE(_gyroscope_measurement, m) {
 
     hana::for_each(trajectory_types, [&](auto traj_type) {
       using TrajectoryModel = typename decltype(traj_type)::type;
-      cls.def("measure", [&](Class& self, std::shared_ptr<ImuModel> imu, std::shared_ptr<TrajectoryModel> trajectory) {
-        return self.template Measure<TrajectoryModel, double>(imu->AsView(), trajectory->AsView());
+      cls.def("measure", [&](Class& self, const taser::type::Trajectory<TrajectoryModel, double> &trajectory) {
+        return self.template Measure<TrajectoryModel>(trajectory);
       });
     }); // for_each(trajectory_types)
 

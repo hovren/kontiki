@@ -160,6 +160,7 @@ class ConstantBiasImu : public internal::ConstantBiasImuEntity<internal::Constan
   using internal::ConstantBiasImuEntity<internal::ConstantBiasImuView,
                                         internal::ConstantBiasImuMeta,
                                         entity::DynamicParameterStore<double>>::ConstantBiasImuEntity;
+  static constexpr const char* CLASS_ID = "ConstantBiasImu";
 };
 } // namespace sensors
 

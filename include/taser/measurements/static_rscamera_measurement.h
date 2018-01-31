@@ -75,6 +75,11 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref,
       return reproject_static<TrajectoryModel, CameraModel>(*observation->landmark()->reference(), *observation, inverse_depth, trajectory, camera);
     };
 
+    template<typename TrajectoryModel>
+    Vector2 Project(const type::Trajectory<TrajectoryModel, double> &trajectory) const {
+      return Project<TrajectoryModel, double>(trajectory, *camera, observation->landmark()->inverse_depth());
+    };
+
     template<typename TrajectoryModel, typename T>
     Eigen::Matrix<T, 2, 1> Error(const type::Trajectory<TrajectoryModel, T> &trajectory,
                                  const type::Camera<CameraModel, T> &camera,
@@ -82,6 +87,11 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref,
       Eigen::Matrix<T,2,1> y_hat = this->Project<TrajectoryModel, T>(trajectory, camera, inverse_depth);
       return observation->uv().cast<T>() - y_hat;
     }
+
+    template<typename TrajectoryModel>
+    Vector2 Error(const type::Trajectory<TrajectoryModel, double> &trajectory) const {
+      return Error<TrajectoryModel, double>(trajectory, *camera, observation->landmark()->inverse_depth());
+    };
 
    protected:
 

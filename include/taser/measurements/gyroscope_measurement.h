@@ -27,9 +27,19 @@ class GyroscopeMeasurement {
     return imu.template Gyroscope<TrajectoryModel>(trajectory, T(t));
   };
 
+  template<typename TrajectoryModel>
+  Vector3 Measure(const type::Trajectory<TrajectoryModel, double> &trajectory) const {
+    return Measure<TrajectoryModel, double>(*imu_, trajectory);
+  };
+
   template<typename TrajectoryModel, typename T>
   Eigen::Matrix<T, 3, 1> Error(const type::Imu<ImuModel, T> &imu, const type::Trajectory<TrajectoryModel, T> &trajectory) const {
     return w.cast<T>() - Measure<TrajectoryModel, T>(imu, trajectory);
+  }
+
+  template<typename TrajectoryModel>
+  Vector3 Error(const type::Trajectory<TrajectoryModel, double> &trajectory) const {
+    return Error<TrajectoryModel, double>(*imu_, trajectory);
   }
 
   // Data

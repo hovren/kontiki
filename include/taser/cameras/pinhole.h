@@ -10,6 +10,7 @@
 #include <Eigen/Dense>
 
 #include "camera.h"
+#include <entity/paramstore/dynamic_pstore.h>
 
 namespace taser {
 namespace cameras {
@@ -26,10 +27,11 @@ struct PinholeMeta : public CameraMeta {
 
 template<typename T, typename MetaType>
 class PinholeView : public CameraView<T, MetaType> {
-  using CameraMatrix = Eigen::Matrix<T, 3, 3>;
   using Vector3 = Eigen::Matrix<T, 3, 1>;
   using Vector2 = Eigen::Matrix<T, 2, 1>;
  public:
+  using CameraMatrix = Eigen::Matrix<T, 3, 3>;
+
   // Inherit constructors
   using CameraView<T, MetaType>::CameraView;
 
@@ -56,10 +58,15 @@ template<template<typename...> typename ViewTemplate, typename MetaType, typenam
 class PinholeEntity : public CameraEntity<ViewTemplate, MetaType, StoreType> {
   using Base = CameraEntity<ViewTemplate, MetaType, StoreType>;
  public:
-  // Inherit constructors
-  PinholeEntity(size_t cols, size_t rows, double readout) :
-      Base(cols, rows, readout) {
-    this->set_camera_matrix(Eigen::Matrix3d::Identity());
+  using CameraMatrix = Eigen::Matrix3d;
+
+  PinholeEntity(size_t rows, size_t cols, double readout, const CameraMatrix &camera_matrix) :
+    Base(rows, cols, readout) {
+    this->set_camera_matrix(camera_matrix);
+  }
+
+  PinholeEntity(size_t rows, size_t cols, double readout) :
+      PinholeEntity(rows, cols, readout, Eigen::Matrix3d::Identity()) {
   }
 
   void AddToProblem(ceres::Problem &problem,
@@ -82,7 +89,7 @@ class PinholeCamera : public internal::PinholeEntity<internal::PinholeView,
                                  internal::PinholeMeta,
                                  entity::DynamicParameterStore<double>>::PinholeEntity;
 
-  static constexpr const char *ENTITY_ID = "Pinhole";
+  static constexpr const char *CLASS_ID = "Pinhole";
 };
 
 } // namespace cameras
