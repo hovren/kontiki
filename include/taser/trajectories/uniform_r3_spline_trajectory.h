@@ -17,13 +17,7 @@ namespace internal {
 
 template<typename T>
 struct R3SplineControlPointInfo : public ControlPointInfo<Eigen::Matrix<T, 3, 1>, 3> {
-  void Validate(const Eigen::Matrix<T, 3, 1> &type1) override {
-    // Do nothing
-  }
-
-  ceres::LocalParameterization *parameterization() const override {
-    return nullptr;
-  }
+  // No validation or parameterization required
 };
 
 template<typename T>

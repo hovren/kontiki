@@ -94,9 +94,10 @@ Eigen::Matrix<T, 3, 1> angular_velocity(const Eigen::Quaternion<T> &q, const Eig
   return w.vec();
 };
 
-bool IsUnitQuaternion(const Eigen::Quaterniond& q) {
-  auto err = std::abs(q.norm() - 1);
-  return err < math::eps_unit_check;
+template<typename T>
+bool IsUnitQuaternion(const Eigen::Quaternion<T>& q) {
+  auto err = ceres::abs(q.norm() - T(1));
+  return err < T(math::eps_unit_check);
 }
 
 } // namespace math

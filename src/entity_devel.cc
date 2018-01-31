@@ -8,6 +8,7 @@
 #include <entity/entity.h>
 #include <taser/trajectories/linear_trajectory.h>
 #include <taser/trajectories/uniform_r3_spline_trajectory.h>
+#include <taser/trajectories/uniform_so3_spline_trajectory.h>
 
 #include <taser/trajectory_estimator.h>
 #include <taser/measurements/position_measurement.h>
@@ -30,33 +31,22 @@ void do_trajectory(const type::Trajectory<TrajectoryModel, double> &trajectory) 
 }
 
 int main() {
-  auto r3_spline = std::make_shared<UniformR3SplineTrajectory>(1.0, 0.0);
-  std::cout << "BEFORE: nknots=" << r3_spline->NumKnots() << std::endl;
-  for (auto& cp : {
-      Eigen::Vector3d(1, 1, 1),
-      Eigen::Vector3d(1, 2, 3),
-      Eigen::Vector3d(-1, 2, 5),
-      Eigen::Vector3d(-1, 7, -2),
-      Eigen::Vector3d(1, 1, 1),
-      Eigen::Vector3d(1, 2, 3),
-      Eigen::Vector3d(-1, 2, 5),
-      Eigen::Vector3d(-1, 7, -2),
-      Eigen::Vector3d(1, 1, 1),
-      Eigen::Vector3d(1, 2, 3),
-      Eigen::Vector3d(-1, 2, 5),
-      Eigen::Vector3d(-1, 7, -2)
-  }) {
-    r3_spline->AppendKnot(cp);
+  auto so3_spline = std::make_shared<UniformSO3SplineTrajectory>(1.0, 0.0);
+
+  for (int i=0; i < 12; ++i) {
+    Eigen::Quaterniond q = Eigen::Quaterniond::UnitRandom();
+    so3_spline->AppendKnot(q);
   }
 
-  std::cout << "AFTER: nknots=" << r3_spline->NumKnots() << std::endl;
-  std::cout << "Valid time: " << r3_spline->MinTime() << " to " << r3_spline->MaxTime() << std::endl;
+  std::cout << "AFTER: nknots=" << so3_spline->NumKnots() << std::endl;
+  std::cout << "Valid time: " << so3_spline->MinTime() << " to " << so3_spline->MaxTime() << std::endl;
   double t = 0.3;
-  std::cout << "pos: " << r3_spline->Position(t).transpose() << std::endl;
+  std::cout << "pos: " << so3_spline->Position(t).transpose() << std::endl;
+  std::cout << "orientation: " << so3_spline->Orientation(t).coeffs().transpose() << std::endl;
 
-  do_trajectory<UniformR3SplineTrajectory>(*r3_spline);
+  do_trajectory<UniformSO3SplineTrajectory>(*so3_spline);
 
-  TrajectoryEstimator<UniformR3SplineTrajectory> estimator(r3_spline);
+  TrajectoryEstimator<UniformSO3SplineTrajectory> estimator(so3_spline);
 
   auto camera = std::make_shared<PinholeCamera>(1920, 1080, 0.2);
   auto v1 = std::make_shared<View>(0, 0.);

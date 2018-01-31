@@ -13,30 +13,35 @@
 
 namespace taser {
 namespace trajectories {
-namespace detail {
+namespace internal {
 
 template<typename T>
-class UnitQuaternionValidator {
- public:
-  static void Validate(const Eigen::Quaternion<T> &cp) {
+struct SO3SplineControlPointInfo : public ControlPointInfo<Eigen::Quaternion<T>, 4> {
+  SO3SplineControlPointInfo() :
+    parameterization_(new ceres::EigenQuaternionParameterization) { };
+
+  void Validate(const Eigen::Quaternion<T> &cp) const override {
     if (!math::IsUnitQuaternion(cp)) {
       throw std::domain_error("Control point must be unit quaternion!");
     }
-  };
+  }
+  ceres::LocalParameterization *parameterization() const override {
+    return parameterization_.get();
+  }
+
+  std::unique_ptr<ceres::EigenQuaternionParameterization> parameterization_;
 };
 
 template <typename T>
-class UniformSO3SplineSegmentView : public SplineSegmentViewBase<T, Eigen::Quaternion<T>, 4, UnitQuaternionValidator<T>> {
+class UniformSO3SplineSegmentView : public SplineSegmentView<T, SO3SplineControlPointInfo<T>> {
   using Quaternion = Eigen::Quaternion<T>;
   using QuaternionMap = Eigen::Map<Quaternion>;
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
   using Vector4 = Eigen::Matrix<T, 4, 1>;
-  using BaseType = SplineSegmentViewBase<T, Eigen::Quaternion<T>, 4, UnitQuaternionValidator<T>>;
+  using Base = SplineSegmentView<T, SO3SplineControlPointInfo<T>>;
  public:
-  using BaseType::Meta;
-
-  // Import constructor
-  using BaseType::SplineSegmentViewBase;
+  // Inherit constructors
+  using Base::SplineSegmentView;
 
   Result Evaluate(T t, int flags) const override {
     auto result = std::make_unique<TrajectoryEvaluation<T>>(flags);
@@ -121,23 +126,12 @@ class UniformSO3SplineSegmentView : public SplineSegmentViewBase<T, Eigen::Quate
 
 };
 
-template<typename T>
-class UniformSO3SplineView : public SplineViewBase<T, UniformSO3SplineSegmentView> {
+} // namespace internal
+
+class UniformSO3SplineTrajectory : public internal::SplineEntity<internal::UniformSO3SplineSegmentView> {
  public:
-  // Inherit constructor
-  using SplineViewBase<T, UniformSO3SplineSegmentView>::SplineViewBase;
-
-};
-
-} // namespace detail
-
-class UniformSO3SplineTrajectory : public detail::SplinedTrajectoryBase<detail::UniformSO3SplineView> {
- public:
-  static constexpr const char* CLASS_ID = "UniformSO3Spline";
-  using SplinedTrajectoryBase<detail::UniformSO3SplineView>::SplinedTrajectoryBase;
-  UniformSO3SplineTrajectory(double dt, double t0) :
-      SplinedTrajectoryBase<detail::UniformSO3SplineView>::SplinedTrajectoryBase(dt, t0,
-                                                                                 std::make_unique<ceres::EigenQuaternionParameterization>()) {};
+  static constexpr const char* ENTITY_ID = "UniformSO3Spline";
+  using internal::SplineEntity<internal::UniformSO3SplineSegmentView>::SplineEntity;
 };
 
 } // namespace trajectories

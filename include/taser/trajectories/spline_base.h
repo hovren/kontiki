@@ -97,8 +97,13 @@ struct ControlPointInfo {
   using type = Type;
   const int size = Size;
 
-  virtual void Validate(const Type&) = 0;
-  virtual ceres::LocalParameterization* parameterization() const = 0;
+  virtual void Validate(const Type&) const {
+    // Do nothing
+  }
+
+  virtual ceres::LocalParameterization* parameterization() const {
+    return nullptr; // No parameterization
+  }
 };
 
 template<
