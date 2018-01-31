@@ -92,12 +92,6 @@ struct SplineMeta : public entity::MetaData {
   }
 };
 
-template<typename T>
-class AlwaysTrueValidator {
- public:
-  static void Validate(const T&) {};
-};
-
 template<typename Type, int Size>
 struct ControlPointInfo {
   using type = Type;
@@ -178,12 +172,10 @@ class SplineView : public TrajectoryView<T, MetaType> {
 
   SplineView(const MetaType &meta, entity::ParameterStore<T> *holder) :
       Base(meta, holder) {
-    std::cout << "SplineView::SplineView (with meta and holder)" << std::endl;
     size_t offset = 0;
     for (auto &segment_meta : meta.segments) {
       size_t length = segment_meta.NumParameters();
       segments.push_back(std::make_shared<SegmentView>(segment_meta, holder->Slice(offset, length)));
-      std::cout << "SplineView: Adding view" << std::endl;
       offset += length;
     }
   }
@@ -239,7 +231,6 @@ class SplineView : public TrajectoryView<T, MetaType> {
       return segments[0];
     }
     else {
-      std::cout << "Number of segments: " << segments.size() << std::endl;
       throw std::runtime_error("Spline had more than one segment!");
     }
   }
@@ -249,7 +240,6 @@ class SplineView : public TrajectoryView<T, MetaType> {
       return segments[0];
     }
     else {
-      std::cout << "Number of segments: " << segments.size() << std::endl;
       throw std::runtime_error("Spline had more than one segment!");
     }
   }
@@ -306,6 +296,11 @@ struct SplineFactory {
       // 3) Update segment meta
       this->meta_.n += 1;
     }
+
+    // Allow the owning Spline Entity to access parameters
+    entity::ParameterInfo<double> Parameter(size_t i) {
+      return this->holder_->Parameter(i);
+    }
   };
 };
 
@@ -321,7 +316,6 @@ class SplineEntity : public TrajectoryEntity<SplineFactory<SegmentViewTemplate>:
   SplineEntity(double dt, double t0, ceres::LocalParameterization* control_point_parameterization) :
       segment_entity_(std::make_shared<SegmentType>(dt, t0)),
       control_point_parameterization_(control_point_parameterization) {
-    std::cout << "SplineEntity::SplineEntity (hidden)" << std::endl;
     this->segments.push_back(segment_entity_);
   };
 
@@ -340,68 +334,12 @@ class SplineEntity : public TrajectoryEntity<SplineFactory<SegmentViewTemplate>:
     segment_entity_->AppendKnot(cp);
   }
 
-
- protected:
   void AddToProblem(ceres::Problem &problem,
                     time_init_t times,
                     SplineMeta &meta,
                     std::vector<entity::ParameterInfo<double>> &parameters) const override {
-    throw std::runtime_error("SplineEntity::AddToProblem not implemented yet!");
-  }
-
-  std::shared_ptr<SegmentType> segment_entity_;
-  std::unique_ptr<ceres::LocalParameterization> control_point_parameterization_;
-};
-
-#if 0
-
-template<template<typename> typename ViewTemplate>
-class SplinedTrajectoryBase : public TrajectoryBase<ViewTemplate> {
- protected:
-  // Hidden constructor, not intended for user code
-  SplinedTrajectoryBase(double dt, double t0, std::unique_ptr<ceres::LocalParameterization> local_parameterization) :
-      TrajectoryBase<ViewTemplate>(new dataholders::VectorHolder<double>()),
-      local_parameterization_(std::move(local_parameterization)) {
-    this->meta_.segments.push_back(detail::SplineSegmentMeta(dt, t0));
-  };
-
- public:
-  using Meta = typename TrajectoryBase<ViewTemplate>::Meta;
-  using ControlPointType = typename ViewTemplate<double>::ControlPointType;
-  using ControlPointMap = typename ViewTemplate<double>::ControlPointMap;
-  using ControlPointValidator = typename ViewTemplate<double>::ControlPointValidator;
-  const static int ControlPointSize = ViewTemplate<double>::ControlPointSize;
-
-  SplinedTrajectoryBase(double dt, double t0) :
-    SplinedTrajectoryBase(dt, t0, nullptr) { };
-
-  SplinedTrajectoryBase(double dt) :
-      SplinedTrajectoryBase(dt, 0.0) { };
-
-  SplinedTrajectoryBase() :
-      SplinedTrajectoryBase(1.0) { };
-
-  double t0() const {
-    return this->AsView().t0();
-  }
-
-  double dt() const {
-    return this->AsView().dt();
-  }
-
-  size_t NumKnots() const {
-    return this->AsView().NumKnots();
-  }
-
-  void AddToProblem(ceres::Problem& problem,
-                    const time_init_t &times,
-                    Meta& meta,
-                    std::vector<double*> &parameter_blocks,
-                    std::vector<size_t> &parameter_sizes) const {
-
-    auto view = this->AsView();
-    double master_dt = view.dt();
-    double master_t0 = view.t0();
+    double master_dt = segment_entity_->dt();
+    double master_t0 = segment_entity_->t0();
     int current_segment_start = 0;
     int current_segment_end = -1; // Negative signals no segment created yet
 
@@ -410,13 +348,13 @@ class SplinedTrajectoryBase : public TrajectoryBase<ViewTemplate> {
 
       int i1, i2;
       double u_notused;
-      view.CalculateIndexAndInterpolationAmount(tt.first, i1, u_notused);
-      view.CalculateIndexAndInterpolationAmount(tt.second, i2, u_notused);
+      segment_entity_->CalculateIndexAndInterpolationAmount(tt.first, i1, u_notused);
+      segment_entity_->CalculateIndexAndInterpolationAmount(tt.second, i2, u_notused);
 
       // Create new segment, or extend the current one
       if (i1 > current_segment_end) {
         double segment_t0 = master_t0 + master_dt * i1;
-        meta.segments.push_back(detail::SplineSegmentMeta(master_dt, segment_t0));
+        meta.segments.push_back(SplineSegmentMeta(master_dt, segment_t0));
         current_segment_start = i1;
       }
       else {
@@ -427,11 +365,9 @@ class SplinedTrajectoryBase : public TrajectoryBase<ViewTemplate> {
 
       // Add parameters and update currently active segment meta
       for (int i=i1; i < (i2 + 4); ++i) {
-        auto ptr = this->holder_->Parameter(i);
-        size_t size = ControlPointSize;
-        parameter_blocks.push_back(ptr);
-        parameter_sizes.push_back(size);
-        problem.AddParameterBlock(ptr, size, this->local_parameterization_.get());
+        auto pi = this->segment_entity_->Parameter(i);
+        parameters.push_back(pi);
+        problem.AddParameterBlock(pi.data, pi.size, pi.parameterization);
         current_segment_meta.n += 1;
       }
 
@@ -439,41 +375,12 @@ class SplinedTrajectoryBase : public TrajectoryBase<ViewTemplate> {
     } // for times
   }
 
-  ControlPointMap MutableControlPoint(size_t i) {
-    return this->AsView().MutableControlPoint(i);
-  }
-
-  const ControlPointMap ControlPoint(size_t i) const {
-    return this->AsView().ControlPoint(i);
-  }
-
-  void AppendKnot(const ControlPointType& cp) {
-    ControlPointValidator::Validate(cp); // Or throw exception
-    auto i = this->holder_->AddParameter(ControlPointSize);
-    this->AsView().MutableControlPoint(i) = cp;
-    // FIXME: Should check for single segment or give error
-    this->meta_.segments[0].n += 1;
-  }
-
-  void ExtendTo(double t, const ControlPointType& fill_value) {
-    while ((this->NumKnots() < 4) || (this->MaxTime() < t)) {
-      this->AppendKnot(fill_value);
-    }
-  }
-
-  const detail::SplineSegmentMeta& ConcreteSegmentMetaOrError() const {
-    if (this->meta_.segments.size() == 1)
-      return this->meta_.segments[0];
-    else
-      throw std::logic_error("Concrete spline had multiple segments. This should not happen!");
-  }
-
  protected:
-  std::unique_ptr<ceres::LocalParameterization> local_parameterization_;
+  std::shared_ptr<SegmentType> segment_entity_;
+  std::unique_ptr<ceres::LocalParameterization> control_point_parameterization_;
 };
-#endif
 
-} // namespace detail
+} // namespace internal
 } // namespace trajectories
 } // namespace taser
 
