@@ -22,15 +22,7 @@ PYBIND11_MODULE(_gyroscope_measurement, m) {
     cls.def(py::init<std::shared_ptr<ImuModel>, double, const Eigen::Vector3d &, double>());
     cls.def(py::init<std::shared_ptr<ImuModel>, double, const Eigen::Vector3d &>());
 
-    hana::for_each(trajectory_types, [&](auto traj_type) {
-      using TrajectoryModel = typename decltype(traj_type)::type;
-      cls.def("measure", [&](Class& self, const taser::type::Trajectory<TrajectoryModel, double> &trajectory) {
-        return self.template Measure<TrajectoryModel>(trajectory);
-      });
-    }); // for_each(trajectory_types)
-
-    // FIXME: Can't declare Measure and Error before fixing issues with multiple arguments
-//    declare_measurement_common<Class>(cls);
+    declare_measurement_common<Class>(cls);
   }); // for_each(imu_types)
 
 }

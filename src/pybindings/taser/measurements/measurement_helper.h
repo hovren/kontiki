@@ -14,13 +14,13 @@ static void declare_measurement_common(PyClass &cls) {
   hana::for_each(trajectory_types, [&](auto t) {
     using TrajectoryModel = typename decltype(t)::type;
 
-    cls.def("error", [](Class &self, const taser::type::Trajectory<TrajectoryModel, double>& trajectory) {
+    cls.def("error", [](Class &self, const TrajectoryModel& trajectory) {
       return self.template Error<TrajectoryModel>(trajectory);
     });
 
-//    cls.def("measure", [](Class &self, const taser::type::Trajectory<TrajectoryModel, double>& trajectory){
-//      return self.template Measure<TrajectoryModel>(trajectory);
-//    });
+    cls.def("measure", [](Class &self, const TrajectoryModel& trajectory){
+      return self.template Measure<TrajectoryModel>(trajectory);
+    });
   });
 };
 

@@ -55,7 +55,8 @@ def test_position_measurements(trajectory_example):
 def test_gyroscope_measurements(trajectory_example, imu):
     trajectory, example_data = trajectory_example
 
+    # Currently fails for ConstantBiasImu since we don't take bias into account
     for t, w in example_data.angular_velocity:
         m = GyroscopeMeasurement(imu, t, w)
-        w_hat = m.measure(imu, trajectory)
+        w_hat = m.measure(trajectory)
         np.testing.assert_almost_equal(w_hat, w)

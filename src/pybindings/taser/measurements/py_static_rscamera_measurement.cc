@@ -37,7 +37,7 @@ PYBIND11_MODULE(_static_rscamera_measurement, m) {
       using TrajectoryModel = typename decltype(tt)::type;
 
       // Use temporary to extract TrajectoryModel from TrajectoryImpl
-      cls.def("project", [](Class &self, const taser::type::Trajectory<TrajectoryModel, double> &trajectory) {
+      cls.def("project", [](Class &self, const TrajectoryModel &trajectory) {
         return self.template Project<TrajectoryModel>(trajectory);
         });
 

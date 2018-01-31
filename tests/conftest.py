@@ -97,7 +97,12 @@ imu_classes = [
 @pytest.fixture(params=imu_classes)
 def imu(request):
     cls = request.param
-    return cls()
+    if cls == BasicImu:
+        return cls()
+    elif cls == ConstantBiasImu:
+        abias = np.random.uniform(-0.1, 0.1, size=3)
+        gbias = np.random.uniform(-0.1, 0.1, size=3)
+        return cls(abias, gbias)
 
 measurement_classes = [
     PositionMeasurement,

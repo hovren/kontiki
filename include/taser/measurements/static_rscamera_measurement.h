@@ -93,6 +93,11 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref,
       return Error<TrajectoryModel, double>(trajectory, *camera, observation->landmark()->inverse_depth());
     };
 
+    template<typename TrajectoryModel>
+    Vector2 Measure(const type::Trajectory<TrajectoryModel, double> &trajectory) const {
+      return Project<TrajectoryModel, double>(trajectory, *camera, observation->landmark()->inverse_depth());
+    };
+
    protected:
 
     template<typename TrajectoryModel>
