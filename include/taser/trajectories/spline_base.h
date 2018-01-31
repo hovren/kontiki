@@ -98,17 +98,22 @@ class AlwaysTrueValidator {
   static void Validate(const T&) {};
 };
 
+template<typename Type, int Size>
+struct ControlPointInfo {
+  using type = Type;
+  const int size = Size;
+
+  virtual void Validate(const Type&) = 0;
+  virtual ceres::LocalParameterization* parameterization() const = 0;
+};
+
 template<
     typename T,
-    typename _ControlPointType,
-    int _ControlPointSize,
-    typename _ControlPointValidator = AlwaysTrueValidator<_ControlPointType>>
+    typename _ControlPointInfo>
 class SplineSegmentView : public TrajectoryView<T, SplineSegmentMeta> {
  public:
-  using ControlPointType = _ControlPointType;
+  using ControlPointType = typename _ControlPointInfo::type;
   using ControlPointMap = Eigen::Map<ControlPointType>;
-  using ControlPointValidator = _ControlPointValidator;
-  const static int ControlPointSize = _ControlPointSize;
 
   // Inherit constructor
   using TrajectoryView<T, SplineSegmentMeta>::TrajectoryView;
@@ -157,6 +162,8 @@ class SplineSegmentView : public TrajectoryView<T, SplineSegmentMeta> {
   int PotentiallyUnsafeFloor(const ceres::Jet<Scalar, N>& x) const {
     return static_cast<int>(std::floor(x.a));
   };
+
+  _ControlPointInfo control_point_info_;
 };
 
 
@@ -168,11 +175,7 @@ class SplineView : public TrajectoryView<T, MetaType> {
  public:
   using ControlPointType = typename SegmentView::ControlPointType;
   using ControlPointMap = typename SegmentView::ControlPointMap;
-  using ControlPointValidator = typename SegmentView::ControlPointValidator;
-  const static int ControlPointSize = SegmentView::ControlPointSize;
 
-  // Inherit Constructor
-  // using TrajectoryView<T, SplineMeta>::TrajectoryView;
   SplineView(const MetaType &meta, entity::ParameterStore<T> *holder) :
       Base(meta, holder) {
     std::cout << "SplineView::SplineView (with meta and holder)" << std::endl;
@@ -277,7 +280,6 @@ struct SplineFactory {
                                                  entity::DynamicParameterStore<double>> {
     using Base = TrajectoryEntity<SegmentView, SplineSegmentMeta, entity::DynamicParameterStore<double>>;
     using ControlPointType = typename Base::ControlPointType;
-    using ControlPointValidator = typename Base::ControlPointValidator;
 
     SegmentEntity(double dt, double t0) {
       this->meta_.dt = dt;
@@ -294,17 +296,16 @@ struct SplineFactory {
 
     void AppendKnot(const ControlPointType& cp) {
       // 1) Validate the control point
-      ControlPointValidator::Validate(cp);
+      this->control_point_info_.Validate(cp);
 
       // 2) Create parameter data and set its value
-      // FIXME: Parameterization
-      auto i = this->holder_->AddParameter(Base::ControlPointSize);
+      auto i = this->holder_->AddParameter(this->control_point_info_.size,
+                                           this->control_point_info_.parameterization());
       this->MutableControlPoint(i) = cp;
 
       // 3) Update segment meta
       this->meta_.n += 1;
     }
-
   };
 };
 

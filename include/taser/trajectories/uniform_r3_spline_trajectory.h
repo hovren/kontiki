@@ -16,12 +16,23 @@ namespace trajectories {
 namespace internal {
 
 template<typename T>
-class UniformR3SplineSegmentView : public SplineSegmentView<T, Eigen::Matrix<T, 3, 1>, 3> {
+struct R3SplineControlPointInfo : public ControlPointInfo<Eigen::Matrix<T, 3, 1>, 3> {
+  void Validate(const Eigen::Matrix<T, 3, 1> &type1) override {
+    // Do nothing
+  }
+
+  ceres::LocalParameterization *parameterization() const override {
+    return nullptr;
+  }
+};
+
+template<typename T>
+class UniformR3SplineSegmentView : public SplineSegmentView<T, R3SplineControlPointInfo<T>> {
   using Result = std::unique_ptr<TrajectoryEvaluation<T>>;
   using Vector3 = Eigen::Matrix<T, 3, 1>;
   using Vector4 = Eigen::Matrix<T, 4, 1>;
   using Vector3Map = Eigen::Map<Vector3>;
-  using Base = SplineSegmentView<T, Eigen::Matrix<T, 3, 1>, 3>;
+  using Base = SplineSegmentView<T, R3SplineControlPointInfo<T>>;
  public:
   // Import constructor
   using Base::SplineSegmentView;
@@ -47,7 +58,7 @@ class UniformR3SplineSegmentView : public SplineSegmentView<T, Eigen::Matrix<T, 
     Vector3 &p = result->position;
     Vector3 &v = result->velocity;
     Vector3 &a = result->acceleration;
-    T dt_inv = T(1) / this->dt();
+    T dt_inv = T(1)/this->dt();
 
     if (result->needs.Position() || result->needs.Velocity())
       u2 = ceres::pow(u, 2);
@@ -56,34 +67,33 @@ class UniformR3SplineSegmentView : public SplineSegmentView<T, Eigen::Matrix<T, 
 
     if (result->needs.Position()) {
       Up = Vector4(T(1), u, u2, u3);
-      Bp = Up.transpose() * M.cast<T>();
+      Bp = Up.transpose()*M.cast<T>();
       p.setZero();
     }
 
     if (result->needs.Velocity()) {
-      Uv = dt_inv * Vector4(T(0), T(1), T(2) * u, T(3) * u2);
-      Bv = Uv.transpose() * M.cast<T>();
+      Uv = dt_inv*Vector4(T(0), T(1), T(2)*u, T(3)*u2);
+      Bv = Uv.transpose()*M.cast<T>();
       v.setZero();
     }
 
     if (result->needs.Acceleration()) {
-      Ua = ceres::pow(dt_inv, 2) *  Vector4(T(0), T(0), T(2), T(6) * u);
-      Ba = Ua.transpose() * M.cast<T>();
+      Ua = ceres::pow(dt_inv, 2)*Vector4(T(0), T(0), T(2), T(6)*u);
+      Ba = Ua.transpose()*M.cast<T>();
       a.setZero();
     }
 
-
-    for (int i=i0; i < i0 + 4; ++i) {
+    for (int i = i0; i < i0 + 4; ++i) {
       Vector3Map cp = this->ControlPoint(i);
 
       if (flags & EvalPosition)
-        p += Bp(i - i0) * cp;
+        p += Bp(i - i0)*cp;
 
       if (flags & EvalVelocity)
-        v += Bv(i - i0) * cp;
+        v += Bv(i - i0)*cp;
 
       if (flags & EvalAcceleration)
-        a += Ba(i - i0) * cp;
+        a += Ba(i - i0)*cp;
 
     }
 
@@ -97,15 +107,8 @@ class UniformR3SplineSegmentView : public SplineSegmentView<T, Eigen::Matrix<T, 
   }
 };
 
-//template<typename T, typename MetaType>
-//class UniformR3SplineView : public SplineView<T, MetaType, UniformR3SplineSegmentView> {
-//  using Base = SplineView<T, MetaType, UniformR3SplineSegmentView>;
-// public:
-//  // Inherit constructor
-//  using Base::SplineView;
-//};
-
 } // namespace internal
+
 
 class UniformR3SplineTrajectory : public internal::SplineEntity<internal::UniformR3SplineSegmentView> {
  public:
