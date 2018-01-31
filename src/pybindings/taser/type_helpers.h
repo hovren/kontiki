@@ -16,6 +16,9 @@ namespace hana = boost::hana;
 #include "cameras/pinhole.h"
 #include "cameras/atan.h"
 
+#include "sensors/basic_imu.h"
+#include "sensors/constant_bias_imu.h"
+
 #include "measurements/static_rscamera_measurement.h"
 #include "measurements/position_measurement.h"
 #include "measurements/gyroscope_measurement.h"

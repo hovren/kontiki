@@ -3,7 +3,7 @@
 
 #include <Eigen/Dense>
 
-#include <taser/sensors/imu.h>
+#include <taser/sensors/constant_bias_imu.h>
 
 namespace py = pybind11;
 
