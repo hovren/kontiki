@@ -113,6 +113,7 @@ ext_modules = [
     SensorExtension('_constant_bias_imu'),
     MeasurementExtension('_position_measurement'),
     MeasurementExtension('_static_rscamera_measurement'),
+    MeasurementExtension('_accelerometer_measurement'),
     MeasurementExtension('_gyroscope_measurement'),
 ]
 

@@ -6,7 +6,7 @@ from fixtures.camera_fixtures import *
 from fixtures.sfm_fixtures import *
 
 from taser.trajectories import LinearTrajectory, UniformR3SplineTrajectory, UniformSO3SplineTrajectory, SplitTrajectory
-from taser.measurements import PositionMeasurement, StaticRsCameraMeasurement, GyroscopeMeasurement
+from taser.measurements import PositionMeasurement, StaticRsCameraMeasurement, GyroscopeMeasurement, AccelerometerMeasurement
 from taser.sensors import BasicImu, ConstantBiasImu
 from taser.utils import safe_time_span
 
@@ -106,6 +106,7 @@ def imu(request):
 
 measurement_classes = [
     PositionMeasurement,
+    AccelerometerMeasurement,
     GyroscopeMeasurement,
     StaticRsCameraMeasurement,
 ]
@@ -126,7 +127,7 @@ def camera_measurements(request, small_sfm):
     return measurements
 
 
-@pytest.fixture(params=[GyroscopeMeasurement])
+@pytest.fixture(params=[AccelerometerMeasurement, GyroscopeMeasurement])
 def imu_measurements(request, imu, trajectory):
     cls = request.param
     length = 5.

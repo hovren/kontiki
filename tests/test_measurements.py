@@ -1,9 +1,11 @@
 import pytest
 import numpy as np
 
-from taser.measurements import StaticRsCameraMeasurement, PositionMeasurement, GyroscopeMeasurement
+from taser.measurements import StaticRsCameraMeasurement, PositionMeasurement, GyroscopeMeasurement, AccelerometerMeasurement
 from taser.rotations import quat_to_rotation_matrix
 from taser.sfm import Landmark, View
+from taser.utils import safe_time_span
+from taser.rotations import quat_to_rotation_matrix
 
 from trajectories.test_general import trajectory_example
 
@@ -64,3 +66,26 @@ def test_gyroscope_measurements(trajectory_example, imu):
         except AttributeError:
             pass # No bias to remove
         np.testing.assert_almost_equal(w_hat, w)
+
+
+def test_accelerometer_measurements(trajectory, imu):
+    times = np.linspace(*safe_time_span(trajectory, 3.0), num=10, endpoint=False)
+
+    def true_acc(t):
+        q = trajectory.orientation(t)
+        acc_world = trajectory.acceleration(t)
+        R = quat_to_rotation_matrix(q)
+        gravity = np.array([0, 0, 9.80665])
+        acc = R.T @ (acc_world - gravity)
+        return acc
+
+    # Currently fails for ConstantBiasImu since we don't take bias into account
+    for t in times:
+        acc = true_acc(t)
+        m = AccelerometerMeasurement(imu, t, acc)
+        acc_hat = m.measure(trajectory)
+        try:
+            acc_hat -= imu.accelerometer_bias
+        except AttributeError:
+            pass # No bias to remove
+        np.testing.assert_almost_equal(acc_hat, acc)

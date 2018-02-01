@@ -6,6 +6,7 @@
 #define TASERV2_TYPE_HELPERS_H
 
 #include <boost/hana.hpp>
+#include <taser/measurements/accelerometer_measurement.h>
 namespace hana = boost::hana;
 
 #include "trajectories/linear_trajectory.h"
@@ -22,6 +23,7 @@ namespace hana = boost::hana;
 #include "measurements/static_rscamera_measurement.h"
 #include "measurements/position_measurement.h"
 #include "measurements/gyroscope_measurement.h"
+#include "measurements/accelerometer_measurement.h"
 
 // Add template-of-template support to hana
 // Thanks to Jason Rice!
@@ -97,7 +99,8 @@ static auto camera_measurements = hana::ap(
 
 // Define IMU measurements
 static auto imu_meas_templates = hana::tuple_t<
-    hana::template_t<TM::GyroscopeMeasurement>
+    hana::template_t<TM::GyroscopeMeasurement>,
+    hana::template_t<TM::AccelerometerMeasurement>
 >;
 
 

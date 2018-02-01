@@ -42,6 +42,11 @@ class ImuMeta(TemplateMeta):
 class GyroscopeMeasurement(metaclass=ImuMeta):
     pass
 
+
+class AccelerometerMeasurement(metaclass=ImuMeta):
+    pass
+
+
 from . import _static_rscamera_measurement as STATIC_MODULE
 static_classes = {
     name: getattr(STATIC_MODULE, name) for name in dir(STATIC_MODULE)
@@ -67,5 +72,20 @@ for name, impl in gyroscope_classes.items():
     try:
         imu_cls = getattr(sensors, imu_id)
         GyroscopeMeasurement.register(imu_cls, impl)
+    except AttributeError:
+        pass
+
+
+from . import _accelerometer_measurement as ACCELEROMETER_MODULE
+accelerometer_classes = {
+    name: getattr(ACCELEROMETER_MODULE, name) for name in dir(ACCELEROMETER_MODULE)
+    if name.startswith('AccelerometerMeasurement_')
+}
+
+for name, impl in accelerometer_classes.items():
+    imu_id = name.split("_")[-1]
+    try:
+        imu_cls = getattr(sensors, imu_id)
+        AccelerometerMeasurement.register(imu_cls, impl)
     except AttributeError:
         pass
