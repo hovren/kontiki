@@ -17,6 +17,6 @@ PYBIND11_MODULE(_pinhole_camera, m) {
   declare_common<Class>(cls);
 
   // Declare extra Pinhole related things here
-  cls.def(py::init<int, int, double, const Class::CameraMatrix &>());
+  cls.def(py::init<size_t, size_t, double, const Class::CameraMatrix &>());
   cls.def_property("camera_matrix", &Class::camera_matrix, &Class::set_camera_matrix);
 }

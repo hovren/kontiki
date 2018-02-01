@@ -17,7 +17,7 @@ PYBIND11_MODULE(_atan_camera, m) {
 //  using BaseClass = C::PinholeCamera;
   auto cls = py::class_<Class, std::shared_ptr<Class>>(m, "AtanCamera");
 
-  cls.def(py::init<int, int, double, const Class::CameraMatrix&, const Eigen::Vector2d&, double >());
+  cls.def(py::init<size_t, size_t, double, const Class::CameraMatrix&, const Eigen::Vector2d&, double >());
   cls.def_property("wc", &Class::wc, &Class::set_wc, "Distortion center");
   cls.def_property("gamma", &Class::gamma, &Class::set_gamma, "Distortion parameter");
 

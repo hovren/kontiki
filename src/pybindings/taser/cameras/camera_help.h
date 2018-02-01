@@ -21,7 +21,7 @@ template<typename Class, typename PyClass>
 void declare_common(PyClass &cls) {
 
 
-  cls.def(py::init<int, int, double>());
+  cls.def(py::init<size_t, size_t, double>());
   cls.def("project", &Class::Project, "Project");
   cls.def("unproject", &Class::Unproject, "Unproject");
   cls.def_property("readout",
