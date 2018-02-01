@@ -59,4 +59,8 @@ def test_gyroscope_measurements(trajectory_example, imu):
     for t, w in example_data.angular_velocity:
         m = GyroscopeMeasurement(imu, t, w)
         w_hat = m.measure(trajectory)
+        try:
+            w_hat -= imu.gyroscope_bias
+        except AttributeError:
+            pass # No bias to remove
         np.testing.assert_almost_equal(w_hat, w)
