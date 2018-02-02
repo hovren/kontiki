@@ -34,7 +34,7 @@ class GyroscopeMeasurement {
 
   template<typename TrajectoryModel, typename T>
   Eigen::Matrix<T, 3, 1> Error(const type::Imu<ImuModel, T> &imu, const type::Trajectory<TrajectoryModel, T> &trajectory) const {
-    return w.cast<T>() - Measure<TrajectoryModel, T>(imu, trajectory);
+    return T(weight) * (w.cast<T>() - Measure<TrajectoryModel, T>(imu, trajectory));
   }
 
   template<typename TrajectoryModel>
