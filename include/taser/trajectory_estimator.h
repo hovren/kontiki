@@ -35,12 +35,12 @@ class TrajectoryEstimator {
 
   ceres::Solver::Summary Solve() {
     ceres::Solver::Options options;
-    options.linear_solver_type = ceres::DENSE_QR; // FIXME: SCHUR?
+    options.linear_solver_type = ceres::SPARSE_SCHUR;
     options.minimizer_progress_to_stdout = true;
 
     // FIXME: Don't hardcode thread counts
     options.num_linear_solver_threads = 4;
-    options.num_threads = 3;
+    options.num_threads = 4;
 
     ceres::Solver::Summary summary;
     ceres::Solve(options, &problem_, &summary);
