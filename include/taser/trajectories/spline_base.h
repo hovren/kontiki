@@ -379,6 +379,10 @@ class SplineEntity : public TrajectoryEntity<SplineFactory<SegmentViewTemplate>:
         auto pi = this->segment_entity_->Parameter(i);
         parameters.push_back(pi);
         problem.AddParameterBlock(pi.data, pi.size, pi.parameterization);
+
+        if (this->IsLocked())
+          problem.SetParameterBlockConstant(pi.data);
+
         current_segment_meta.n += 1;
       }
 

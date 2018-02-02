@@ -204,3 +204,8 @@ def test_angular_velocity_numerical(trajectory):
     w_actual = trajectory.angular_velocity(t)
     np.testing.assert_almost_equal(w_actual, w_num)
 
+
+def test_locking(trajectory):
+    assert not trajectory.locked
+    trajectory.locked = True
+    assert trajectory.locked

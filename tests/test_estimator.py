@@ -49,3 +49,26 @@ def test_solve_camera_nocrash(estimator, camera_measurements):
     summary = estimator.solve()
     print(summary.FullReport())
     assert summary.num_parameters > 0
+
+
+def test_trajectory_lock(trajectory, simple_measurements):
+    estimator_unlocked = TrajectoryEstimator(trajectory)
+    for m in simple_measurements:
+        estimator_unlocked.add_measurement(m)
+
+    summary_unlocked = estimator_unlocked.solve()
+    assert summary_unlocked.num_parameters > 0, "Measurements generated no parameters"
+    print('U', summary_unlocked.num_parameters_reduced)
+
+    estimator_locked = TrajectoryEstimator(trajectory)
+    trajectory.locked = True
+    for m in simple_measurements:
+        estimator_locked.add_measurement(m)
+
+    summary_locked = estimator_locked.solve()
+    print('L', summary_locked.num_parameters_reduced)
+
+    print(summary_unlocked.FullReport())
+    print(summary_locked.FullReport())
+
+    assert summary_locked.num_parameters_reduced == 0, "Not locked"

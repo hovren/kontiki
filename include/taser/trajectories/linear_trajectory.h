@@ -111,6 +111,10 @@ class LinearEntity : public TrajectoryEntity<ViewTemplate, MetaType, StoreType> 
     // Add constant to list of parameters
     auto param_constant = this->holder_->Parameter(0);
     problem.AddParameterBlock(param_constant.data, param_constant.size, param_constant.parameterization);
+
+    if (this->IsLocked())
+      problem.SetParameterBlockConstant(param_constant.data);
+
     parameters.push_back(param_constant);
   }
 };

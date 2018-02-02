@@ -136,7 +136,23 @@ template<template<typename...> typename ViewTemplate, typename MetaType, typenam
 class TrajectoryEntity : public type::Entity<ViewTemplate, MetaType, StoreType> {
  public:
   // Import constructor
-  using type::Entity<ViewTemplate, MetaType, StoreType>::Entity;
+//  using type::Entity<ViewTemplate, MetaType, StoreType>::Entity;
+
+  TrajectoryEntity() :
+    locked_(false) {
+    // Nothing else
+  }
+
+  virtual bool IsLocked() const {
+    return locked_;
+  }
+
+  virtual void Lock(bool lock) {
+    locked_ = lock;
+  }
+
+ protected:
+  bool locked_; // Locked: Trajectory not updated by optimizer
 };
 
 } // namespace trajectories

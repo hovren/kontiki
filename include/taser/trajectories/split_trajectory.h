@@ -94,6 +94,22 @@ class SplitEntity : public TrajectoryEntity<ViewTemplate, MetaType, StoreType> {
   SplitEntity() :
     SplitEntity(1.0, 1.0) { };
 
+  bool IsLocked() const override {
+    bool r3_locked = this->r3_trajectory_->IsLocked();
+    bool so3_locked = this->so3_trajectory_->IsLocked();
+
+    if (r3_locked != so3_locked) {
+      throw std::runtime_error("R3 and SO3 trajectories have different lock status!");
+    }
+
+    return r3_locked;
+  }
+
+  void Lock(bool lock) override {
+    this->r3_trajectory_->Lock(lock);
+    this->so3_trajectory_->Lock(lock);
+  }
+
   void AddToProblem(ceres::Problem &problem,
                     time_init_t times,
                     MetaType &meta,
