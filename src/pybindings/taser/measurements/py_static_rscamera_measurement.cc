@@ -27,6 +27,7 @@ PYBIND11_MODULE(_static_rscamera_measurement, m) {
     auto cls = py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str());
 
     declare_measurement_common<Class>(cls);
+    cls.def(py::init<std::shared_ptr<CameraModel>, std::shared_ptr<taser::Observation>, double>());
     cls.def(py::init<std::shared_ptr<CameraModel>, std::shared_ptr<taser::Observation>>());
 
     cls.def_readonly("camera", &Class::camera);

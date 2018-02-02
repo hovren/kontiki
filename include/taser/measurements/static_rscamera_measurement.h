@@ -61,8 +61,11 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref,
   class StaticRsCameraMeasurement {
     using Vector2 = Eigen::Vector2d;
    public:
+    StaticRsCameraMeasurement(std::shared_ptr<CameraModel> camera, std::shared_ptr<Observation> obs, double huber_loss)
+        : camera(camera), observation(obs), loss_function_(huber_loss) {};
+
     StaticRsCameraMeasurement(std::shared_ptr<CameraModel> camera, std::shared_ptr<Observation> obs)
-        : camera(camera), observation(obs) {};
+        : StaticRsCameraMeasurement(camera, obs, 5.) { };
 
     std::shared_ptr<CameraModel> camera;
     // Measurement data
@@ -165,13 +168,17 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref,
 
       // Give residual block to Problem
       estimator.problem().AddResidualBlock(cost_function,
-                                           nullptr,
+                                           &loss_function_,
                                            entity::ParameterInfo<double>::ToParameterBlocks(parameters));
     }
+
+    // The loss function is not a pointer since the Problem does not take ownership.
+    ceres::HuberLoss loss_function_;
 
     template<template<typename> typename TrajectoryModel>
     friend class taser::TrajectoryEstimator;
   };
+
 } // namespace measurements
 } // namespace taser
 
