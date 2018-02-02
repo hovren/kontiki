@@ -13,7 +13,7 @@
 
 namespace taser {
 
-class Landmark : public std::enable_shared_from_this<Landmark> {
+class Landmark {
   friend View;
   static size_t new_id() {
     static size_t next_id = -1;
