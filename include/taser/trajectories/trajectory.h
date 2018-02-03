@@ -59,18 +59,19 @@ struct TrajectoryEvaluation {
     }
 
     bool AnyLinear() const {
-      return (
-        (flags & EvalPosition) ||
-        (flags & EvalVelocity) ||
-        (flags & EvalAcceleration)
-      );
+      return FlagsLinear();
     }
 
     bool AnyRotation() const {
-      return (
-          (flags & EvalOrientation) ||
-          (flags & EvalAngularVelocity)
-      );
+      return FlagsRotation();
+    }
+
+    int FlagsLinear() const {
+      return flags & (EvalPosition | EvalVelocity | EvalAcceleration);
+    }
+
+    int FlagsRotation() const {
+      return flags & (EvalOrientation | EvalAngularVelocity);
     }
 
    protected:

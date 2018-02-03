@@ -42,14 +42,14 @@ class SplitView : public TrajectoryView<T, MetaType> {
     Result result = std::make_unique<TrajectoryEvaluation<T>>(flags);
 
     if (result->needs.AnyLinear()) {
-      Result r3_result = r3_view_->Evaluate(t, flags);
+      Result r3_result = r3_view_->Evaluate(t, result->needs.FlagsLinear());
       result->position = r3_result->position;
       result->velocity = r3_result->velocity;
       result->acceleration = r3_result->acceleration;
     }
 
     if (result->needs.AnyRotation()) {
-      Result so3_result = so3_view_->Evaluate(t, flags);
+      Result so3_result = so3_view_->Evaluate(t, result->needs.FlagsRotation());
       result->orientation = so3_result->orientation;
       result->angular_velocity = so3_result->angular_velocity;
     }
