@@ -39,7 +39,8 @@ PYBIND11_MODULE(_trajectory_estimator, m) {
 
     cls.def(py::init<std::shared_ptr<TrajectoryImpl>>());
     cls.def_property_readonly("trajectory", &Class::trajectory, "Get the trajectory");
-    cls.def("solve", &Class::Solve);
+    cls.def("solve", &Class::Solve, "Solve the current estimation problem",
+            py::arg("max_iterations")=50, py::arg("progress")=true);
 
     // Add all known measurement types
     hana::for_each(measurement_types, [&](auto tm) {

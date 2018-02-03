@@ -33,14 +33,16 @@ class TrajectoryEstimator {
     return trajectory_;
   }
 
-  ceres::Solver::Summary Solve() {
+  ceres::Solver::Summary Solve(int max_iterations=50, bool progress=true) {
     ceres::Solver::Options options;
     options.linear_solver_type = ceres::SPARSE_SCHUR;
-    options.minimizer_progress_to_stdout = true;
+    options.minimizer_progress_to_stdout = progress;
 
     // FIXME: Don't hardcode thread counts
     options.num_linear_solver_threads = 4;
     options.num_threads = 4;
+
+    options.max_num_iterations = max_iterations;
 
     ceres::Solver::Summary summary;
     ceres::Solve(options, &problem_, &summary);
