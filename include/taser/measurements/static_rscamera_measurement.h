@@ -132,27 +132,39 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref,
       auto cost_function = new ceres::DynamicAutoDiffCostFunction<ResidualImpl>(residual);
       std::vector<entity::ParameterInfo<double>> parameters;
 
-      // Add trajectory to problem
+      // Find timespans for the two observations
       const auto landmark = observation->landmark();
       auto t0_ref = landmark->reference()->view()->t0();
       auto t0_obs = observation->view()->t0();
+
+      // The list of spans must be ordered
+      double t1, t2;
+      if (t0_ref <= t0_obs) {
+        t1 = t0_ref;
+        t2 = t0_obs;
+      }
+      else {
+        t1 = t0_obs;
+        t2 = t0_ref;
+      }
+
       estimator.AddTrajectoryForTimes({
-                                          {t0_ref, t0_ref + camera->readout()},
-                                          {t0_obs, t0_obs + camera->readout()}
+                                          {t1, t1 + camera->readout()},
+                                          {t2, t2 + camera->readout()}
                                       },
                                       residual->trajectory_meta,
                                       parameters);
 
       // Add camera to proble
       camera->AddToProblem(estimator.problem(), {
-                               {t0_ref, t0_ref + camera->readout()},
-                               {t0_obs, t0_obs + camera->readout()}
+                               {t1, t1 + camera->readout()},
+                               {t2, t2 + camera->readout()}
                            },
                            residual->camera_meta,
                            parameters);
 
       // Add Landmark inverse depth
-      // FIXME: Landmarks should be an entity
+      // FIXME: Landmarks could be an entity
       double *p_rho = landmark->inverse_depth_ptr();
       estimator.problem().AddParameterBlock(p_rho, 1);
       estimator.problem().SetParameterLowerBound(p_rho, 0, 0.); // Only positive inverse depths please
