@@ -52,7 +52,6 @@ class ConstantBiasImuView : public ImuView<T, MetaType, ConstantBiasImuView<T, M
 
   template<typename TrajectoryModel>
   Vector3 Gyroscope(const type::Trajectory<TrajectoryModel, T> &trajectory, T t) const {
-    std::cout << "ConstantBiasImuView::Gyroscope" << std::endl;
     Vector3 base = Base::template StandardGyroscope<TrajectoryModel>(trajectory, t);
     return  base + gyroscope_bias();
   }
@@ -62,7 +61,9 @@ template<template<typename...> typename ViewTemplate, typename MetaType, typenam
 class ConstantBiasImuEntity : public BasicImuEntity<ViewTemplate, MetaType, StoreType> {
   using Base = BasicImuEntity<ViewTemplate, MetaType, StoreType>;
  public:
-  ConstantBiasImuEntity(const Eigen::Vector3d &abias, const Eigen::Vector3d &gbias) {
+  ConstantBiasImuEntity(const Eigen::Vector3d &abias, const Eigen::Vector3d &gbias) :
+      gyro_bias_locked_(true),
+      acc_bias_locked_(true) {
     // Define parameters
     this->holder_->AddParameter(3); // 0: Accelerometer bias
     this->holder_->AddParameter(3); // 1: Gyroscope bias
@@ -74,17 +75,47 @@ class ConstantBiasImuEntity : public BasicImuEntity<ViewTemplate, MetaType, Stor
   ConstantBiasImuEntity() :
     ConstantBiasImuEntity(Eigen::Vector3d::Zero(), Eigen::Vector3d::Zero()) { }
 
+  bool GyroscopeBiasIsLocked() const {
+    return gyro_bias_locked_;
+  }
+
+  bool LockGyroscopeBias(bool lock) {
+    gyro_bias_locked_ = lock;
+  }
+
+  bool AccelerometerBiasIsLocked() const {
+    return acc_bias_locked_;
+  }
+
+  bool LockAccelerometerBias(bool lock) {
+    acc_bias_locked_ = lock;
+  }
+
+
   void AddToProblem(ceres::Problem &problem,
                     time_init_t times,
                     MetaType &meta,
                     std::vector<entity::ParameterInfo<double>> &parameters) const override {
     Base::AddToProblem(problem, times, meta, parameters);
-    for (auto i : {0 , 1}) {
-      auto pi = this->holder_->Parameter(i);
-      problem.AddParameterBlock(pi.data, pi.size, pi.parameterization);
-      parameters.push_back(pi);
-    }
+
+    auto p_ab = this->holder_->Parameter(0);
+    problem.AddParameterBlock(p_ab.data, p_ab.size, p_ab.parameterization);
+    parameters.push_back(p_ab);
+
+    if (acc_bias_locked_)
+      problem.SetParameterBlockConstant(p_ab.data);
+
+    auto p_gb = this->holder_->Parameter(1);
+    problem.AddParameterBlock(p_gb.data, p_gb.size, p_gb.parameterization);
+    parameters.push_back(p_gb);
+
+    if (gyro_bias_locked_)
+      problem.SetParameterBlockConstant(p_gb.data);
   }
+
+ protected:
+  bool gyro_bias_locked_;
+  bool acc_bias_locked_;
 };
 
 

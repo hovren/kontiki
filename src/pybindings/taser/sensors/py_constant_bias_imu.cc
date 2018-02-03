@@ -19,6 +19,8 @@ PYBIND11_MODULE(_constant_bias_imu, m) {
 
   cls.def_property("accelerometer_bias", &Class::accelerometer_bias, &Class::set_accelerometer_bias);
   cls.def_property("gyroscope_bias", &Class::gyroscope_bias, &Class::set_gyroscope_bias);
+  cls.def_property("accelerometer_bias_locked", &Class::AccelerometerBiasIsLocked, &Class::LockAccelerometerBias);
+  cls.def_property("gyroscope_bias_locked", &Class::GyroscopeBiasIsLocked, &Class::LockGyroscopeBias);
 
   declare_imu_common<Class>(cls);
 }
