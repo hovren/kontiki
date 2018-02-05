@@ -5,8 +5,10 @@
 #ifndef TASERV2_MEASUREMENT_HELPER_H
 #define TASERV2_MEASUREMENT_HELPER_H
 
-#include "../type_helpers.h"
 #include <boost/hana.hpp>
+namespace hana = boost::hana;
+
+#include "../trajectory_defs.h"
 
 template<typename Class, typename PyClass>
 static void declare_measurement_common(PyClass &cls) {

@@ -1,21 +1,13 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>
 
-#include <Eigen/Dense>
-//#include <cameras/atan.h>
-
 #include "trajectory_estimator.h"
-#include "trajectories/linear_trajectory.h"
-//#include "trajectories/constant_trajectory.h"
-#include "measurements/position_measurement.h"
-//#include "measurements/static_rscamera_measurement.h"
-//#include "cameras/pinhole.h"
-
-#include "type_helpers.h"
-#include "../../../deps/pybind11/include/pybind11/attr.h"
 
 #include <boost/hana.hpp>
 namespace hana = boost::hana;
+
+#include "trajectory_defs.h"
+#include "measurement_defs.h"
 
 namespace py = pybind11;
 

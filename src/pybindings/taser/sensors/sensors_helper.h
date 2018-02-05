@@ -6,8 +6,9 @@
 #define TASERV2_SENSORS_HELPER_H
 
 #include <boost/hana.hpp>
+namespace hana = boost::hana;
 
-#include "../type_helpers.h"
+#include "../trajectory_defs.h"
 
 template<typename Class, typename PyClass>
 static void declare_imu_common(PyClass &cls) {

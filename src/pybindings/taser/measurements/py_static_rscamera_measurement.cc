@@ -2,14 +2,17 @@
 #include <pybind11/eigen.h>
 
 #include <Eigen/Dense>
-#include <boost/hana/for_each.hpp>
+#include <boost/hana.hpp>
+namespace hana = boost::hana;
 
 #include <taser/types.h>
 #include "measurements/static_rscamera_measurement.h"
 #include "sfm/landmark.h"
 #include "sfm/observation.h"
 
-#include "../type_helpers.h"
+#include "../camera_defs.h"
+#include "../trajectory_defs.h"
+
 #include "measurement_helper.h"
 
 
@@ -22,7 +25,7 @@ PYBIND11_MODULE(_static_rscamera_measurement, m) {
   hana::for_each(camera_types, [&](auto ct) {
     using CameraModel = typename decltype(ct)::type;
 
-    using Class = TM::StaticRsCameraMeasurement<CameraModel>;
+    using Class = taser::measurements::StaticRsCameraMeasurement<CameraModel>;
     std::string pyclass_name = "StaticRsCameraMeasurement_" + std::string(CameraModel::CLASS_ID);
     auto cls = py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str());
 

@@ -2,11 +2,13 @@
 #include <pybind11/eigen.h>
 
 #include <Eigen/Dense>
-#include <boost/hana/for_each.hpp>
+
+#include <boost/hana.hpp>
+namespace hana = boost::hana;
 
 #include "measurement_helper.h"
 #include "measurements/accelerometer_measurement.h"
-#include "../type_helpers.h"
+#include "../imu_defs.h"
 
 namespace py = pybind11;
 
