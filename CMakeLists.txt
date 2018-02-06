@@ -25,6 +25,7 @@ include_directories(
     include
     include/taser
     deps/hana/include
+    deps/Sophus/
     ${EIGEN3_INCLUDE_DIR}
     ${CERES_INCLUDE_DIRS})
 
@@ -76,6 +77,7 @@ taser_add_module(taser._ceres)
 taser_add_module(taser.trajectories._linear_trajectory)
 taser_add_module(taser.trajectories._uniform_r3_spline_trajectory)
 taser_add_module(taser.trajectories._uniform_so3_spline_trajectory)
+taser_add_module(taser.trajectories._uniform_se3_spline_trajectory)
 taser_add_module(taser.trajectories._split_trajectory)
 
 # Cameras
@@ -101,6 +103,8 @@ taser_add_module(taser.measurements._static_rscamera_measurement)
 add_executable(entity_devel src/entity_devel.cc)
 target_link_libraries(entity_devel PRIVATE ${CERES_LIBRARIES})
 
+add_executable(spline_devel src/spline_devel.cc)
+target_link_libraries(spline_devel PRIVATE ${CERES_LIBRARIES})
 
 # CLion requires projects to use CMake, and this tells it about our headers
 # Please reload the project within CLion when adding new sources

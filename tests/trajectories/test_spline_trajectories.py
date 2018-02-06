@@ -2,7 +2,8 @@ import pytest
 import numpy as np
 from scipy.interpolate import BSpline
 
-from taser.trajectories import UniformR3SplineTrajectory, UniformSO3SplineTrajectory
+from taser.trajectories import UniformR3SplineTrajectory, UniformSO3SplineTrajectory, UniformSE3SplineTrajectory
+from taser.rotations import random_quaternion, identity_quaternion, quat_to_rotation_matrix
 
 spline_classes = (UniformR3SplineTrajectory, UniformSO3SplineTrajectory)
 
@@ -225,3 +226,28 @@ def test_so3_require_unit_quaternion():
     traj.append_knot(np.array([1., 0., 0., 0.]))  # OK (norm=1)
     with pytest.raises(ValueError):
         traj.append_knot(np.array([1., 1., 1., 1.]))  # Fail
+
+
+# ---- Specific UniformSE3Spline tests -------------------------------- #
+
+def test_se3_require_se3_elements():
+    traj = UniformSE3SplineTrajectory()
+
+    q = random_quaternion()
+    cp_good = np.block([[quat_to_rotation_matrix(q), np.random.uniform(-1, 1, size=(3,1))],
+                        [np.array([0, 0, 0, 1])]])
+
+    traj.append_knot(cp_good) # Should not fail
+
+
+    cp_bad_determinant = np.copy(cp_good)
+    cp_bad_determinant[:3, :3] = np.array([[-1, 0, 0], [0, 1, 0], [0, 0, 1]])
+    np.testing.assert_almost_equal(np.linalg.det(cp_bad_determinant[:3, :3]), -1)
+    with pytest.raises(ValueError):
+        traj.append_knot(cp_bad_determinant)
+
+    cp_bad_last_row = np.copy(cp_good)
+    cp_bad_last_row[3] = np.random.uniform(-1, 1, size=4)
+    cp_bad_last_row[3] /= np.linalg.norm(cp_bad_last_row[3])
+    with pytest.raises(ValueError):
+        traj.append_knot(cp_bad_last_row)

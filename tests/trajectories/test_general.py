@@ -3,8 +3,8 @@ from collections import defaultdict, namedtuple
 import numpy as np
 import pytest
 
-from taser.utils import safe_time
-from taser.trajectories import LinearTrajectory, UniformR3SplineTrajectory, UniformSO3SplineTrajectory, SplitTrajectory
+from taser.utils import safe_time, safe_time_span
+from taser.trajectories import LinearTrajectory, UniformR3SplineTrajectory, UniformSO3SplineTrajectory, UniformSE3SplineTrajectory, SplitTrajectory
 from taser.rotations import quat_to_rotation_matrix
 
 ExampleData = namedtuple('ExampleData',
@@ -202,7 +202,7 @@ def test_angular_velocity_numerical(trajectory):
     print(f'Python: q={q}')
     print(f'Python: dq={dq_num}')
     w_actual = trajectory.angular_velocity(t)
-    np.testing.assert_almost_equal(w_actual, w_num)
+    np.testing.assert_almost_equal(w_actual, w_num, decimal=4)
 
 
 def test_locking(trajectory):

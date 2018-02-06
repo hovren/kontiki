@@ -1,7 +1,9 @@
 #include <iostream>
 #include <vector>
 
-#include <taser/trajectories/uniform_r3_spline_trajectory.h>
+#include <sophus/se3.hpp>
+
+#include <taser/trajectories/uniform_se3_spline_trajectory.h>
 #include <taser/trajectory_estimator.h>
 #include <taser/measurements/position_measurement.h>
 #include <taser/cameras/pinhole.h>
@@ -15,37 +17,39 @@ using namespace taser::measurements;
 int main() {
   std::cout << "Begin" << std::endl;
 
-  auto traj = std::make_shared<UniformR3SplineTrajectory>(0.34, 1.22);
+  using SE3Type = Sophus::SE3d;
+  using Point = SE3Type::Point;
+  using SO3Type = Sophus::SO3d;
 
-  traj->AppendKnot(Eigen::Vector3d(1, 1, 1));
-  traj->AppendKnot(Eigen::Vector3d(1, 5, -1));
-  traj->AppendKnot(Eigen::Vector3d(2, 3, -1));
-  traj->AppendKnot(Eigen::Vector3d(1, 5, -4));
-  traj->AppendKnot(Eigen::Vector3d(-2, 12, -7));
-  traj->AppendKnot(Eigen::Vector3d(-3, 10, -8));
-  traj->AppendKnot(Eigen::Vector3d(-4, 11, -8));
-  traj->AppendKnot(Eigen::Vector3d(-3, 2, -12));
-  traj->AppendKnot(Eigen::Vector3d(-6, 5, -1));
+  Eigen::Matrix4d Z;
+  Z << 1, 0, 0, 10, 0, 1, 0, 20, 0, 0, 1, 30, 0, 0, 0, 1;
+  std::cout<< Z << std::endl;
+
+  Sophus::SE3d T(Z);
+  std::cout << T.matrix() << std::endl;
+
+  auto traj = std::make_shared<UniformSE3SplineTrajectory>(0.34, 1.22);
 
   std::cout << "dt=" << traj->dt() << ", t0=" << traj->t0();
   std::cout << " nknots=" << traj->NumKnots() << std::endl;
-  std::cout << "valid time: " << traj->MinTime() << " - " << traj->MaxTime() << std::endl;
 
-  std::cout << "::KNOTS" << std::endl;
-  for (int i=0; i < traj->NumKnots(); ++i) {
-    std::cout << i << ": " << traj->ControlPoint(i).transpose() << std::endl;
+  for (int i=0; i < 10; ++i) {
+    SE3Type cp = SE3Type(SO3Type::exp(Point(0.2, 0.5, 0.0)), Point(0, 0, 0));
+    traj->AppendKnot(cp);
   }
 
-  TrajectoryEstimator<UniformR3SplineTrajectory> estimator(traj);
+  std::cout << " nknots=" << traj->NumKnots() << std::endl;
+  std::cout << "valid time: " << traj->MinTime() << " - " << traj->MaxTime() << std::endl;
+
+  double t = 2.1;
+  Eigen::Vector3d p = traj->Position(t);
+  std::cout << "Pos: " << p.transpose() << std::endl;
 
 #if 0
-  auto m1 = std::make_shared<PositionMeasurement>(0.1, Eigen::Vector3d(1, 1, 2));
-  auto m2 = std::make_shared<PositionMeasurement>(1.2, Eigen::Vector3d(3, -1, -2));
-  auto m3 = std::make_shared<PositionMeasurement>(1.8, Eigen::Vector3d(3.2, -1.4, -2.2));
-  auto m4 = std::make_shared<PositionMeasurement>(2.2, Eigen::Vector3d(2.6, -1.1, -1.0));
 
-  std::vector<std::shared_ptr<PositionMeasurement>> meas = {m1, m2, m3, m4};
-#else
+  TrajectoryEstimator<UniformSE3SplineTrajectory> estimator(traj);
+
+
   auto v1 = std::make_shared<taser::View>(0, 1.22);
   auto v2 = std::make_shared<taser::View>(3, 3.1);
   auto v3 = std::make_shared<taser::View>(2, 1.93);
@@ -68,7 +72,6 @@ int main() {
     std::cout << "Project: " << m->Project<double, UniformR3SplineTrajectory>(traj->AsView()) << std::endl;
   }
 
-#endif
   for (auto m : meas){
     estimator.AddMeasurement(m);
   }
@@ -77,17 +80,11 @@ int main() {
 
   std::cout << summary.FullReport() << std::endl;
 
-#if 0
-  for (auto m : meas){
-    Eigen::Vector3d phat = m->Measure<double, UniformR3SplineTrajectory>(traj->AsView());
-    std::cout << "t=" << m->t << " p=" << m->p.transpose() << "  -->  " << phat.transpose() << std::endl;
-  }
-#endif
-
   std::cout << "::KNOTS" << std::endl;
   for (int i=0; i < traj->NumKnots(); ++i) {
     std::cout << i << ": " << traj->ControlPoint(i).transpose() << std::endl;
   }
 
+#endif
   return 0;
 }

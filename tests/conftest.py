@@ -5,7 +5,8 @@ import numpy as np
 from fixtures.camera_fixtures import *
 from fixtures.sfm_fixtures import *
 
-from taser.trajectories import LinearTrajectory, UniformR3SplineTrajectory, UniformSO3SplineTrajectory, SplitTrajectory
+from taser.trajectories import LinearTrajectory, UniformR3SplineTrajectory, UniformSO3SplineTrajectory, SplitTrajectory, \
+    UniformSE3SplineTrajectory
 from taser.measurements import PositionMeasurement, StaticRsCameraMeasurement, GyroscopeMeasurement, AccelerometerMeasurement
 from taser.sensors import BasicImu, ConstantBiasImu
 from taser.utils import safe_time_span
@@ -14,6 +15,7 @@ trajectory_classes = [
     LinearTrajectory,
     UniformR3SplineTrajectory,
     UniformSO3SplineTrajectory,
+    UniformSE3SplineTrajectory,
     SplitTrajectory,
 ]
 
@@ -74,6 +76,20 @@ def trajectory(request):
             instance.append_knot(cp)
 
         return instance
+
+    elif cls == UniformSE3SplineTrajectory:
+        instance = cls(0.55, -0.76)
+        # FIXME: Should not be a random trajectory
+        from taser.rotations import random_quaternion, quat_to_rotation_matrix
+        # q0 = random_quaternion()
+        for i in range(8):
+            q = random_quaternion()
+            T = np.eye(4)
+            T[:3, :3] = quat_to_rotation_matrix(q)
+            T[:3, 3] = np.random.uniform(-2, 2, size=3)
+            instance.append_knot(T)
+        return instance
+
     elif cls == SplitTrajectory:
         class DummyRequest:
             def __init__(self, cls):
