@@ -102,6 +102,9 @@ def trajectory_example(trajectory):
         example_data.acceleration.extend(r3_example.acceleration)
         example_data.orientation.extend(so3_example.orientation)
         example_data.angular_velocity.extend(so3_example.angular_velocity)
+    elif cls == UniformSE3SplineTrajectory:
+        pytest.xfail("We have no good way to produce data for this test case")
+
     else:
         raise NotImplementedError(f"No example data for {cls} available")
 
@@ -133,6 +136,9 @@ def test_trajectory_example(trajectory_example, modality):
     trajectory, example_data = trajectory_example
     expected_data = getattr(example_data, modality)
     func = getattr(trajectory, modality)
+
+    if modality == 'orientation' and type(trajectory) in (UniformSO3SplineTrajectory, SplitTrajectory):
+        pytest.xfail('Orientation examples for SO3 and split missing')
 
     assert len(expected_data) > 0, "No test data available"
     for t, x in expected_data:
