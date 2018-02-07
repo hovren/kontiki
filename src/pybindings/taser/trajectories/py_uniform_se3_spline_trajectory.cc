@@ -46,6 +46,15 @@ PYBIND11_MODULE(_uniform_se3_spline_trajectory, m) {
   using Helper = PySE3SplineHelper;
   auto cls = py::class_<Class, std::shared_ptr<Class>>(m, "UniformSE3SplineTrajectory");
 
+  cls.def("evaluate", [](Class &self, double t){
+    Sophus::SE3d P_SE3;
+    Eigen::Matrix4d P, P_prim, P_bis;
+    self.EvaluateSpline(t, 0xff, P_SE3, P_prim, P_bis);
+    P = P_SE3.matrix();
+
+    return std::make_tuple(P, P_prim, P_bis);
+  });
+
 
   // Common attributes
   declare_spline_common<Class, Helper>(cls);

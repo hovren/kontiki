@@ -79,17 +79,41 @@ class UniformSE3SplineSegmentView : public SplineSegmentView<T, SE3SplineControl
   using Base::SplineSegmentView;
 
   Result Evaluate(T t, int flags) const override {
+    SE3Type P;
+    Matrix4 P_prim, P_bis;
+    EvaluateSpline(t, flags, P, P_prim, P_bis);
+
+    auto result = std::make_unique<TrajectoryEvaluation<T>>(flags);
+    result->position = P.translation();
+    result->velocity = P_prim.col(3).head(3);
+    result->acceleration = P_bis.col(3).head(3);
+
+    result->orientation = P.unit_quaternion();
+
+    Eigen::Matrix<T, 3, 3> omega_hat = P_prim.topLeftCorner(3, 3) * P.rotationMatrix().transpose();
+    result->angular_velocity(0) = 0.5 * (omega_hat(2, 1) - omega_hat(1, 2));
+    result->angular_velocity(1) = 0.5 * (omega_hat(0, 2) - omega_hat(2, 0));
+    result->angular_velocity(2) = 0.5 * (omega_hat(1, 0) - omega_hat(0, 1));
+
+    return result;
+  }
+
+  void EvaluateSpline(T t, int flags, SE3Type &P, Matrix4 &P_prim, Matrix4 &P_bis) const {
     auto result = std::make_unique<TrajectoryEvaluation<T>>(flags);
 
-    int num_derivatives = 0;
-
-    if (result->needs.Velocity() || result->needs.AngularVelocity()) {
-      num_derivatives = 1;
-    }
+    int num_derivatives;
 
     if (result->needs.Acceleration()) {
       num_derivatives = 2;
     }
+    else if (result->needs.Velocity() || result->needs.AngularVelocity()) {
+      num_derivatives = 1;
+    }
+    else {
+      num_derivatives = 0;
+    }
+
+
 
     int i0;
     T u;
@@ -127,7 +151,7 @@ class UniformSE3SplineSegmentView : public SplineSegmentView<T, SE3SplineControl
     Matrix4 A_bis[3];
     Matrix4 Aj_prim;
 
-    SE3Type P = this->ControlPoint(i0); // Pose
+    P = this->ControlPoint(i0); // Pose
 
     const int K = (i0 + 4);
     for (int i=(i0 + 1); i < K; ++i) {
@@ -151,7 +175,6 @@ class UniformSE3SplineSegmentView : public SplineSegmentView<T, SE3SplineControl
 
     } // for i (control points)
 
-    Matrix4 P_prim, P_bis;
     SE3Map P0 = this->ControlPoint(i0);
     if (num_derivatives >= 1) {
       Matrix4 M1 = A_prim[0] * A[1] * A[2] +
@@ -167,18 +190,7 @@ class UniformSE3SplineSegmentView : public SplineSegmentView<T, SE3SplineControl
       P_bis = P0.matrix() * M2;
     }
 
-    result->position = P.translation();
-    result->velocity = P_prim.col(3).head(3);
-    result->acceleration = P_bis.col(3).head(3);
 
-    result->orientation = P.unit_quaternion();
-
-    Eigen::Matrix<T, 3, 3> omega_hat = P_prim.topLeftCorner(3, 3) * P.rotationMatrix().transpose();
-    result->angular_velocity(0) = 0.5 * (omega_hat(2, 1) - omega_hat(1, 2));
-    result->angular_velocity(1) = 0.5 * (omega_hat(0, 2) - omega_hat(2, 0));
-    result->angular_velocity(2) = 0.5 * (omega_hat(1, 0) - omega_hat(0, 1));
-
-    return result;
   }
 };
 
@@ -188,6 +200,10 @@ class UniformSE3SplineTrajectory : public internal::SplineEntity<internal::Unifo
  public:
   static constexpr const char* CLASS_ID = "UniformSE3Spline";
   using internal::SplineEntity<internal::UniformSE3SplineSegmentView>::SplineEntity;
+
+  void EvaluateSpline(double t, int flags, Sophus::SE3d &P, Eigen::Matrix4d &P_prim, Eigen::Matrix4d &P_bis) const {
+    this->segment_entity_->EvaluateSpline(t, flags, P, P_prim, P_bis);
+  }
 };
 
 } // namespace trajectories
