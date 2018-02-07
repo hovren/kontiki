@@ -8,6 +8,7 @@
 #include "trajectories/linear_trajectory.h"
 #include "trajectories/uniform_r3_spline_trajectory.h"
 #include "trajectories/uniform_so3_spline_trajectory.h"
+#include "trajectories/uniform_se3_spline_trajectory.h"
 #include "trajectories/split_trajectory.h"
 
 namespace TT = taser::trajectories;
@@ -16,6 +17,7 @@ static constexpr auto trajectory_types = hana::tuple_t<
     TT::LinearTrajectory,
     TT::UniformR3SplineTrajectory,
     TT::UniformSO3SplineTrajectory,
+    TT::UniformSE3SplineTrajectory,
     TT::SplitTrajectory
 >;
 

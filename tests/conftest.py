@@ -10,6 +10,7 @@ from taser.trajectories import LinearTrajectory, UniformR3SplineTrajectory, Unif
 from taser.measurements import PositionMeasurement, StaticRsCameraMeasurement, GyroscopeMeasurement, AccelerometerMeasurement
 from taser.sensors import BasicImu, ConstantBiasImu
 from taser.utils import safe_time_span
+from taser.rotations import quat_to_rotation_matrix
 
 trajectory_classes = [
     LinearTrajectory,
@@ -23,6 +24,11 @@ trajectory_classes = [
 def trajectory(request):
     "Handcrafted 'simple' trajectory which is at least 5 seconds long"
     cls = request.param
+
+    # Used to get trajectory from this function, from within it
+    class DummyRequest:
+        def __init__(self, cls):
+            self.param = cls
 
     if cls == LinearTrajectory:
         t0 = 2
@@ -78,23 +84,30 @@ def trajectory(request):
         return instance
 
     elif cls == UniformSE3SplineTrajectory:
-        instance = cls(0.55, -0.76)
-        # FIXME: Should not be a random trajectory
-        from taser.rotations import random_quaternion, quat_to_rotation_matrix
-        # q0 = random_quaternion()
-        for i in range(8):
-            q = random_quaternion()
-            T = np.eye(4)
-            T[:3, :3] = quat_to_rotation_matrix(q)
-            T[:3, 3] = np.random.uniform(-2, 2, size=3)
+        dt = 2.3
+        t0 = 1.22
+        instance = cls(dt, t0)
+
+        control_points = [
+            ([1, 0, 2, 3], [1, 4, 6]),
+            ([3, 1, 2, 3], [-1, 2, 3]),
+            ([1, 0, 1, 3], [2, 3, 2]),
+            ([2, 1, 4, 1], [1, 4, 7]),
+            ([1, 0, 2, 3], [1, 4, 6]),
+            ([1, 1, 3, 1], [2, -1, 2]),
+        ]
+
+        for q, p in control_points:
+            q = np.array(q) / np.linalg.norm(q)
+            p = np.array(p).reshape(3, 1)
+            R = quat_to_rotation_matrix(q)
+            T = np.block([[R, p],
+                          [np.array([[0, 0, 0, 1]])]])
             instance.append_knot(T)
+
         return instance
 
     elif cls == SplitTrajectory:
-        class DummyRequest:
-            def __init__(self, cls):
-                self.param = cls
-
         # Get examples for R3 and SO3
         r3_traj = trajectory(DummyRequest(UniformR3SplineTrajectory))
         so3_traj = trajectory(DummyRequest(UniformSO3SplineTrajectory))
