@@ -4,14 +4,14 @@
 #include <Eigen/Dense>
 
 #include "camera_help.h"
-#include "cameras/atan.h"
+#include "taser/sensors/atan_camera.h"
 
 namespace py = pybind11;
 
-namespace C = taser::cameras;
+namespace C = taser::sensors;
 
 PYBIND11_MODULE(_atan_camera, m) {
-  py::module::import("taser.cameras._pinhole_camera");
+//  py::module::import("taser.sensors._pinhole_camera");
 
   using Class = C::AtanCamera;
 //  using BaseClass = C::PinholeCamera;

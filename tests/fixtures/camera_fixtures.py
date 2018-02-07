@@ -2,7 +2,7 @@ import pytest
 
 import numpy as np
 
-from taser.cameras import PinholeCamera, AtanCamera
+from taser.sensors import PinholeCamera, AtanCamera
 from taser.rotations import random_quaternion
 
 IMAGE_ROWS = 1080

@@ -10,7 +10,7 @@
 #include "sfm/landmark.h"
 #include "sfm/view.h"
 #include "trajectory_estimator.h"
-#include "cameras/camera.h"
+#include "taser/sensors/camera.h"
 #include <taser/types.h>
 
 namespace taser {
@@ -38,7 +38,7 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref,
   auto eval_obs = trajectory.Evaluate(t_obs, flags);
 
   // FIXME: We have a ToTrajectory/FromTrajectory function
-  const taser::cameras::RelativePose<T> &rel_pose = camera.relative_pose();
+  const taser::sensors::RelativePose<T> &rel_pose = camera.relative_pose();
   const Vector3 p_ct = rel_pose.translation;
   const Eigen::Quaternion<T> q_ct = rel_pose.orientation;
 

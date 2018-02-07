@@ -6,7 +6,7 @@
 #include <taser/trajectories/uniform_se3_spline_trajectory.h>
 #include <taser/trajectory_estimator.h>
 #include <taser/measurements/position_measurement.h>
-#include <taser/cameras/pinhole.h>
+#include <taser/sensors/pinhole_camera.h>
 #include <taser/measurements/static_rscamera_measurement.h>
 #include <taser/sfm/view.h>
 
@@ -59,9 +59,9 @@ int main() {
   auto obs2 = v3->create_observation(lm, 103, 110);
   lm->set_reference(ref);
 
-  auto camera = std::make_shared<taser::cameras::PinholeCamera>(640, 480, 0.1);
+  auto camera = std::make_shared<taser::sensors::PinholeCamera>(640, 480, 0.1);
 
-  using MClass = taser::measurements::StaticRsCameraMeasurement<taser::cameras::PinholeCamera>;
+  using MClass = taser::measurements::StaticRsCameraMeasurement<taser::sensors::PinholeCamera>;
 
   auto m1 = std::make_shared<MClass>(camera, obs);
   auto m2 = std::make_shared<MClass>(camera, obs2);

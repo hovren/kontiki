@@ -4,11 +4,11 @@
 #include <Eigen/Dense>
 
 #include "camera_help.h"
-#include "cameras/pinhole.h"
+#include "taser/sensors/pinhole_camera.h"
 
 namespace py = pybind11;
 
-namespace C = taser::cameras;
+namespace C = taser::sensors;
 
 PYBIND11_MODULE(_pinhole_camera, m) {
   using Class = C::PinholeCamera;

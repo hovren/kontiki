@@ -5,14 +5,14 @@
 #ifndef TASERV2_CAMERA_HELP_H
 #define TASERV2_CAMERA_HELP_H
 
-#include "cameras/camera.h"
+#include "taser/sensors/camera.h"
 
 #include <pybind11/eigen.h>
 #include <pybind11/stl.h>
 
 namespace py = pybind11;
 
-namespace C = taser::cameras;
+namespace C = taser::sensors;
 
 // Eigen::Quaternion not exposed, to use Vector4d instead
 using PyRelPosePair = std::pair<Eigen::Vector4d, Eigen::Vector3d>;

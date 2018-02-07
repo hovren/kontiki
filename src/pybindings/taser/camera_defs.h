@@ -8,10 +8,10 @@
 #include <boost/hana.hpp>
 namespace hana = boost::hana;
 
-#include "cameras/pinhole.h"
-#include "cameras/atan.h"
+#include "taser/sensors/pinhole_camera.h"
+#include "taser/sensors/atan_camera.h"
 
-namespace TC = taser::cameras;
+namespace TC = taser::sensors;
 
 // Define valid camera types
 static constexpr auto camera_types = hana::tuple_t<

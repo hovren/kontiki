@@ -80,11 +80,12 @@ taser_add_module(taser.trajectories._uniform_so3_spline_trajectory)
 taser_add_module(taser.trajectories._uniform_se3_spline_trajectory)
 taser_add_module(taser.trajectories._split_trajectory)
 
-# Cameras
-taser_add_module(taser.cameras._pinhole_camera)
-taser_add_module(taser.cameras._atan_camera)
+# Sensors
+# - Cameras
+taser_add_module(taser.sensors._pinhole_camera)
+taser_add_module(taser.sensors._atan_camera)
 
-# IMUs
+# - IMUs
 taser_add_module(taser.sensors._basic_imu)
 taser_add_module(taser.sensors._constant_bias_imu)
 

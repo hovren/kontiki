@@ -14,8 +14,8 @@
 #include <taser/trajectory_estimator.h>
 #include <taser/measurements/position_measurement.h>
 #include <taser/measurements/static_rscamera_measurement.h>
-#include <taser/cameras/pinhole.h>
-#include <taser/cameras/atan.h>
+#include <taser/sensors/pinhole_camera.h>
+#include <taser/sensors/atan_camera.h>
 #include <taser/sfm/view.h>
 #include <taser/sfm/landmark.h>
 #include <taser/sfm/observation.h>
@@ -23,7 +23,7 @@
 
 using namespace taser;
 using namespace taser::trajectories;
-using namespace taser::cameras;
+using namespace taser::sensors;
 using namespace taser::measurements;
 
 template<typename TrajectoryModel>

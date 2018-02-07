@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal, assert_equal
 
-from taser.cameras import AtanCamera
+from taser.sensors import AtanCamera
 from taser.rotations import random_quaternion, quat_to_rotation_matrix
 from fixtures.camera_fixtures import relative_pose, CAMERA_READOUT, IMAGE_ROWS, IMAGE_COLS, ATAN_K, ATAN_WC, ATAN_GAMMA
 

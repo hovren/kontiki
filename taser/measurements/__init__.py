@@ -2,7 +2,7 @@ import pkgutil
 import importlib
 
 from ..templatemeta import TemplateMeta
-from .. import cameras, sensors
+from .. import sensors
 
 
 for module in pkgutil.iter_modules(__path__):
@@ -56,7 +56,7 @@ static_classes = {
 for name, impl in static_classes.items():
     camera_id = name.split("_")[-1]
     try:
-        camera_cls = getattr(cameras, camera_id + 'Camera')
+        camera_cls = getattr(sensors, camera_id + 'Camera')
         StaticRsCameraMeasurement.register(camera_cls, impl)
     except AttributeError:
         pass
