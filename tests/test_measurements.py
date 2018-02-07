@@ -54,11 +54,18 @@ def test_position_measurements(trajectory_example):
         xhat = m.measure(trajectory)
         np.testing.assert_almost_equal(xhat, x)
 
-def test_gyroscope_measurements(trajectory_example, imu):
-    trajectory, example_data = trajectory_example
+def test_gyroscope_measurements(trajectory, imu):
+    times = np.linspace(*safe_time_span(trajectory, 3.0), num=10, endpoint=False)
 
-    # Currently fails for ConstantBiasImu since we don't take bias into account
-    for t, w in example_data.angular_velocity:
+    def true_gyro(t):
+        q = trajectory.orientation(t)
+        R = quat_to_rotation_matrix(q)
+        w_world = trajectory.angular_velocity(t)
+        w_body = R.T @ w_world
+        return w_body
+
+    for t in times:
+        w = true_gyro(t)
         m = GyroscopeMeasurement(imu, t, w)
         w_hat = m.measure(trajectory)
         try:
