@@ -140,7 +140,7 @@ class SplitTrajectory : public internal::SplitEntity<internal::SplitView,
   using internal::SplitEntity<internal::SplitView,
                               internal::SplitMeta,
                               entity::EmptyParameterStore<double>>::SplitEntity;
-  static constexpr const char* CLASS_ID = "Split";
+  static constexpr const char* CLASS_ID = "SplitTrajectory";
 };
 
 } // namespace trajectories

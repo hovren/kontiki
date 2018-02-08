@@ -136,7 +136,7 @@ class LinearTrajectory : public internal::LinearEntity<internal::LinearView,
                                internal::LinearMeta,
                                entity::DynamicParameterStore<double>>::LinearEntity;
 
-  static constexpr const char* CLASS_ID = "Linear";
+  static constexpr const char* CLASS_ID = "LinearTrajectory";
 
 };
 

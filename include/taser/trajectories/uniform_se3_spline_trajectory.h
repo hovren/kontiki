@@ -198,7 +198,7 @@ class UniformSE3SplineSegmentView : public SplineSegmentView<T, SE3SplineControl
 
 class UniformSE3SplineTrajectory : public internal::SplineEntity<internal::UniformSE3SplineSegmentView> {
  public:
-  static constexpr const char* CLASS_ID = "UniformSE3Spline";
+  static constexpr const char* CLASS_ID = "UniformSE3SplineTrajectory";
   using internal::SplineEntity<internal::UniformSE3SplineSegmentView>::SplineEntity;
 
   void EvaluateSpline(double t, int flags, Sophus::SE3d &P, Eigen::Matrix4d &P_prim, Eigen::Matrix4d &P_bis) const {

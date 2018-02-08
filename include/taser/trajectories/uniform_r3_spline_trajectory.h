@@ -106,7 +106,7 @@ class UniformR3SplineSegmentView : public SplineSegmentView<T, R3SplineControlPo
 
 class UniformR3SplineTrajectory : public internal::SplineEntity<internal::UniformR3SplineSegmentView> {
  public:
-  static constexpr const char* CLASS_ID = "UniformR3Spline";
+  static constexpr const char* CLASS_ID = "UniformR3SplineTrajectory";
   using internal::SplineEntity<internal::UniformR3SplineSegmentView>::SplineEntity;
 };
 

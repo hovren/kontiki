@@ -9,6 +9,7 @@
 namespace hana = boost::hana;
 
 #include "measurements/static_rscamera_measurement.h"
+#include "measurements/lifting_rscamera_measurement.h"
 #include "measurements/position_measurement.h"
 #include "measurements/gyroscope_measurement.h"
 #include "measurements/accelerometer_measurement.h"
@@ -35,7 +36,8 @@ namespace TM = taser::measurements;
 
 // Define Camera measurements
 static auto cam_meas_templates = hana::tuple_t<
-    hana::template_t<TM::StaticRsCameraMeasurement>
+    hana::template_t<TM::StaticRsCameraMeasurement>,
+    hana::template_t<TM::LiftingRsCameraMeasurement>
     >;
 
 

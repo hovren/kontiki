@@ -1,5 +1,5 @@
 from .templatemeta import TemplateMeta
-from . import _trajectory_estimator as MODULE
+from . import _trajectory_estimator as __MODULE
 from . import trajectories
 
 class Meta(TemplateMeta):
@@ -14,15 +14,16 @@ class Meta(TemplateMeta):
 class TrajectoryEstimator(metaclass=Meta):
     pass
 
+
 estimator_classes = {
-    name: getattr(MODULE, name) for name in dir(MODULE)
+    name: getattr(__MODULE, name) for name in dir(__MODULE)
     if name.startswith('TrajectoryEstimator')
 }
 
 for name, impl in estimator_classes.items():
     traj_id = name.split("_")[-1]
     try:
-        traj_cls = getattr(trajectories, traj_id + 'Trajectory')
+        traj_cls = getattr(trajectories, traj_id)
         TrajectoryEstimator.register(traj_cls, impl)
     except AttributeError:
         pass

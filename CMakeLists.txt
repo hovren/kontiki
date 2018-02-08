@@ -100,6 +100,7 @@ taser_add_module(taser.measurements._position_measurement)
 taser_add_module(taser.measurements._accelerometer_measurement)
 taser_add_module(taser.measurements._gyroscope_measurement)
 taser_add_module(taser.measurements._static_rscamera_measurement)
+taser_add_module(taser.measurements._lifting_rscamera_measurement)
 
 add_executable(entity_devel src/entity_devel.cc)
 target_link_libraries(entity_devel PRIVATE ${CERES_LIBRARIES})

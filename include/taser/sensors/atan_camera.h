@@ -105,7 +105,7 @@ class AtanCamera : public internal::AtanEntity<internal::AtanView,
                              internal::AtanMeta,
                              entity::DynamicParameterStore<double>>::AtanEntity;
 
-  static constexpr const char *CLASS_ID = "Atan";
+  static constexpr const char *CLASS_ID = "AtanCamera";
 };
 
 } // namespace sensors

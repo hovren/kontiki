@@ -90,7 +90,7 @@ class PinholeCamera : public internal::PinholeEntity<internal::PinholeView,
                                  internal::PinholeMeta,
                                  entity::DynamicParameterStore<double>>::PinholeEntity;
 
-  static constexpr const char *CLASS_ID = "Pinhole";
+  static constexpr const char *CLASS_ID = "PinholeCamera";
 };
 
 } // namespace sensors

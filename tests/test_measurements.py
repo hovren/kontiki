@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from taser.measurements import StaticRsCameraMeasurement, PositionMeasurement, GyroscopeMeasurement, AccelerometerMeasurement
+from taser.measurements import StaticRsCameraMeasurement, LiftingRsCameraMeasurement, PositionMeasurement, GyroscopeMeasurement, AccelerometerMeasurement
 from taser.rotations import quat_to_rotation_matrix
 from taser.sfm import Landmark, View
 from taser.utils import safe_time_span
@@ -9,7 +9,8 @@ from taser.rotations import quat_to_rotation_matrix
 
 from trajectories.test_general import trajectory_example
 
-def test_static(small_sfm):
+@pytest.mark.parametrize('cls', [StaticRsCameraMeasurement, LiftingRsCameraMeasurement])
+def test_rscamera_measurements(cls, small_sfm):
     # NOTE: If this test fails, first try to clear the pytest cache using
     #  python3 -m pytest --cache-clear
 
@@ -22,12 +23,13 @@ def test_static(small_sfm):
     # Make sure the measurements agree
     assert len(lm.observations) >= 2
     for obs in lm.observations[1:]:
-        m = StaticRsCameraMeasurement(camera, obs)
+        m = cls(camera, obs)
         yhat = m.project(trajectory)
         np.testing.assert_almost_equal(yhat, obs.uv)
 
-        
-def test_static_attribute_access(camera):
+
+@pytest.mark.parametrize('cls', [StaticRsCameraMeasurement, LiftingRsCameraMeasurement])
+def test_rscamera_measurements_attribute_access(cls, camera):
     lm = Landmark()
     views = [View(i, i/30) for i in range(2)]
 
@@ -43,7 +45,10 @@ def test_static_attribute_access(camera):
 def test_camera_errors_size(trajectory, camera_measurements):
     for m in camera_measurements:
         e = m.error(trajectory)
-        assert e.size == 2
+        if issubclass(type(m), LiftingRsCameraMeasurement):
+            assert e.size == 3
+        else:
+            assert e.size == 2
 
 def test_position_measurements(trajectory_example):
     trajectory, example_data = trajectory_example
