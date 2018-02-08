@@ -26,5 +26,5 @@ PYBIND11_MODULE(_atan_camera, m) {
   cls.def_property("camera_matrix", &Class::camera_matrix, &Class::set_camera_matrix);
 
   // Common functions
-  declare_common<Class>(cls);
+  declare_camera_common<Class>(cls);
 }

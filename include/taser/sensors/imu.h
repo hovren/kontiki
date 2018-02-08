@@ -3,6 +3,7 @@
 
 #include <Eigen/Dense>
 
+#include "sensors.h"
 #include <entity/entity.h>
 #include <taser/trajectories/trajectory.h>
 #include <taser/types.h>
@@ -20,12 +21,12 @@ static const double STANDARD_GRAVITY = 9.80665;
 // Base Imu view using CRTP to access the correct Gyroscope()/Accelerometer() methods
 // All IMU views must inherit from this one directly, and not through subclasses.
 template<typename T, typename MetaType, typename Derived>
-class ImuView : public entity::EntityView<T, MetaType> {
+class ImuView : public SensorView<T, MetaType> {
   using Vector3 = Eigen::Matrix<T, 3, 1>;
   using Flags = trajectories::EvaluationFlags;
  public:
   // Import constructor
-  using entity::EntityView<T, MetaType>::EntityView;
+  using SensorView<T, MetaType>::SensorView;
 
 //  static const Vector3 GRAVITY;
 
@@ -64,11 +65,11 @@ class ImuView : public entity::EntityView<T, MetaType> {
 
 
 template<template<typename...> typename ViewTemplate, typename MetaType, typename StoreType>
-class ImuEntity : public type::Entity<ViewTemplate, MetaType, StoreType> {
+class ImuEntity : public SensorEntity<ViewTemplate, MetaType, StoreType> {
   using Vector3 = Eigen::Vector3d;
  public:
   // Inherit constructors
-  using type::Entity<ViewTemplate, MetaType, StoreType>::Entity;
+  using SensorEntity<ViewTemplate, MetaType, StoreType>::SensorEntity;
 };
 
 } // namespace detail

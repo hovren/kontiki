@@ -96,3 +96,11 @@ def test_accelerometer_measurements(trajectory, imu):
         except AttributeError:
             pass # No bias to remove
         np.testing.assert_almost_equal(acc_hat, acc)
+
+
+@pytest.mark.parametrize('mcls', [AccelerometerMeasurement, GyroscopeMeasurement])
+def test_imu_measurement_same_imu(mcls, imu):
+    t = 1.0
+    m = mcls(imu, t, np.random.uniform(-1, 1, size=3))
+    print(imu, m.imu)
+    assert m.imu is imu

@@ -16,10 +16,6 @@ ATAN_WC = np.array([0.0029110778971412417, 0.0004189670467132041])#.reshape(2,1)
 ATAN_GAMMA = 0.8894355177968156
 
 @pytest.fixture
-def relative_pose():
-    return random_quaternion(), np.random.uniform(-1, 1, size=3)
-
-@pytest.fixture
 def pinhole_camera():
     K = np.eye(3)
     return PinholeCamera(IMAGE_ROWS, IMAGE_COLS, CAMERA_READOUT, K)

@@ -156,12 +156,15 @@ def camera_measurements(request, small_sfm):
     return measurements
 
 
+used_imus = []
+
 @pytest.fixture(params=[AccelerometerMeasurement, GyroscopeMeasurement])
 def imu_measurements(request, imu, trajectory):
     cls = request.param
     length = 5.
     n = int(length * 3)
     times = np.linspace(*safe_time_span(trajectory, length), num=n)
+    print('Creating from imu', imu)
     return [cls(imu, t, np.random.uniform(-1, 1, size=3)) for t in times]
 
 
@@ -175,3 +178,19 @@ def simple_measurements(request, trajectory):
         return [cls(t, np.random.uniform(-1, 1, size=3)) for t in times]
     else:
         raise NotImplementedError(f"simple_measurements fixture not implemented for {cls}")
+
+
+sensor_classes = list(camera_classes.keys()) + imu_classes
+
+@pytest.fixture(params=sensor_classes)
+def sensor(request):
+    cls = request.param
+    if cls.__name__.endswith('Camera'):
+        return camera(request, (np.array([1, 0, 0, 0]), np.zeros(3)))
+    else:
+        return cls()
+
+
+@pytest.fixture
+def relative_pose():
+    return random_quaternion(), np.random.uniform(-1, 1, size=3)

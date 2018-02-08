@@ -4,7 +4,7 @@
 #include <Eigen/Dense>
 
 #include <taser/sensors/constant_bias_imu.h>
-#include "sensors_helper.h"
+#include "imu_helper.h"
 
 namespace py = pybind11;
 

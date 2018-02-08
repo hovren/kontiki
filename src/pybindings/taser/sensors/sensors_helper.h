@@ -5,25 +5,26 @@
 #ifndef TASERV2_SENSORS_HELPER_H
 #define TASERV2_SENSORS_HELPER_H
 
-#include <boost/hana.hpp>
-namespace hana = boost::hana;
-
-#include "../trajectory_defs.h"
+// Eigen::Quaternion not exposed, to use Vector4d instead
+using PyRelPosePair = std::pair<Eigen::Vector4d, Eigen::Vector3d>;
 
 template<typename Class, typename PyClass>
-static void declare_imu_common(PyClass &cls) {
-  // Bind functions that need to know the trajectory type
-  hana::for_each(trajectory_types, [&](auto t) {
-    using TrajectoryModel = typename decltype(t)::type;
+static void declare_sensors_common(PyClass &cls) {
+  cls.def_property("relative_pose", [](Class &self) {
+                     const Eigen::Quaterniond &q = self.relative_orientation();
+                     Eigen::Vector4d pyq(q.w(), q.x(), q.y(), q.z());
+                     return PyRelPosePair(pyq, self.relative_position());
+                   },
+                   [](Class &self, const PyRelPosePair &pose) {
+                     //Eigen::Quaterniond q(pose.first.data());
+                     const Eigen::Vector4d &q = pose.first;
+                     self.set_relative_orientation(Eigen::Quaterniond(q(0), q(1), q(2), q(3)));
+                     self.set_relative_position(pose.second);
+                   });
 
-    cls.def("accelerometer", [](Class &self, const TrajectoryModel& trajectory, double t) {
-      return self.template Accelerometer<TrajectoryModel>(trajectory, t);
-    });
+  cls.def("from_trajectory", &Class::FromTrajectory);
+  cls.def("to_trajectory", &Class::ToTrajectory);
 
-    cls.def("gyroscope", [](Class &self, const TrajectoryModel& trajectory, double t) {
-      return self.template Gyroscope<TrajectoryModel>(trajectory, t);
-    });
-  }); // for_each trajectory type
 }
 
 

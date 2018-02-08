@@ -14,7 +14,7 @@ PYBIND11_MODULE(_pinhole_camera, m) {
   using Class = C::PinholeCamera;
   auto cls = py::class_<Class, std::shared_ptr<Class>>(m, "PinholeCamera");
 
-  declare_common<Class>(cls);
+  declare_camera_common<Class>(cls);
 
   // Declare extra Pinhole related things here
   cls.def(py::init<size_t, size_t, double, const Class::CameraMatrix &>());

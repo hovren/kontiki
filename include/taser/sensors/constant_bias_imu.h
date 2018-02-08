@@ -14,7 +14,7 @@ namespace internal {
 
 struct ConstantBiasImuMeta : public BasicImuMeta {
   size_t NumParameters() const override {
-    return 2;
+    return BasicImuMeta::NumParameters() + 2;
   }
 };
 
@@ -23,24 +23,28 @@ class ConstantBiasImuView : public ImuView<T, MetaType, ConstantBiasImuView<T, M
   using Vector3 = Eigen::Matrix<T, 3, 1>;
   using Vector3Map = Eigen::Map<Vector3>;
   using Base = ImuView<T, MetaType, ConstantBiasImuView<T, MetaType>>;
+ protected:
+  // Parameter indices. 0 and 1 are rel pose set by SensorEntity
+  const size_t PARAM_ABIAS = 2;
+  const size_t PARAM_GBIAS = 3;
  public:
   using Base::ImuView;
 
   Vector3Map accelerometer_bias() const {
-    return Vector3Map(this->holder_->ParameterData(0));
+    return Vector3Map(this->holder_->ParameterData(PARAM_ABIAS));
   }
 
   void set_accelerometer_bias(const Vector3& b) {
-    Vector3Map bmap(this->holder_->ParameterData(0));
+    Vector3Map bmap(this->holder_->ParameterData(PARAM_ABIAS));
     bmap = b;
   }
 
   Vector3Map gyroscope_bias() const {
-    return Vector3Map(this->holder_->ParameterData(1));
+    return Vector3Map(this->holder_->ParameterData(PARAM_GBIAS));
   }
 
   void set_gyroscope_bias(const Vector3 &b) {
-    Vector3Map bmap(this->holder_->ParameterData(1));
+    Vector3Map bmap(this->holder_->ParameterData(PARAM_GBIAS));
     bmap = b;
   }
 
@@ -62,11 +66,12 @@ class ConstantBiasImuEntity : public BasicImuEntity<ViewTemplate, MetaType, Stor
   using Base = BasicImuEntity<ViewTemplate, MetaType, StoreType>;
  public:
   ConstantBiasImuEntity(const Eigen::Vector3d &abias, const Eigen::Vector3d &gbias) :
+      Base(),
       gyro_bias_locked_(true),
       acc_bias_locked_(true) {
     // Define parameters
-    this->holder_->AddParameter(3); // 0: Accelerometer bias
-    this->holder_->AddParameter(3); // 1: Gyroscope bias
+    this->holder_->AddParameter(3);
+    this->holder_->AddParameter(3);
 
     this->set_accelerometer_bias(abias);
     this->set_gyroscope_bias(gbias);
@@ -98,14 +103,14 @@ class ConstantBiasImuEntity : public BasicImuEntity<ViewTemplate, MetaType, Stor
                     std::vector<entity::ParameterInfo<double>> &parameters) const override {
     Base::AddToProblem(problem, times, meta, parameters);
 
-    auto p_ab = this->holder_->Parameter(0);
+    auto p_ab = this->holder_->Parameter(this->PARAM_ABIAS);
     problem.AddParameterBlock(p_ab.data, p_ab.size, p_ab.parameterization);
     parameters.push_back(p_ab);
 
     if (acc_bias_locked_)
       problem.SetParameterBlockConstant(p_ab.data);
 
-    auto p_gb = this->holder_->Parameter(1);
+    auto p_gb = this->holder_->Parameter(this->PARAM_GBIAS);
     problem.AddParameterBlock(p_gb.data, p_gb.size, p_gb.parameterization);
     parameters.push_back(p_gb);
 

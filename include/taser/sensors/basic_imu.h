@@ -11,10 +11,8 @@ namespace taser {
 namespace sensors {
 namespace internal {
 
-struct BasicImuMeta : public entity::MetaData {
-  size_t NumParameters() const override {
-    return 0;
-  }
+struct BasicImuMeta : public SensorMeta {
+
 };
 
 template<typename T, typename MetaType>
@@ -40,12 +38,6 @@ class BasicImuEntity : public ImuEntity<ViewTemplate, MetaType, StoreType> {
  public:
   using ImuEntity<ViewTemplate, MetaType, StoreType>::ImuEntity;
 
-  void AddToProblem(ceres::Problem &problem,
-                    time_init_t times,
-                    MetaType &meta,
-                    std::vector<entity::ParameterInfo<double>> &parameters) const override {
-    // No parameters to add
-  }
 };
 
 
@@ -53,7 +45,7 @@ class BasicImuEntity : public ImuEntity<ViewTemplate, MetaType, StoreType> {
 
 class BasicImu : public internal::BasicImuEntity<internal::BasicImuView,
                                                  internal::BasicImuMeta,
-                                                 entity::EmptyParameterStore<double>> {
+                                                 entity::DynamicParameterStore<double>> {
  public:
   static constexpr const char* CLASS_ID = "BasicImu";
 };

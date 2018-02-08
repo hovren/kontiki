@@ -10,16 +10,16 @@
 #include <pybind11/eigen.h>
 #include <pybind11/stl.h>
 
+#include "sensors_helper.h"
+
 namespace py = pybind11;
 
 namespace C = taser::sensors;
 
-// Eigen::Quaternion not exposed, to use Vector4d instead
-using PyRelPosePair = std::pair<Eigen::Vector4d, Eigen::Vector3d>;
-
 template<typename Class, typename PyClass>
-void declare_common(PyClass &cls) {
+void declare_camera_common(PyClass &cls) {
 
+  declare_sensors_common<Class>(cls);
 
   cls.def(py::init<size_t, size_t, double>());
   cls.def("project", &Class::Project, "Project");
@@ -36,21 +36,6 @@ void declare_common(PyClass &cls) {
                    &Class::cols,
                    &Class::set_cols,
                    "Image cols");
-  cls.def_property("relative_pose", [](Class &self) {
-    const C::RelativePose<double> &pose_struct = self.relative_pose();
-    const Eigen::Quaterniond &q = pose_struct.orientation;
-    Eigen::Vector4d pyq(q.w(), q.x(), q.y(), q.z());
-    return PyRelPosePair(pyq, pose_struct.translation);
-  },
-  [](Class &self, const PyRelPosePair &pose) {
-    //Eigen::Quaterniond q(pose.first.data());
-    const Eigen::Vector4d &q = pose.first;
-   self.set_relative_pose(C::RelativePose<double>(Eigen::Quaterniond(q(0), q(1), q(2), q(3)),
-                                          pose.second));
-  });
-
-  cls.def("from_trajectory", &Class::FromTrajectory);
-  cls.def("to_trajectory", &Class::ToTrajectory);
 }
 
 #endif //TASERV2_CAMERA_HELP_H

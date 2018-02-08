@@ -22,6 +22,7 @@ PYBIND11_MODULE(_gyroscope_measurement, m) {
     auto cls = py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str());
     cls.def(py::init<std::shared_ptr<ImuModel>, double, const Eigen::Vector3d &, double>());
     cls.def(py::init<std::shared_ptr<ImuModel>, double, const Eigen::Vector3d &>());
+    cls.def_readonly("imu", &Class::imu_);
 
     declare_measurement_common<Class>(cls);
   }); // for_each(imu_types)

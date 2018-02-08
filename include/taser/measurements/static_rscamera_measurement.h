@@ -38,9 +38,8 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref,
   auto eval_obs = trajectory.Evaluate(t_obs, flags);
 
   // FIXME: We have a ToTrajectory/FromTrajectory function
-  const taser::sensors::RelativePose<T> &rel_pose = camera.relative_pose();
-  const Vector3 p_ct = rel_pose.translation;
-  const Eigen::Quaternion<T> q_ct = rel_pose.orientation;
+  const Vector3 p_ct = camera.relative_position();
+  const Eigen::Quaternion<T> q_ct = camera.relative_orientation();
 
   Vector2 y = ref.uv().cast<T>();
   Vector3 yh = camera.Unproject(y);
