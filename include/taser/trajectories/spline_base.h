@@ -193,7 +193,12 @@ class SplineView : public TrajectoryView<T, MetaType> {
       }
     }
 
-    throw std::range_error("No segment found for time t");
+    std::stringstream ss;
+    ss << "No segment found for time t=" << t;
+    ss << "Segments: ";
+    for (auto &seg : segments)
+      ss << "[" << seg->MinTime() << ", " << seg->MaxTime() << ") ";
+    throw std::range_error(ss.str());
   }
 
   const ControlPointMap ControlPoint(int i) const {
