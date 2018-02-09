@@ -35,6 +35,7 @@ PYBIND11_MODULE(_lifting_rscamera_measurement, m) {
 
     cls.def_readonly("camera", &Class::camera);
     cls.def_readonly("observation", &Class::observation);
+    cls.def_readonly("vt", &Class::vt_);
 
     // Declare the project() function for all trajectory types
     hana::for_each(trajectory_types, [&](auto tt) {
