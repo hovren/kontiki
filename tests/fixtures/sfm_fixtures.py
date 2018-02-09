@@ -72,6 +72,9 @@ def generate_valid_structure(camera, trajectory):
     fps = 30
     nviews = 8
     t1, t2 = safe_time_span(trajectory, nviews/fps)
+    # Safety margins
+    t1 += 1e-2
+    t2 -= 1e-2
     times = t1 + np.arange(nviews) / fps
     views = [View(i, t) for i, t in enumerate(times)]
     nlandmarks = 5

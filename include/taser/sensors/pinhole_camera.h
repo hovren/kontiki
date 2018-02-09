@@ -29,6 +29,7 @@ template<typename T, typename MetaType>
 class PinholeView : public CameraView<T, MetaType> {
   using Vector3 = Eigen::Matrix<T, 3, 1>;
   using Vector2 = Eigen::Matrix<T, 2, 1>;
+  using Result = std::unique_ptr<CameraEvaluation<T>>;
  public:
   using CameraMatrix = Eigen::Matrix<T, 3, 3>;
 
@@ -43,10 +44,22 @@ class PinholeView : public CameraView<T, MetaType> {
     this->meta_.camera_matrix = K.template cast<double>();
   }
 
-  Vector2 Project(const Vector3 &X) const override {
-    Vector3 y = camera_matrix() * X;
-    return y.head(2)/y(2);
+  Result EvaluateProjection(const Vector3 &X, const Vector3 &dX, bool derive) const override {
+    auto result = std::make_unique<CameraEvaluation<T>>(derive);
+    Vector3 p = camera_matrix() * X;
+    result->y = p.head(2)/p(2);
+
+    if (derive) {
+      const T z_eps = T(1e-32);
+      Vector3 dp = camera_matrix() * dX;
+      T denominator = (p(2)*p(2)) + z_eps;
+      result->dy(0) = ((dp(0) * p(2)) - (p(0)*dp(2))) / denominator;
+      result->dy(1) = ((dp(1) * p(2)) - (p(1)*dp(2))) / denominator;
+    }
+
+    return result;
   }
+
   Vector3 Unproject(const Vector2 &y) const override {
     Vector3 xh(y(0), y(1), T(1));
     CameraMatrix K = camera_matrix();

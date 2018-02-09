@@ -30,6 +30,7 @@ class AtanView : public PinholeView<T, MetaType> {
   using Base = PinholeView<T, MetaType>;
   using Vector2 = Eigen::Matrix<T, 2, 1>;
   using Vector3 = Eigen::Matrix<T, 3, 1>;
+  using Result = std::unique_ptr<CameraEvaluation<T>>;
  public:
   // Inherit constructors
   using Base::PinholeView;
@@ -50,8 +51,10 @@ class AtanView : public PinholeView<T, MetaType> {
     this->meta_.gamma = (double) gamma;
   }
 
-  Vector2 Project(const Vector3 &X) const override {
+  Result EvaluateProjection(const Vector3 &X, const Vector3 &dX, bool derive) const override {
     const T eps = T(1e-32);
+
+    auto result = std::make_unique<CameraEvaluation<T>>(derive);
 
     // Common parts
     Vector2 A = X.head(2)/(X(2) + eps);
@@ -64,7 +67,13 @@ class AtanView : public PinholeView<T, MetaType> {
 
     // Apply camera matrix
     // Normalization not needed since Y(2) == 1
-    return (this->camera_matrix() * Y).head(2);
+    result->y = (this->camera_matrix() * Y).head(2);
+
+    if (derive) {
+
+    }
+
+    return result;
   }
   Vector3 Unproject(const Vector2 &y) const override {
     const T eps = T(1e-32);

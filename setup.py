@@ -111,6 +111,7 @@ ext_modules = [
     MeasurementExtension('_position_measurement'),
     MeasurementExtension('_static_rscamera_measurement'),
     MeasurementExtension('_lifting_rscamera_measurement'),
+    MeasurementExtension('_newton_rscamera_measurement'),
     MeasurementExtension('_accelerometer_measurement'),
     MeasurementExtension('_gyroscope_measurement'),
 ]

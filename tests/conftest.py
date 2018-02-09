@@ -7,7 +7,7 @@ from fixtures.sfm_fixtures import *
 
 from taser.trajectories import LinearTrajectory, UniformR3SplineTrajectory, UniformSO3SplineTrajectory, SplitTrajectory, \
     UniformSE3SplineTrajectory
-from taser.measurements import PositionMeasurement, LiftingRsCameraMeasurement, StaticRsCameraMeasurement, GyroscopeMeasurement, AccelerometerMeasurement
+from taser.measurements import PositionMeasurement, NewtonRsCameraMeasurement, LiftingRsCameraMeasurement, StaticRsCameraMeasurement, GyroscopeMeasurement, AccelerometerMeasurement
 from taser.sensors import BasicImu, ConstantBiasImu
 from taser.utils import safe_time_span
 from taser.rotations import quat_to_rotation_matrix
@@ -44,7 +44,9 @@ def trajectory(request):
             np.array([1, 4, 0]),
             np.array([-2, 2, 2]),
             np.array([-3, -2, 1]),
-            np.array([-4, -2, 0])
+            np.array([-4, -2, 0]),
+            np.array([-1, 2, 0]),
+            np.array([-2, -1.5, 1.2])
         ]
 
         instance = cls(dt, t0)
@@ -138,9 +140,11 @@ measurement_classes = [
     AccelerometerMeasurement,
     GyroscopeMeasurement,
     StaticRsCameraMeasurement,
+    LiftingRsCameraMeasurement,
+    NewtonRsCameraMeasurement
 ]
 
-@pytest.fixture(params=[StaticRsCameraMeasurement, LiftingRsCameraMeasurement])
+@pytest.fixture(params=[StaticRsCameraMeasurement, LiftingRsCameraMeasurement, NewtonRsCameraMeasurement])
 def camera_measurements(request, small_sfm):
     views, trajectory, camera = small_sfm
     MeasurementClass = request.param

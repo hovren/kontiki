@@ -95,6 +95,26 @@ Eigen::Matrix<T, 3, 1> angular_velocity(const Eigen::Quaternion<T> &q, const Eig
 };
 
 template<typename T>
+Eigen::Quaternion<T> embed_vector(const Eigen::Matrix<T, 3, 1> &v) {
+  return Eigen::Quaternion<T>(T(0), v(0), v(1), v(2));
+}
+
+template<typename T>
+Eigen::Quaternion<T> dq_from_angular_velocity(const Eigen::Matrix<T, 3, 1> &w, const Eigen::Quaternion<T> &q) {
+  Eigen::Quaternion<T> qw = embed_vector(w);
+  return Eigen::Quaternion<T>(T(0.5) * (qw * q).coeffs());
+}
+
+// Calculate the quaternion product qa * qx * qb, where qx is x embedded in a quaternion
+template<typename T>
+Eigen::Matrix<T, 3, 1> vector_sandwich(const Eigen::Quaternion<T> &qa,
+                                       const Eigen::Matrix<T, 3, 1> &x,
+                                       const Eigen::Quaternion<T> &qb) {
+  Eigen::Quaternion<T> qx = embed_vector(x);
+  return (qa * qx * qb).vec();
+};
+
+template<typename T>
 bool IsUnitQuaternion(const Eigen::Quaternion<T>& q) {
   auto err = ceres::abs(q.norm() - T(1));
   return err < T(math::eps_unit_check);

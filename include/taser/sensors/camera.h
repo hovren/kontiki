@@ -27,14 +27,37 @@ struct CameraMeta : public SensorMeta {
   size_t cols;
 };
 
+template<typename T>
+struct CameraEvaluation {
+  using Vector2 = Eigen::Matrix<T, 2, 1>;
+
+  CameraEvaluation(bool derive) :
+      derive(derive) { };
+
+  // Data
+  Vector2 y;
+  Vector2 dy;
+
+  bool derive;
+};
+
 template<typename T, typename MetaType>
 class CameraView : public SensorView<T, MetaType> {
+ protected:
   using Vector2 = Eigen::Matrix<T, 2, 1>;
   using Vector3 = Eigen::Matrix<T, 3, 1>;
+  using Result = std::unique_ptr<CameraEvaluation<T>>;
  public:
   using SensorView<T, MetaType>::SensorView;
 
-  virtual Vector2 Project(const Vector3 &X) const = 0;
+  virtual Result EvaluateProjection(const Vector3 &X, const Vector3 &dX, bool derive) const = 0;
+
+  Vector2 Project(const Vector3 &X) const {
+    Vector3 dX;
+    auto result = EvaluateProjection(X, dX, false);
+    return result->y;
+  };
+
   virtual Vector3 Unproject(const Vector2& y) const = 0;
 
   size_t rows() const {

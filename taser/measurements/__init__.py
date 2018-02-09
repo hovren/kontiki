@@ -34,6 +34,9 @@ class StaticRsCameraMeasurement(metaclass=RsMeta):
 class LiftingRsCameraMeasurement(metaclass=RsMeta):
     pass
 
+class NewtonRsCameraMeasurement(metaclass=RsMeta):
+    pass
+
 
 class ImuMeta(TemplateMeta):
     def __call__(self, imu, *args, **kwargs):
