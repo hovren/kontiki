@@ -159,17 +159,19 @@ Eigen::Matrix<T, 2, 1> reproject_lifting(const Observation& ref,
         t2 = t0_ref;
       }
 
+      const double margin = 1e-3;
+
       estimator.AddTrajectoryForTimes({
-                                          {t1, t1 + camera->readout()},
-                                          {t2, t2 + camera->readout()}
+                                          {t1 - margin, t1 + camera->readout() + margin},
+                                          {t2 - margin, t2 + camera->readout() + margin}
                                       },
                                       residual->trajectory_meta,
                                       parameters);
 
       // Add camera to proble
       camera->AddToProblem(estimator.problem(), {
-                               {t1, t1 + camera->readout()},
-                               {t2, t2 + camera->readout()}
+                               {t1 - margin, t1 + camera->readout() + margin},
+                               {t2 - margin, t2 + camera->readout() + margin}
                            },
                            residual->camera_meta,
                            parameters);
