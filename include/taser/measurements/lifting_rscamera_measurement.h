@@ -63,8 +63,11 @@ Eigen::Matrix<T, 2, 1> reproject_lifting(const Observation& ref,
     using Vector3 = Eigen::Vector3d;
    public:
     LiftingRsCameraMeasurement(std::shared_ptr<CameraModel> camera, std::shared_ptr<Observation> obs, double huber_loss)
-        : camera(camera), observation(obs), loss_function_(huber_loss) {
-      vt_ = observation->uv()[1] / camera->rows();
+        : camera(camera),
+          observation(obs),
+          loss_function_(huber_loss),
+          vt_orig_(observation->v() / camera->rows()){
+      vt_ = vt_orig_;
     };
 
     LiftingRsCameraMeasurement(std::shared_ptr<CameraModel> camera, std::shared_ptr<Observation> obs)
@@ -94,10 +97,15 @@ Eigen::Matrix<T, 2, 1> reproject_lifting(const Observation& ref,
                                  const T vt,
                                  const T inverse_depth) const {
       Eigen::Matrix<T,2,1> y_hat = this->Project<TrajectoryModel, T>(trajectory, camera, vt, inverse_depth);
-
       Eigen::Matrix<T, 3, 1> e;
+
+      // Projection error (in pixels)
       e.head(2) = observation->uv().cast<T>() - y_hat;
-      e(2) = vt - T(vt_);
+
+      // Timing error (in pixels)
+      e(2) = T(camera.rows()) * (vt - T(vt_orig_));
+
+      return e;
     }
 
     template<typename TrajectoryModel>
@@ -207,6 +215,7 @@ Eigen::Matrix<T, 2, 1> reproject_lifting(const Observation& ref,
 
     // The loss function is not a pointer since the Problem does not take ownership.
     ceres::HuberLoss loss_function_;
+    const double vt_orig_;
 
     template<template<typename> typename TrajectoryModel>
     friend class taser::TrajectoryEstimator;
