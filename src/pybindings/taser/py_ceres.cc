@@ -19,6 +19,7 @@ void declare_summary(py::module& m) {
       .def("IsSolutionUsable", &Class::IsSolutionUsable)
       .def_readonly("message", &Class::message)
       .def_readonly("initial_cost", &Class::initial_cost)
+      .def_readonly("iterations", &Class::iterations)
       .def_readonly("final_cost", &Class::final_cost)
       .def_readonly("fixed_cost", &Class::fixed_cost)
       .def_readonly("num_successful_steps", &Class::num_successful_steps)
@@ -92,7 +93,7 @@ void declare_iteration_summary(py::module& m) {
 PYBIND11_MODULE(_ceres, m) {
   m.doc() = "ceres-solver types";
 
-  declare_summary(m);
   declare_iteration_summary(m);
+  declare_summary(m);
   declare_iteration_callback(m);
 }
