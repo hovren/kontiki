@@ -4,6 +4,7 @@ import h5py
 import numpy as np
 
 from .sfm import Landmark, View
+from .sensors import AtanCamera
 
 
 def save_structure(fileobj, landmarks, *, landmark_colors=None):
@@ -108,4 +109,15 @@ def _load_structure_impl(fileobj):
         raise IOError("Number of colors do not match!")
 
     return views, landmarks, landmark_colors
+    
+
+def load_atan_camera(path):
+    with h5py.File(str(path)) as f:
+        cols, rows = f['size'].value
+        camera = AtanCamera(rows, cols,
+                            f['readout'].value,
+                            f['K'].value,
+                            f['wc'].value,
+                            f['lgamma'].value)
+    return camera    
 
