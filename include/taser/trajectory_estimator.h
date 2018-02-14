@@ -48,6 +48,10 @@ class TrajectoryEstimator {
 
     options.max_num_iterations = max_iterations;
 
+    for (auto &cb : callbacks_) {
+      options.callbacks.push_back(cb.get());
+    }
+
     ceres::Solver::Summary summary;
     ceres::Solve(options, &problem_, &summary);
     return summary;
@@ -68,6 +72,10 @@ class TrajectoryEstimator {
     CheckTimeSpans(times);
     trajectory_->AddToProblem(problem_, times, meta, parameter_info);
     return true;
+  }
+
+  void AddCallback(std::unique_ptr<ceres::IterationCallback> callback) {
+    callbacks_.push_back(std::move(callback));
   }
 
  protected:
@@ -103,8 +111,11 @@ class TrajectoryEstimator {
     }
   }
 
+
+  // Data members
   std::shared_ptr<TrajectoryModel> trajectory_;
   ceres::Problem problem_;
+  std::vector<std::unique_ptr<ceres::IterationCallback>> callbacks_;
 };
 
 } // namespace taser

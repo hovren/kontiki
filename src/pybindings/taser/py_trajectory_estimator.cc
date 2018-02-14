@@ -1,6 +1,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>
 
+#include <ceres/ceres.h>
+
 #include "trajectory_estimator.h"
 
 #include <boost/hana.hpp>
@@ -10,6 +12,31 @@ namespace hana = boost::hana;
 #include "measurement_defs.h"
 
 namespace py = pybind11;
+
+class PythonIterationCallback : public ceres::IterationCallback {
+ public:
+  explicit PythonIterationCallback(py::object callback) : callback_func_(callback) {};
+
+  ceres::CallbackReturnType operator()(const ceres::IterationSummary& summary) {
+    py::object py_res = callback_func_(summary);
+
+    // Treat None as Continue
+    if (py_res.is_none()) {
+      return ceres::CallbackReturnType::SOLVER_CONTINUE;
+    }
+    else {
+      // Otherwise we require the result to be a ceres return type
+      return py_res.cast<ceres::CallbackReturnType>();
+    }
+  }
+
+  PythonIterationCallback(const PythonIterationCallback&) = delete;
+  PythonIterationCallback& operator=(const PythonIterationCallback&) = delete;
+  virtual ~PythonIterationCallback() { };
+
+ protected:
+  py::object callback_func_;
+};
 
 PYBIND11_MODULE(_trajectory_estimator, m) {
   m.doc() = "Trajectory estimation class";
@@ -33,6 +60,11 @@ PYBIND11_MODULE(_trajectory_estimator, m) {
     cls.def_property_readonly("trajectory", &Class::trajectory, "Get the trajectory");
     cls.def("solve", &Class::Solve, "Solve the current estimation problem",
             py::arg("max_iterations")=50, py::arg("progress")=true, py::arg("num_threads")=-1);
+
+    cls.def("add_callback", [](Class &self, py::object f) {
+      std::unique_ptr<ceres::IterationCallback> cb(new PythonIterationCallback(f));
+      self.AddCallback(std::move(cb));
+    }, "Add iteration callback");
 
     // Add all known measurement types
     hana::for_each(measurement_types, [&](auto tm) {
