@@ -61,10 +61,10 @@ PYBIND11_MODULE(_trajectory_estimator, m) {
     cls.def("solve", &Class::Solve, "Solve the current estimation problem",
             py::arg("max_iterations")=50, py::arg("progress")=true, py::arg("num_threads")=-1);
 
-    cls.def("add_callback", [](Class &self, py::object f) {
+    cls.def("add_callback", [](Class &self, py::object f, bool update_state) {
       std::unique_ptr<ceres::IterationCallback> cb(new PythonIterationCallback(f));
-      self.AddCallback(std::move(cb));
-    }, "Add iteration callback");
+      self.AddCallback(std::move(cb), update_state);
+    }, "Add iteration callback", py::arg("callback"), py::arg("update_state")=false);
 
     // Add all known measurement types
     hana::for_each(measurement_types, [&](auto tm) {

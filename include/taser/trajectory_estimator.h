@@ -28,7 +28,8 @@ class TrajectoryEstimator {
  public:
   TrajectoryEstimator(std::shared_ptr<TrajectoryModel> trajectory) :
       trajectory_(trajectory),
-      problem_(DefaultProblemOptions()) { };
+      problem_(DefaultProblemOptions()),
+      callback_needs_state_(false) { };
 
   auto trajectory() const {
     return trajectory_;
@@ -48,8 +49,13 @@ class TrajectoryEstimator {
 
     options.max_num_iterations = max_iterations;
 
-    for (auto &cb : callbacks_) {
-      options.callbacks.push_back(cb.get());
+    if (callbacks_.size() > 0) {
+      for (auto &cb : callbacks_) {
+        options.callbacks.push_back(cb.get());
+      }
+
+      if (callback_needs_state_)
+        options.update_state_every_iteration = true;
     }
 
     ceres::Solver::Summary summary;
@@ -74,8 +80,12 @@ class TrajectoryEstimator {
     return true;
   }
 
-  void AddCallback(std::unique_ptr<ceres::IterationCallback> callback) {
+  void AddCallback(std::unique_ptr<ceres::IterationCallback> callback, bool needs_state=false) {
     callbacks_.push_back(std::move(callback));
+
+    // If any callback requires state, the flag must be set
+    if (!callback_needs_state_)
+      callback_needs_state_ = needs_state;
   }
 
  protected:
@@ -116,6 +126,7 @@ class TrajectoryEstimator {
   std::shared_ptr<TrajectoryModel> trajectory_;
   ceres::Problem problem_;
   std::vector<std::unique_ptr<ceres::IterationCallback>> callbacks_;
+  bool callback_needs_state_;
 };
 
 } // namespace taser

@@ -145,3 +145,32 @@ def test_estimator_callback_multiple(callback_estimator):
     # They should have been called an equal amount of times
     for i in range(1, 10):
         assert counter[i] > 1 and counter[i] == counter[0]
+
+
+@pytest.mark.parametrize('update', [True, False])
+def test_estimator_callback_no_state_update(callback_estimator, update):
+    def get_knots():
+        return np.vstack([knot for knot in callback_estimator.trajectory.R3_spline])
+
+    knots0 = get_knots()
+    all_knots = []
+
+    def callback(isum):
+        all_knots.append(get_knots())
+
+    callback_estimator.add_callback(callback, update_state=update)
+
+    callback_estimator.solve(max_iterations=5)
+
+    if update:
+        # Knots update between iterations, should be unequal
+        for knots1, knots2 in zip(all_knots, all_knots[1:]):
+            assert not np.allclose(knots1, knots2) and not np.allclose(knots1, 0)
+    else:
+        # Knots should be the same as original
+        for knots in all_knots:
+            np.testing.assert_equal(knots0, knots)
+
+
+
+
