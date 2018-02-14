@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal, assert_equal
+import scipy.misc
 
 from taser.sensors import AtanCamera
 from taser.rotations import random_quaternion, quat_to_rotation_matrix
@@ -35,6 +36,35 @@ def test_project_unproject(camera):
 
     assert_almost_equal(yhat, y)
 
+
+def test_derivative(camera):
+    y = random_image_point(camera)
+    X = camera.unproject(y) * np.random.uniform(3, 10)
+
+    # Random derivative of the landmark
+    dX = X + np.random.normal(size=3)
+
+    # Analytical differentiation
+    _, dy = camera.evaluate_projection(X, dX, True)
+
+    # Numerical differentiation
+    # dy = Jf(X) @ Jx  where Jf(X) is the jacobian of f at the point X and Jx=dx is the jacobian of X
+    # Start by constructing Jf(X) by differentiating each element
+    def f_jacobian_element(fi, xi):
+        X0 = np.copy(X)
+        def func(x):
+            X0[xi] = x
+            f = camera.project(X0)
+            return f[fi]
+        return scipy.misc.derivative(func, X0[xi], dx=1e-3)
+
+    f_jac = np.empty((2, 3))
+    for fi, xi in np.ndindex(f_jac.shape):
+        f_jac[fi, xi] = f_jacobian_element(fi, xi)
+
+    # Construct the numerical derivative, and compare it
+    dy_num = f_jac @ dX
+    np.testing.assert_almost_equal(dy_num, dy, decimal=3)
 
 def test_pinhole(pinhole_camera):
     camera = pinhole_camera

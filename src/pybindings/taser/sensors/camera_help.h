@@ -7,6 +7,8 @@
 
 #include "taser/sensors/camera.h"
 
+#include <Eigen/Dense>
+
 #include <pybind11/eigen.h>
 #include <pybind11/stl.h>
 
@@ -16,6 +18,9 @@ namespace py = pybind11;
 
 namespace C = taser::sensors;
 
+using Vector3 = Eigen::Vector3d;
+using Vector2 = Eigen::Vector2d;
+
 template<typename Class, typename PyClass>
 void declare_camera_common(PyClass &cls) {
 
@@ -24,6 +29,11 @@ void declare_camera_common(PyClass &cls) {
   cls.def(py::init<size_t, size_t, double>());
   cls.def("project", &Class::Project, "Project");
   cls.def("unproject", &Class::Unproject, "Unproject");
+  cls.def("evaluate_projection", [](Class &self, const Vector3 &X, const Vector3 &dX, bool derive){
+    auto result = self.EvaluateProjection(X, dX, derive);
+    auto pair = std::pair<Vector2, Vector2>(result->y, result->dy);
+    return pair;
+  }, "Evaluate");
   cls.def_property("readout",
                    &Class::readout,
                    &Class::set_readout,
