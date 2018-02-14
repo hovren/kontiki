@@ -24,6 +24,9 @@ PYBIND11_MODULE(_accelerometer_measurement, m) {
     cls.def(py::init<std::shared_ptr<ImuModel>, double, const Eigen::Vector3d &, double>());
     cls.def(py::init<std::shared_ptr<ImuModel>, double, const Eigen::Vector3d &>());
     cls.def_readonly("imu", &Class::imu_);
+    cls.def_readonly("t", &Class::t);
+    cls.def_readonly("a", &Class::a);
+    cls.def_readonly("weight", &Class::weight);
 
     declare_measurement_common<Class>(cls);
   }); // for_each(imu_types)
