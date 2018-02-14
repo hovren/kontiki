@@ -63,14 +63,27 @@ class AtanView : public PinholeView<T, MetaType> {
     T f = ceres::atan(r*gamma())/gamma();
 
     Vector3 Y(T(0), T(0), T(1));
-    Y.head(2) = wc() + f*L/r;
+    Vector2 g = L / r;
+    Y.head(2) = wc() + f*g;
 
     // Apply camera matrix
     // Normalization not needed since Y(2) == 1
     result->y = (this->camera_matrix() * Y).head(2);
 
     if (derive) {
+      T dx = (dX(0)*X(2) - X(0)*dX(2)) / (X(2)*X(2) + eps);
+      T dy = (dX(1)*X(2) - X(1)*dX(2)) / (X(2)*X(2) + eps);
 
+      T common = (g(0) * dx + g(1) * dy);
+      T df = common / (T(1) + ceres::pow(gamma(), 2)*r*r);
+
+      T dgu = (dx * r - L(0) * common) / (r*r);
+      T du = f * dgu + df * g(0);
+
+      T dgv = (dy*r - L(1) * common) / (r*r);
+      T dv = f * dgv + df * g(1);
+
+      result->dy = (this->camera_matrix() * Eigen::Matrix<T, 3, 1>(du, dv, T(0.0))).head(2);
     }
 
     return result;

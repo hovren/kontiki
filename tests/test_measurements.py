@@ -1,7 +1,8 @@
 import pytest
 import numpy as np
 
-from taser.measurements import StaticRsCameraMeasurement, LiftingRsCameraMeasurement, PositionMeasurement, GyroscopeMeasurement, AccelerometerMeasurement
+from taser.measurements import StaticRsCameraMeasurement, LiftingRsCameraMeasurement, NewtonRsCameraMeasurement, \
+    PositionMeasurement, GyroscopeMeasurement, AccelerometerMeasurement
 from taser.rotations import quat_to_rotation_matrix
 from taser.sfm import Landmark, View
 from taser.utils import safe_time_span
@@ -9,7 +10,9 @@ from taser.rotations import quat_to_rotation_matrix
 
 from trajectories.test_general import trajectory_example
 
-@pytest.mark.parametrize('cls', [StaticRsCameraMeasurement, LiftingRsCameraMeasurement])
+projection_types = [StaticRsCameraMeasurement, LiftingRsCameraMeasurement, NewtonRsCameraMeasurement]
+
+@pytest.mark.parametrize('cls', projection_types)
 def test_rscamera_measurements(cls, small_sfm):
     # NOTE: If this test fails, first try to clear the pytest cache using
     #  python3 -m pytest --cache-clear
@@ -18,17 +21,39 @@ def test_rscamera_measurements(cls, small_sfm):
 
     # Take the first landmark
     landmarks = {obs.landmark for v in views for obs in v.observations}
-    lm = next(_ for _ in landmarks)
 
     # Make sure the measurements agree
-    assert len(lm.observations) >= 2
-    for obs in lm.observations[1:]:
-        m = cls(camera, obs)
-        yhat = m.project(trajectory)
-        np.testing.assert_almost_equal(yhat, obs.uv)
+    for lm in landmarks:
+        assert len(lm.observations) >= 2
+        for obs in lm.observations[1:]:
+            m = cls(camera, obs)
+            yhat = m.project(trajectory)
+            np.testing.assert_almost_equal(yhat, obs.uv)
+
+# Newton method should handle noise in the projection
+# Beware that this doesn't seem to catch faulty derivatives for the camera
+def test_newton_rscamera_measurements_with_noise(small_sfm):
+    # NOTE: If this test fails, first try to clear the pytest cache using
+    #  python3 -m pytest --cache-clear
+
+    views, trajectory, camera = small_sfm
+
+    # Take the first landmark
+    landmarks = {obs.landmark for v in views for obs in v.observations}
+
+    # The projection error should be below half a row, because that is the threshold we use to terminate the Newton algorithm
+    for lm in landmarks:
+        assert len(lm.observations) >= 2
+        for obs in lm.observations[1:]:
+            uv_org = obs.uv
+            obs.uv = obs.uv + np.random.normal(0, 2.0, size=2)
+            m = NewtonRsCameraMeasurement(camera, obs)
+            yhat = m.project(trajectory)
+            row_diff = yhat[1] - uv_org[1]
+            assert np.abs(row_diff) <= 0.5
 
 
-@pytest.mark.parametrize('cls', [StaticRsCameraMeasurement, LiftingRsCameraMeasurement])
+@pytest.mark.parametrize('cls', projection_types)
 def test_rscamera_measurements_attribute_access(cls, camera):
     lm = Landmark()
     views = [View(i, i/30) for i in range(2)]

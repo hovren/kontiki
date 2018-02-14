@@ -51,7 +51,6 @@ Eigen::Matrix<T, 2, 1> reproject_newton(const Observation& ref,
   Vector3 yh = camera.Unproject(y);
   Vector3 X_ref = q_ct.conjugate() * (yh - inverse_depth * p_ct);
   Vector3 X = eval_ref->orientation * X_ref + eval_ref->position * inverse_depth;
-  Quaternion Xq = math::embed_vector(X);
 
   // Threshold for termination is a half row
   const T max_time_delta = T(0.5) * camera.readout() / T(camera.rows());
@@ -62,6 +61,9 @@ Eigen::Matrix<T, 2, 1> reproject_newton(const Observation& ref,
 
   Vector2 y_out;
 
+  // Run the Newton algorithm to get the correct projection time t_obs
+  // This means that we need to differentiate the projection point with respect to t_obs.
+  // Since the world landmark position X above only depends on t_ref, it is constant in the following computations.
   for (int iter=0; iter < max_iterations; ++iter) {
     auto eval_obs = trajectory.Evaluate(t_obs, flags);
     Vector3 p = eval_obs->position;
@@ -75,16 +77,16 @@ Eigen::Matrix<T, 2, 1> reproject_newton(const Observation& ref,
     Vector3 ds = -inverse_depth * dp;
 
     // World to trajectory  at t_obs
-    Vector3 X_obs = q * s;
+    Vector3 X_obs = q.conjugate() * s;
 
     // Trajectory to camera
     Vector3 X_obs_cam = q_ct * X_obs + inverse_depth * p_ct;
 
     // Derivatives
     Vector3 dX_obs = (
-        math::vector_sandwich(q_inv, s, dq) +
+        math::vector_sandwich(dq_inv, s, q) +
         math::vector_sandwich(q_inv, ds, q) +
-        math::vector_sandwich(dq_inv, s, q)
+        math::vector_sandwich(q_inv, s, dq)
     );
 
     Vector3 dX_obs_cam = q_ct * dX_obs + inverse_depth * p_ct;
