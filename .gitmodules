@@ -1,9 +1,6 @@
-[submodule "deps/pybind11"]
-	path = deps/pybind11
+[submodule "python/deps/pybind11"]
+	path = python/deps/pybind11
 	url = https://github.com/pybind/pybind11.git
-[submodule "deps/hana"]
-	path = deps/hana
-	url = https://github.com/boostorg/hana.git
-[submodule "deps/Sophus"]
-	path = deps/Sophus
-	url = https://github.com/strasdat/Sophus.git
+[submodule "python/deps/hana"]
+	path = python/deps/hana
+	url = https://github.com/boostorg/hana
