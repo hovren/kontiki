@@ -46,7 +46,6 @@ else()
 endif()
 
 file(GLOB_RECURSE Taser_HEADER_FILES include/*.h)
-#target_sources(Taser INTERFACE ${Taser_HEADER_FILES})
 
 # Associate target with include directory
 target_include_directories(Taser INTERFACE
@@ -97,3 +96,5 @@ install(
     FILES ${Taser_HEADER_FILES}
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/taser
 )
+
+add_custom_target(taser_lib_ide_target SOURCES ${Taser_HEADER_FILES})

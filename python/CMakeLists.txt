@@ -92,3 +92,7 @@ taser_add_module(taser.measurements._gyroscope_measurement)
 taser_add_module(taser.measurements._static_rscamera_measurement)
 taser_add_module(taser.measurements._lifting_rscamera_measurement)
 taser_add_module(taser.measurements._newton_rscamera_measurement)
+
+# IDE helper target
+file(GLOB_RECURSE python_sources src/*.cc src/*.h)
+add_custom_target(taser_python_ide_target SOURCES ${python_sources})
