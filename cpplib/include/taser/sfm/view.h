@@ -22,7 +22,7 @@ class View : public std::enable_shared_from_this<View> {
     // Make sure a View that is destroyed propagate observations removed
     std::vector<std::shared_ptr<Observation>> obs_copy(observations_);
     for (auto obs : obs_copy) {
-      remove_observation(obs);
+      RemoveObservation(obs);
     }
   }
 
@@ -32,14 +32,14 @@ class View : public std::enable_shared_from_this<View> {
   void set_t0(double t0) { t0_ = t0; }
   auto observations() const { return observations_; }
 
-  auto create_observation(std::shared_ptr<Landmark> landmark, double u, double v) {
+  auto CreateObservation(std::shared_ptr<Landmark> landmark, double u, double v) {
     auto obs = std::make_shared<Observation>(u, v, landmark, shared_from_this());
     observations_.push_back(obs);
     landmark->observations_.push_back(obs);
     return obs;
   }
 
-  void remove_observation(std::shared_ptr<Observation> obs) {
+  void RemoveObservation(std::shared_ptr<Observation> obs) {
     auto it = std::find(observations_.begin(), observations_.end(), obs);
     if (it != observations_.end()) {
       observations_.erase(it);
@@ -48,7 +48,7 @@ class View : public std::enable_shared_from_this<View> {
       throw std::runtime_error("Observation does not beloing to this view");
     }
 
-    obs->landmark()->remove_observation(obs);
+    obs->landmark()->RemoveObservation(obs);
   }
 
  protected:

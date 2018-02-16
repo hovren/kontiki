@@ -52,8 +52,8 @@ int main() {
   auto v1 = std::make_shared<View>(0, 0.);
   auto v2 = std::make_shared<View>(7, 2.0);
   auto lm = std::make_shared<Landmark>();
-  auto ref = v1->create_observation(lm, 400, 400);
-  auto obs = v2->create_observation(lm, 300, 200);
+  auto ref = v1->CreateObservation(lm, 400, 400);
+  auto obs = v2->CreateObservation(lm, 300, 200);
   lm->set_reference(ref);
 
   using MClass = StaticRsCameraMeasurement<PinholeCamera>;

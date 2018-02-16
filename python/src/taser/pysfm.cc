@@ -23,8 +23,6 @@ static void declare_landmark(py::module &m) {
   auto cls = py::class_<Landmark, std::shared_ptr<Landmark>>(m, "Landmark");
   cls.def(py::init());
   cls.def_property_readonly("id", &Class::id, "Landmark ID");
-  //cls.def("remove_observation", &Landmark::remove_observation, "Remove observation");
-  //cls.def("set_reference", &Landmark::set_reference, "Set reference observation by index");
   cls.def_property("reference", &Landmark::reference, &Landmark::set_reference, "Reference observation");
   cls.def_property_readonly("observations", &Landmark::observations, "Observations");
   cls.def_property("inverse_depth", &Landmark::inverse_depth, &Landmark::set_inverse_depth, "Inverse depth");
@@ -39,10 +37,8 @@ static void declare_landmark(py::module &m) {
 static void declare_observation(py::module &m) {
   using Class = Observation;
   auto cls = py::class_<Observation, std::shared_ptr<Observation>>(m, "Observation");
-  //cls.def(py::init<double, double, double, std::shared_ptr<Landmark>>());
   cls.def_property_readonly("landmark", &Observation::landmark, "Landmark");
   cls.def_property_readonly("view", &Class::view, "View");
-  //cls.def_property("t0", &Observation::t0, &Observation::set_t0, "Observation frame start time");
   cls.def_property("uv", &Observation::uv, &Observation::set_uv, "Image measurement");
   cls.def("__repr__", [](Observation& self) {
     std::stringstream ss;
@@ -60,8 +56,8 @@ static void declare_view(py::module &m) {
   cls.def_property("t0", &Class::t0, &Class::set_t0, "Start of frame time");
   cls.def_property("frame_nr", &Class::frame_nr, &Class::set_frame_nr, "Frame number");
   cls.def_property_readonly("observations", &Class::observations, "Observations");
-  cls.def("create_observation", &Class::create_observation, "Create new observation");
-  cls.def("remove_observation", &Class::remove_observation, "Remove observation");
+  cls.def("create_observation", &Class::CreateObservation, "Create new observation");
+  cls.def("remove_observation", &Class::RemoveObservation, "Remove observation");
 
   cls.def("__repr__", [](Class& self) {
     std::stringstream ss;
