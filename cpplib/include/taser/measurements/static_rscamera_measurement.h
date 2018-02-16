@@ -6,9 +6,7 @@
 #define TASERV2_STATIC_RSCAMERA_MEASUREMENT_H
 
 #include "../trajectories/trajectory.h"
-#include "../sfm/observation.h"
-#include "../sfm/landmark.h"
-#include "../sfm/view.h"
+#include "../sfm/sfm.h"
 #include "../trajectory_estimator.h"
 #include "../sensors/camera.h"
 #include "../types.h"

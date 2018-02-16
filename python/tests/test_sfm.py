@@ -97,6 +97,21 @@ def test_landmark_reference_not_owned():
         lm.reference = obs_not_owned # Error
 
 
+def test_observation_is_reference():
+    views = [View(i, i) for i in range(4)]
+    lm = Landmark()
+    ref = views[0].create_observation(lm, np.array([1, 2]))
+    lm.reference = ref
+    not_refs = []
+    for v in views:
+        obs = v.create_observation(lm, np.array([1, 2]))
+        not_refs.append(obs)
+
+    assert ref.is_reference
+    assert not any(obs.is_reference for obs in not_refs)
+
+
+
 def test_remove_then_set_references():
     landmarks = [Landmark() for i in range(20)]
     views = [View(i, i) for i in range(30)]

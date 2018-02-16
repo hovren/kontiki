@@ -12,9 +12,7 @@ namespace py = pybind11;
 
 PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 
-#include <taser/sfm/landmark.h>
-#include <taser/sfm/observation.h>
-#include <taser/sfm/view.h>
+#include <taser/sfm/sfm.h>
 
 using namespace taser;
 
@@ -40,6 +38,7 @@ static void declare_observation(py::module &m) {
   cls.def_property_readonly("landmark", &Observation::landmark, "Landmark");
   cls.def_property_readonly("view", &Class::view, "View");
   cls.def_property("uv", &Observation::uv, &Observation::set_uv, "Image measurement");
+  cls.def_property_readonly("is_reference", &Class::IsReference, "Check if this is the reference");
   cls.def("__repr__", [](Observation& self) {
     std::stringstream ss;
     ss << "<Observation lm=" << self.landmark()->id() << " f=" << self.view()->frame_nr()
