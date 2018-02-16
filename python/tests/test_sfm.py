@@ -95,3 +95,24 @@ def test_landmark_reference_not_owned():
 
     with pytest.raises(RuntimeError):
         lm.reference = obs_not_owned # Error
+
+
+def test_remove_then_set_references():
+    landmarks = [Landmark() for i in range(20)]
+    views = [View(i, i) for i in range(30)]
+
+    observations = []
+    for v in views:
+        for lm in landmarks:
+            obs = v.create_observation(lm, *np.random.uniform(0, 1000, size=2))
+            observations.append(obs)
+
+    to_remove = [lm.observations[0] for lm in landmarks]
+
+    for obs in to_remove:
+        obs.view.remove_observation(obs)
+
+
+    for lm in landmarks:
+        lm.reference = lm.observations[0]
+

@@ -48,18 +48,7 @@ class View : public std::enable_shared_from_this<View> {
       throw std::runtime_error("Observation does not beloing to this view");
     }
 
-    auto lmit = std::find_if(obs->landmark()->observations_.begin(),
-    obs->landmark()->observations_.begin(), [obs](auto wp) {
-          auto sp = wp.lock();
-          return sp && sp == obs;
-        });
-    if (lmit != obs->landmark()->observations_.end()) {
-      obs->landmark()->observations_.erase(lmit);
-    }
-    else {
-      throw std::runtime_error("Observation did not belong to its Landmark");
-    }
-
+    obs->landmark()->remove_observation(obs);
   }
 
  protected:
