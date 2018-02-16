@@ -18,8 +18,8 @@ template<
     typename TrajectoryModel,
     typename CameraModel,
     typename T>
-Eigen::Matrix<T, 2, 1> reproject_lifting(const Observation& ref,
-                                        const Observation& obs,
+Eigen::Matrix<T, 2, 1> reproject_lifting(const sfm::Observation& ref,
+                                        const sfm::Observation& obs,
                                         T vt,  // [0-1]: frame normalized time
                                         T inverse_depth,
                                         const type::Trajectory<TrajectoryModel, T>& trajectory,
@@ -60,7 +60,7 @@ Eigen::Matrix<T, 2, 1> reproject_lifting(const Observation& ref,
     using Vector2 = Eigen::Vector2d;
     using Vector3 = Eigen::Vector3d;
    public:
-    LiftingRsCameraMeasurement(std::shared_ptr<CameraModel> camera, std::shared_ptr<Observation> obs, double huber_loss)
+    LiftingRsCameraMeasurement(std::shared_ptr<CameraModel> camera, std::shared_ptr<sfm::Observation> obs, double huber_loss)
         : camera(camera),
           observation(obs),
           loss_function_(huber_loss),
@@ -68,13 +68,13 @@ Eigen::Matrix<T, 2, 1> reproject_lifting(const Observation& ref,
       vt_ = vt_orig_;
     };
 
-    LiftingRsCameraMeasurement(std::shared_ptr<CameraModel> camera, std::shared_ptr<Observation> obs)
+    LiftingRsCameraMeasurement(std::shared_ptr<CameraModel> camera, std::shared_ptr<sfm::Observation> obs)
         : LiftingRsCameraMeasurement(camera, obs, 5.) { };
 
     std::shared_ptr<CameraModel> camera;
     // Measurement data
     double vt_;
-    std::shared_ptr<taser::Observation> observation;
+    std::shared_ptr<sfm::Observation> observation;
 
     template<typename TrajectoryModel, typename T>
     Eigen::Matrix<T, 2, 1> Project(const type::Trajectory<TrajectoryModel, T> &trajectory,

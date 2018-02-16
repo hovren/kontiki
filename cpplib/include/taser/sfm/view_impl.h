@@ -10,9 +10,10 @@
 #include "observation.h"
 
 namespace taser {
+namespace sfm {
 
 View::View(size_t frame, double t0)
-: frame_nr_(frame), t0_(t0) {  };
+    : frame_nr_(frame), t0_(t0) {};
 
 View::~View() {
   // Make sure a View that is destroyed propagate observations removed
@@ -57,10 +58,9 @@ std::shared_ptr<Observation> View::CreateObservation(std::shared_ptr<Landmark> l
 void View::RemoveObservation(std::shared_ptr<Observation> obs) {
   // Find and remove the landmark from the view's list
   auto it = std::find(observations_.begin(), observations_.end(), obs);
-  if (it != observations_.end()) {
+  if (it!=observations_.end()) {
     observations_.erase(it);
-  }
-  else {
+  } else {
     throw std::runtime_error("Observation does not beloing to this view");
   }
 
@@ -68,6 +68,7 @@ void View::RemoveObservation(std::shared_ptr<Observation> obs) {
   obs->landmark()->RemoveObservation(obs);
 }
 
+} // namespace sfm
 } // namespace taser
 
 #endif //TASERV2_VIEW_IMPL_H

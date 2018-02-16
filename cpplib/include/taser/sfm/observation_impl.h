@@ -8,11 +8,12 @@
 #include "observation.h"
 
 namespace taser {
+namespace sfm {
 
 Observation::Observation(const Eigen::Vector2d &uv, std::shared_ptr<Landmark> landmark, std::shared_ptr<View> view) :
     uv_(uv),
     landmark_(landmark),
-    view_(view) { };
+    view_(view) {};
 
 std::shared_ptr<Landmark> Observation::landmark() const {
   return landmark_;
@@ -27,14 +28,14 @@ std::shared_ptr<View> Observation::view() const {
 }
 
 bool Observation::IsReference() const {
-  return landmark_->reference().get() == this;
+  return landmark_->reference().get()==this;
 }
 
 Eigen::Vector2d Observation::uv() const {
   return uv_;
 }
 
-void Observation::set_uv(const Eigen::Vector2d& uv) {
+void Observation::set_uv(const Eigen::Vector2d &uv) {
   uv_ = uv;
 }
 
@@ -46,6 +47,7 @@ double Observation::v() const {
   return uv_(1);
 }
 
+} // namespace sfm
 } // namespace taser
 
 #endif //TASERV2_OBSERVATION_IMPL_H

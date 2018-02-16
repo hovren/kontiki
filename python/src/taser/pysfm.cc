@@ -14,7 +14,7 @@ PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 
 #include <taser/sfm/sfm.h>
 
-using namespace taser;
+using namespace taser::sfm;
 
 static void declare_landmark(py::module &m) {
   using Class = Landmark;

@@ -9,6 +9,7 @@
 #include <memory>
 
 namespace taser {
+namespace sfm {
 
 class Observation;
 class Landmark;
@@ -33,5 +34,6 @@ class View : public std::enable_shared_from_this<View> {
   std::vector<std::shared_ptr<Observation>> observations_;
 };
 
+} // namespace sfm
 } // namespace taser
 #endif //TASER_VIEW_H

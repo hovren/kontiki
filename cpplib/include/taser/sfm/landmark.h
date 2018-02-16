@@ -11,6 +11,7 @@
 #include <Eigen/Core>
 
 namespace taser {
+namespace sfm {
 
 class Observation;
 class View;
@@ -48,5 +49,6 @@ class Landmark {
   std::vector<std::weak_ptr<Observation>> observations_;
 };
 
+} // namespace sfm
 } // namespace taser
 #endif //TASER_LANDMARK_H

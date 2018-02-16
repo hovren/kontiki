@@ -6,6 +6,7 @@
 #define TASER_OBSERVATION_H
 
 namespace taser {
+namespace sfm {
 class Landmark; // Forward declaration
 class View; // Forward declaration
 
@@ -33,6 +34,7 @@ class Observation {
   std::weak_ptr<View> view_;
 };
 
+} // namespace sfm
 } // namespace taser
 
 #endif //TASER_OBSERVATION_H

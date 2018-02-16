@@ -8,6 +8,7 @@
 #include "landmark.h"
 
 namespace taser {
+namespace sfm {
 
 Landmark::Landmark() : inverse_depth_(0), id_(new_id()) {}
 
@@ -76,6 +77,7 @@ void Landmark::RemoveObservation(std::shared_ptr<Observation> obs) {
   }
 }
 
+} // namespace sfm
 } // namespace taser
 
 

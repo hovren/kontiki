@@ -20,8 +20,8 @@ template<
     typename TrajectoryModel,
     typename CameraModel,
     typename T>
-Eigen::Matrix<T, 2, 1> reproject_newton(const Observation& ref,
-                                        const Observation& obs,
+Eigen::Matrix<T, 2, 1> reproject_newton(const sfm::Observation& ref,
+                                        const sfm::Observation& obs,
                                         T inverse_depth,
                                         const type::Trajectory<TrajectoryModel, T>& trajectory,
                                         const type::Camera<CameraModel, T>& camera,
@@ -123,18 +123,18 @@ Eigen::Matrix<T, 2, 1> reproject_newton(const Observation& ref,
   class NewtonRsCameraMeasurement {
     using Vector2 = Eigen::Vector2d;
    public:
-    NewtonRsCameraMeasurement(std::shared_ptr<CameraModel> camera, std::shared_ptr<Observation> obs, double huber_loss)
+    NewtonRsCameraMeasurement(std::shared_ptr<CameraModel> camera, std::shared_ptr<sfm::Observation> obs, double huber_loss)
         : camera(camera),
           observation(obs),
           loss_function_(huber_loss),
           max_iterations_(5) { };
 
-    NewtonRsCameraMeasurement(std::shared_ptr<CameraModel> camera, std::shared_ptr<Observation> obs)
+    NewtonRsCameraMeasurement(std::shared_ptr<CameraModel> camera, std::shared_ptr<sfm::Observation> obs)
         : NewtonRsCameraMeasurement(camera, obs, 5.) { };
 
     std::shared_ptr<CameraModel> camera;
     // Measurement data
-    std::shared_ptr<taser::Observation> observation;
+    std::shared_ptr<sfm::Observation> observation;
 
     template<typename TrajectoryModel, typename T>
     Eigen::Matrix<T, 2, 1> Project(const type::Trajectory<TrajectoryModel, T> &trajectory,

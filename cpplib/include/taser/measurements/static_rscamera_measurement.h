@@ -18,8 +18,8 @@ template<
     typename TrajectoryModel,
     typename CameraModel,
     typename T>
-Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref,
-                                        const Observation& obs,
+Eigen::Matrix<T, 2, 1> reproject_static(const sfm::Observation& ref,
+                                        const sfm::Observation& obs,
                                         T inverse_depth,
                                         const type::Trajectory<TrajectoryModel, T>& trajectory,
                                         const type::Camera<CameraModel, T>& camera) {
@@ -58,15 +58,15 @@ Eigen::Matrix<T, 2, 1> reproject_static(const Observation& ref,
   class StaticRsCameraMeasurement {
     using Vector2 = Eigen::Vector2d;
    public:
-    StaticRsCameraMeasurement(std::shared_ptr<CameraModel> camera, std::shared_ptr<Observation> obs, double huber_loss)
+    StaticRsCameraMeasurement(std::shared_ptr<CameraModel> camera, std::shared_ptr<sfm::Observation> obs, double huber_loss)
         : camera(camera), observation(obs), loss_function_(huber_loss) {};
 
-    StaticRsCameraMeasurement(std::shared_ptr<CameraModel> camera, std::shared_ptr<Observation> obs)
+    StaticRsCameraMeasurement(std::shared_ptr<CameraModel> camera, std::shared_ptr<sfm::Observation> obs)
         : StaticRsCameraMeasurement(camera, obs, 5.) { };
 
     std::shared_ptr<CameraModel> camera;
     // Measurement data
-    std::shared_ptr<taser::Observation> observation;
+    std::shared_ptr<sfm::Observation> observation;
 
     template<typename TrajectoryModel, typename T>
     Eigen::Matrix<T, 2, 1> Project(const type::Trajectory<TrajectoryModel, T> &trajectory,
