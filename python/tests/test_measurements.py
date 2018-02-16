@@ -58,8 +58,10 @@ def test_rscamera_measurements_attribute_access(cls, camera):
     lm = Landmark()
     views = [View(i, i/30) for i in range(2)]
 
-    ref, obs = [v.create_observation(lm, np.random.uniform(0, camera.cols), np.random.uniform(0, camera.rows))
-                for v in views]
+    def random_point():
+        return np.array([np.random.uniform(0, camera.cols), np.random.uniform(0, camera.rows)])
+
+    ref, obs = [v.create_observation(lm, random_point()) for v in views]
     lm.reference = ref
 
     m = StaticRsCameraMeasurement(camera, obs)

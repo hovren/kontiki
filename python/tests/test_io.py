@@ -15,7 +15,7 @@ def test_structure(tmpdir):
         n = np.random.randint(1, len(landmarks)-1)
         for lm in np.random.choice(landmarks, n, replace=False):
             uv = np.random.uniform(0, 1000, size=2)
-            v.create_observation(lm, *uv)
+            v.create_observation(lm, uv)
 
     for lm in landmarks:
         lm.reference = lm.observations[0]

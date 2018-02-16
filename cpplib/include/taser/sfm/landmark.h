@@ -63,6 +63,10 @@ class Landmark {
   auto inverse_depth_ptr() { return &inverse_depth_; }
 
  protected:
+  void AddObservation(std::shared_ptr<Observation> obs) {
+    observations_.push_back(obs);
+  }
+
   void RemoveObservation(std::shared_ptr<Observation> obs) {
     auto found_it = std::find_if(observations_.begin(), observations_.end(), [&obs](auto &wp) {
       auto sp = wp.lock();

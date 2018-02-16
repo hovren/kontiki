@@ -91,7 +91,7 @@ def _load_structure_impl(fileobj):
     for uv, lm_idx, v_idx in zip(gobs['uv'].value, gobs['lm_idx'].value, gobs['v_idx'].value):
         view = views[v_idx]
         lm = landmarks[lm_idx]
-        obs = view.create_observation(lm, *uv)
+        obs = view.create_observation(lm, uv)
         observations.append(obs)
 
     for lm, invd, ref_idx in zip(landmarks, glandmarks['inverse_depth'].value, glandmarks['ref_idx'].value):

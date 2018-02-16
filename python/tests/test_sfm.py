@@ -19,7 +19,7 @@ def test_view_add_observations():
     v = View(0, 0.0)
 
     p1 = np.array([100, 200])
-    v.create_observation(lm1, *p1)
+    v.create_observation(lm1, p1)
     assert len(v) == 1
     assert len(lm1.observations) == 1
     assert lm1.observations[0].view is v
@@ -27,7 +27,7 @@ def test_view_add_observations():
     assert len(lm2.observations) == 0
 
     p2 = np.array([300, 499])
-    v.create_observation(lm2, *p2)
+    v.create_observation(lm2, p2)
     assert len(v) == 2
     assert len(lm2.observations) == 1
 
@@ -36,8 +36,8 @@ def test_remove_observations():
     v1 = View(0, 0.0)
     v2 = View(1, 1.0)
 
-    obs1 = v1.create_observation(lm, 1, 2)
-    _ = v2.create_observation(lm, 3, 4)
+    obs1 = v1.create_observation(lm, np.array([1, 2]))
+    _ = v2.create_observation(lm, np.array([3, 4]))
     assert len(v1) == 1
     assert len(v2) == 1
     assert len(lm.observations) == 2
@@ -51,8 +51,8 @@ def test_remove_nonowned():
     lm = Landmark()
     v = View(0, 0.0)
     v_other = View(1, 1.0)
-    _ = v.create_observation(lm, 1, 2)
-    obs_other = v_other.create_observation(lm, 3, 4)
+    _ = v.create_observation(lm, np.array([1, 2]))
+    obs_other = v_other.create_observation(lm, np.array([3, 4]))
     with pytest.raises(RuntimeError):
         v.remove_observation(obs_other)
 
@@ -61,7 +61,7 @@ def test_deleted_view_cleanup():
     N = 100
     landmarks = [Landmark() for _ in range(N)]
     for lm in landmarks:
-        v.create_observation(lm, 1, 1)
+        v.create_observation(lm, np.array([1, 1]))
         assert len(lm.observations) == 1
 
     del v
@@ -86,8 +86,8 @@ def test_landmark_ids_unique():
 def test_landmark_reference_not_owned():
     v = View(0, 0.0)
     lm = Landmark()
-    obs_owned = v.create_observation(lm, 1, 2)
-    obs_not_owned = v.create_observation(Landmark(), 6, 7)
+    obs_owned = v.create_observation(lm, np.array([1, 2]))
+    obs_not_owned = v.create_observation(Landmark(), np.array([6, 7]))
 
     lm.reference = obs_owned # OK
 
@@ -104,7 +104,7 @@ def test_remove_then_set_references():
     observations = []
     for v in views:
         for lm in landmarks:
-            obs = v.create_observation(lm, *np.random.uniform(0, 1000, size=2))
+            obs = v.create_observation(lm, np.random.uniform(0, 1000, size=2))
             observations.append(obs)
 
     to_remove = [lm.observations[0] for lm in landmarks]

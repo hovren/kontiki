@@ -11,14 +11,16 @@ class View; // Forward declaration
 
 class Observation {
  public:
-  Observation(double u, double v, std::shared_ptr<Landmark> landmark, std::shared_ptr<View> view) :
-      u_(u), v_(v), landmark_(landmark), view_(view) {};
+  Observation(const Eigen::Vector2d &uv, std::shared_ptr<Landmark> landmark, std::shared_ptr<View> view) :
+      uv_(uv),
+      landmark_(landmark),
+      view_(view) { };
 
-  auto landmark() const {
+  std::shared_ptr<Landmark> landmark() const {
     return landmark_;
   };
 
-  auto view() const {
+  std::shared_ptr<View> view() const {
     auto sp = view_.lock();
     if (sp)
       return sp;
@@ -26,15 +28,24 @@ class Observation {
       throw std::runtime_error("View does not exist anymore");
   }
 
-  Eigen::Vector2d uv() const { return Eigen::Vector2d(u_, v_); }
-  void set_uv(const Eigen::Vector2d& uv) {
-    u_ = uv(0);
-    v_ = uv(1);
+  Eigen::Vector2d uv() const {
+    return uv_;
   }
-  auto u() const { return u_; }
-  auto v() const { return v_; }
+
+  void set_uv(const Eigen::Vector2d& uv) {
+    uv_ = uv;
+  }
+
+  double u() const {
+    return uv_(0);
+  }
+
+  double v() const {
+    return uv_(1);
+  }
+
  protected:
-  double u_, v_;
+  Eigen::Vector2d uv_;
   std::shared_ptr<Landmark> landmark_;
   std::weak_ptr<View> view_;
 };

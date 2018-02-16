@@ -32,14 +32,19 @@ class View : public std::enable_shared_from_this<View> {
   void set_t0(double t0) { t0_ = t0; }
   auto observations() const { return observations_; }
 
-  auto CreateObservation(std::shared_ptr<Landmark> landmark, double u, double v) {
-    auto obs = std::make_shared<Observation>(u, v, landmark, shared_from_this());
+  auto CreateObservation(std::shared_ptr<Landmark> landmark, const Eigen::Vector2d &uv) {
+    // Create and store the new observation
+    auto obs = std::make_shared<Observation>(uv, landmark, shared_from_this());
     observations_.push_back(obs);
-    landmark->observations_.push_back(obs);
+
+    // Let the Landmark know about its new observation
+    landmark->AddObservation(obs);
+
     return obs;
   }
 
   void RemoveObservation(std::shared_ptr<Observation> obs) {
+    // Find and remove the landmark from the view's list
     auto it = std::find(observations_.begin(), observations_.end(), obs);
     if (it != observations_.end()) {
       observations_.erase(it);
@@ -48,6 +53,7 @@ class View : public std::enable_shared_from_this<View> {
       throw std::runtime_error("Observation does not beloing to this view");
     }
 
+    // Tell the landmark to remove it from its list
     obs->landmark()->RemoveObservation(obs);
   }
 
