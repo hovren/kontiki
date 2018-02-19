@@ -13,6 +13,7 @@ namespace entity {
 
 template <typename T>
 class DynamicParameterStore : public ParameterStore<T> {
+ public:
   T* ParameterData(int i) {
     return parameters_.at(i).data;
   }

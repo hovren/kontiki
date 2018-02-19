@@ -21,6 +21,7 @@ using entity::type::View;
 // All optimizable objects should inherit the Entity type
 template<template<typename...> typename ViewTemplate, typename MetaType, typename StoreType>
 class Entity : public entity::Entity<ViewTemplate, MetaType, StoreType> {
+ public:
   // Add this type to an optimization problem
   virtual void AddToProblem(ceres::Problem &problem,
                             time_init_t times,

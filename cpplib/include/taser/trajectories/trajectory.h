@@ -135,6 +135,7 @@ class TrajectoryView : public entity::EntityView<T, MetaType> {
 
 template<template<typename...> typename ViewTemplate, typename MetaType, typename StoreType>
 class TrajectoryEntity : public type::Entity<ViewTemplate, MetaType, StoreType> {
+  using Base = type::Entity<ViewTemplate, MetaType, StoreType>;
  public:
   // Import constructor
 //  using type::Entity<ViewTemplate, MetaType, StoreType>::Entity;
