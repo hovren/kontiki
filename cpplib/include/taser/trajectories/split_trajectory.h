@@ -94,6 +94,10 @@ class SplitEntity : public TrajectoryEntity<ViewTemplate, MetaType, StoreType> {
   SplitEntity() :
     SplitEntity(1.0, 1.0) { };
 
+  SplitEntity(const SplitEntity &rhs) :
+    SplitEntity(std::make_shared<UniformR3SplineTrajectory>(*rhs.r3_trajectory_),
+                std::make_shared<UniformSO3SplineTrajectory>(*rhs.so3_trajectory_)) { };
+
   bool IsLocked() const override {
     bool r3_locked = this->r3_trajectory_->IsLocked();
     bool so3_locked = this->so3_trajectory_->IsLocked();

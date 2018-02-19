@@ -39,6 +39,17 @@ class Entity : public ViewTemplate<double, MetaType> {
   // Default constructor
   Entity() : Base(MetaType(), new StoreType()) { };
 
+  // Copy constructor
+  Entity(const Entity& rhs) :
+      Base(rhs.meta_, new StoreType()) {
+    // Copy parameters
+    for (int i=0; i < rhs.holder_->Size(); ++i) {
+      auto pi = rhs.holder_->Parameter(i);
+      this->holder_->AddParameter(pi.size, pi.parameterization);
+      memcpy(this->holder_->ParameterData(i), pi.data, pi.size*sizeof(double));
+    }
+  }
+
   // Access view
   template<typename T, typename MetaT=MetaType>
   using View = ViewTemplate<T, MetaT>;

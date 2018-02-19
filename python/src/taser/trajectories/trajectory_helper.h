@@ -26,6 +26,10 @@ void declare_trajectory_common(PyClass &cls) {
   cls.def_property_readonly("max_time", &Class::MaxTime);
   cls.def_property_readonly("valid_time", &Class::ValidTime);
   cls.def_property("locked", &Class::IsLocked, &Class::Lock);
+  cls.def("clone", [](const Class &self){
+    auto cloned = std::make_shared<Class>(self);
+    return cloned;
+  }, "Clone trajectory");
 };
 
 #endif //TASERV2_TRAJECTORY_HELPER_H

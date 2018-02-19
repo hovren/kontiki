@@ -340,6 +340,14 @@ class SplineEntity : public TrajectoryEntity<SplineFactory<SegmentViewTemplate>:
   SplineEntity() :
       SplineEntity(1.0) { };
 
+  SplineEntity(const SplineEntity &rhs) :
+    Base(rhs),
+    segment_entity_(std::make_shared<SegmentType>(*rhs.segment_entity_)),
+    control_point_parameterization_(this->ControlPointParameterization())
+  {
+    this->segments.push_back(segment_entity_);
+  }
+
   void AppendKnot(const ControlPointType& cp) {
     segment_entity_->AppendKnot(cp);
   }

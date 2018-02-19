@@ -7,6 +7,9 @@ from taser.utils import safe_time, safe_time_span
 from taser.trajectories import LinearTrajectory, UniformR3SplineTrajectory, UniformSO3SplineTrajectory, UniformSE3SplineTrajectory, SplitTrajectory
 from taser.rotations import quat_to_rotation_matrix
 
+from taser.trajectory_estimator import TrajectoryEstimator
+from taser.measurements import PositionMeasurement
+
 ExampleData = namedtuple('ExampleData',
                          ['position', 'velocity', 'acceleration', 'orientation', 'angular_velocity',
                           'min_time', 'max_time'])
@@ -215,3 +218,35 @@ def test_locking(trajectory):
     assert not trajectory.locked
     trajectory.locked = True
     assert trajectory.locked
+
+
+def test_clone(trajectory):
+    if type(trajectory) == UniformSO3SplineTrajectory:
+        pytest.xfail('Test mutates position, which this trajectory does not have')
+
+    t1, t2 = safe_time_span(trajectory, 4)
+    times = np.arange(t1, t2, 0.01)
+
+    def sample(trajectory):
+        return np.vstack([trajectory.position(t) for t in times])
+
+    orig_pos = sample(trajectory)
+
+    # Clone
+    cloned_trajectory = trajectory.clone()
+    cloned_pos = sample(cloned_trajectory)
+    np.testing.assert_equal(orig_pos, cloned_pos)
+
+    # Change original
+    meas = [PositionMeasurement(t, np.random.uniform(-4, 1, size=3)) for t in np.arange(t1, t2, 0.1)]
+    estimator = TrajectoryEstimator(trajectory)
+    for m in meas:
+        estimator.add_measurement(m)
+    estimator.solve(max_iterations=10)
+    new_pos = sample(trajectory)
+    assert np.linalg.norm(new_pos - orig_pos) > 1
+
+    # Check that clone did NOT change
+    new_cloned = sample(cloned_trajectory)
+    np.testing.assert_equal(new_cloned, orig_pos)
+
