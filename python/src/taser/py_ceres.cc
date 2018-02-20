@@ -22,6 +22,7 @@ void declare_summary(py::module& m) {
       .def_readonly("iterations", &Class::iterations)
       .def_readonly("final_cost", &Class::final_cost)
       .def_readonly("fixed_cost", &Class::fixed_cost)
+      .def_readonly("termination_type", &Class::termination_type)
       .def_readonly("num_successful_steps", &Class::num_successful_steps)
       .def_readonly("num_unsuccessful_steps", &Class::num_unsuccessful_steps)
       .def_readonly("num_inner_iteration_steps", &Class::num_inner_iteration_steps)
@@ -90,10 +91,20 @@ void declare_iteration_summary(py::module& m) {
   cls.def_readonly("cumulative_time_in_seconds", &Class::cumulative_time_in_seconds);
 }
 
+void declare_termination_type(py::module &m) {
+  py::enum_<ceres::TerminationType> e(m, "TerminationType");
+  e.value("Convergence", ceres::TerminationType::CONVERGENCE);
+  e.value("NoConvergence", ceres::TerminationType::NO_CONVERGENCE);
+  e.value("Failure", ceres::TerminationType::FAILURE);
+  e.value("UserSuccess", ceres::TerminationType::USER_SUCCESS);
+  e.value("UserFailure", ceres::TerminationType::USER_FAILURE);
+}
+
 PYBIND11_MODULE(_ceres, m) {
   m.doc() = "ceres-solver types";
 
   declare_iteration_summary(m);
   declare_summary(m);
+  declare_termination_type(m);
   declare_iteration_callback(m);
 }

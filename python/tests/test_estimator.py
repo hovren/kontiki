@@ -3,7 +3,7 @@ import pytest
 import numpy as np
 
 from taser.trajectory_estimator import TrajectoryEstimator
-from taser._ceres import CallbackReturnType
+from taser._ceres import CallbackReturnType, TerminationType
 
 @pytest.fixture
 def estimator(trajectory):
@@ -105,21 +105,32 @@ def test_estimator_callback_returntype_none(callback_estimator):
     summary = callback_estimator.solve(max_iterations=4)
     print(summary.FullReport())
 
-    assert len(data) > 1
+    assert summary.termination_type == TerminationType.Convergence
 
 
 def test_estimator_callback_abort(callback_estimator):
     data = []
-    def abort_on_two(iter_summary):
+    def abort_immediately(iter_summary):
         data.append('Foo')
-        if iter_summary.iteration == 2:
-            return CallbackReturnType.Abort
+        return CallbackReturnType.Abort
 
-    callback_estimator.add_callback(abort_on_two)
+    callback_estimator.add_callback(abort_immediately)
 
     summary = callback_estimator.solve(max_iterations=4)
 
-    assert len(data) == 3  # First iteration is 0
+    assert summary.termination_type == TerminationType.UserFailure
+
+
+def test_estimator_callback_success(callback_estimator):
+    data = []
+    def success_immediately(iter_summary):
+        return CallbackReturnType.TerminateSuccessfully
+
+    callback_estimator.add_callback(success_immediately)
+
+    summary = callback_estimator.solve(max_iterations=4)
+
+    assert TerminationType.UserSuccess == summary.termination_type
 
 
 def test_estimator_callback_multiple(callback_estimator):
@@ -148,7 +159,7 @@ def test_estimator_callback_multiple(callback_estimator):
 
 
 @pytest.mark.parametrize('update', [True, False])
-def test_estimator_callback_no_state_update(callback_estimator, update):
+def test_estimator_callback_state_update(callback_estimator, update):
     def get_knots():
         return np.vstack([knot for knot in callback_estimator.trajectory.R3_spline])
 
