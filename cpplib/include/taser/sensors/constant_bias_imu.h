@@ -31,20 +31,20 @@ class ConstantBiasImuView : public ImuView<T, MetaType, ConstantBiasImuView<T, M
   using Base::ImuView;
 
   Vector3Map accelerometer_bias() const {
-    return Vector3Map(this->holder_->ParameterData(PARAM_ABIAS));
+    return Vector3Map(this->pstore_->ParameterData(PARAM_ABIAS));
   }
 
   void set_accelerometer_bias(const Vector3& b) {
-    Vector3Map bmap(this->holder_->ParameterData(PARAM_ABIAS));
+    Vector3Map bmap(this->pstore_->ParameterData(PARAM_ABIAS));
     bmap = b;
   }
 
   Vector3Map gyroscope_bias() const {
-    return Vector3Map(this->holder_->ParameterData(PARAM_GBIAS));
+    return Vector3Map(this->pstore_->ParameterData(PARAM_GBIAS));
   }
 
   void set_gyroscope_bias(const Vector3 &b) {
-    Vector3Map bmap(this->holder_->ParameterData(PARAM_GBIAS));
+    Vector3Map bmap(this->pstore_->ParameterData(PARAM_GBIAS));
     bmap = b;
   }
 
@@ -70,8 +70,8 @@ class ConstantBiasImuEntity : public BasicImuEntity<ViewTemplate, MetaType, Stor
       gyro_bias_locked_(true),
       acc_bias_locked_(true) {
     // Define parameters
-    this->holder_->AddParameter(3);
-    this->holder_->AddParameter(3);
+    this->pstore_->AddParameter(3);
+    this->pstore_->AddParameter(3);
 
     this->set_accelerometer_bias(abias);
     this->set_gyroscope_bias(gbias);
@@ -103,14 +103,14 @@ class ConstantBiasImuEntity : public BasicImuEntity<ViewTemplate, MetaType, Stor
                     std::vector<entity::ParameterInfo<double>> &parameters) const override {
     Base::AddToProblem(problem, times, meta, parameters);
 
-    auto p_ab = this->holder_->Parameter(this->PARAM_ABIAS);
+    auto p_ab = this->pstore_->Parameter(this->PARAM_ABIAS);
     problem.AddParameterBlock(p_ab.data, p_ab.size, p_ab.parameterization);
     parameters.push_back(p_ab);
 
     if (acc_bias_locked_)
       problem.SetParameterBlockConstant(p_ab.data);
 
-    auto p_gb = this->holder_->Parameter(this->PARAM_GBIAS);
+    auto p_gb = this->pstore_->Parameter(this->PARAM_GBIAS);
     problem.AddParameterBlock(p_gb.data, p_gb.size, p_gb.parameterization);
     parameters.push_back(p_gb);
 

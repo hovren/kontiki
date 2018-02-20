@@ -20,10 +20,10 @@ template<typename T, typename MetaType>
 class EntityView {
  public:
   EntityView(const MetaType& meta, ParameterStore<T> *holder) :
-      meta_(meta), holder_(holder) { };
+      meta_(meta), pstore_(holder) { };
 
  protected:
-  std::unique_ptr<ParameterStore<T>> holder_;
+  std::unique_ptr<ParameterStore<T>> pstore_;
   MetaType meta_;
 };
 
@@ -43,10 +43,10 @@ class Entity : public ViewTemplate<double, MetaType> {
   Entity(const Entity& rhs) :
       Base(rhs.meta_, new StoreType()) {
     // Copy parameters
-    for (int i=0; i < rhs.holder_->Size(); ++i) {
-      auto pi = rhs.holder_->Parameter(i);
-      this->holder_->AddParameter(pi.size, pi.parameterization);
-      memcpy(this->holder_->ParameterData(i), pi.data, pi.size*sizeof(double));
+    for (int i=0; i < rhs.pstore_->Size(); ++i) {
+      auto pi = rhs.pstore_->Parameter(i);
+      this->pstore_->AddParameter(pi.size, pi.parameterization);
+      memcpy(this->pstore_->ParameterData(i), pi.data, pi.size*sizeof(double));
     }
   }
 

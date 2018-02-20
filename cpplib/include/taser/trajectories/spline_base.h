@@ -118,11 +118,11 @@ class SplineSegmentView : public TrajectoryView<T, SplineSegmentMeta> {
   using TrajectoryView<T, SplineSegmentMeta>::TrajectoryView;
 
   const ControlPointMap ControlPoint(int i) const {
-    return ControlPointMap(this->holder_->ParameterData(i));
+    return ControlPointMap(this->pstore_->ParameterData(i));
   }
 
   ControlPointMap MutableControlPoint(int i) {
-    return ControlPointMap(this->holder_->ParameterData(i));
+    return ControlPointMap(this->pstore_->ParameterData(i));
   }
 
   T t0() const {
@@ -299,7 +299,7 @@ struct SplineFactory {
       this->control_point_info_.Validate(cp);
 
       // 2) Create parameter data and set its value
-      auto i = this->holder_->AddParameter(this->control_point_info_.size,
+      auto i = this->pstore_->AddParameter(this->control_point_info_.size,
                                            this->control_point_info_.parameterization());
       this->MutableControlPoint(i) = cp;
 
@@ -309,7 +309,7 @@ struct SplineFactory {
 
     // Allow the owning Spline Entity to access parameters
     entity::ParameterInfo<double> Parameter(size_t i) {
-      return this->holder_->Parameter(i);
+      return this->pstore_->Parameter(i);
     }
   };
 };

@@ -47,12 +47,12 @@ class LinearView  : public TrajectoryView<T, MetaType> {
   }
 
   const Vector3 constant() const {
-    const Vector3 v = Eigen::Map<const Vector3>(this->holder_->ParameterData(0));
+    const Vector3 v = Eigen::Map<const Vector3>(this->pstore_->ParameterData(0));
     return v;
   }
 
   void set_constant(const Vector3 &k) {
-    Eigen::Map<Vector3> kmap(this->holder_->ParameterData(0));
+    Eigen::Map<Vector3> kmap(this->pstore_->ParameterData(0));
     kmap = k;
   }
 
@@ -96,7 +96,7 @@ template<template <typename...> typename ViewTemplate, typename MetaType, typena
 class LinearEntity : public TrajectoryEntity<ViewTemplate, MetaType, StoreType> {
  public:
   LinearEntity(double t0, const Eigen::Vector3d& k) {
-    size_t i = this->holder_->AddParameter(3); // Add the constant
+    size_t i = this->pstore_->AddParameter(3); // Add the constant
     this->set_t0(t0);
     this->set_constant(k);
   }
@@ -109,7 +109,7 @@ class LinearEntity : public TrajectoryEntity<ViewTemplate, MetaType, StoreType> 
     meta = this->meta_;
 
     // Add constant to list of parameters
-    auto param_constant = this->holder_->Parameter(0);
+    auto param_constant = this->pstore_->Parameter(0);
     problem.AddParameterBlock(param_constant.data, param_constant.size, param_constant.parameterization);
 
     if (this->IsLocked())
