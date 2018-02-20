@@ -1,12 +1,12 @@
 import pytest
 import numpy as np
 
-from taser.measurements import StaticRsCameraMeasurement, LiftingRsCameraMeasurement, NewtonRsCameraMeasurement, \
+from kontiki.measurements import StaticRsCameraMeasurement, LiftingRsCameraMeasurement, NewtonRsCameraMeasurement, \
     PositionMeasurement, GyroscopeMeasurement, AccelerometerMeasurement
-from taser.rotations import quat_to_rotation_matrix
-from taser.sfm import Landmark, View
-from taser.utils import safe_time_span, safe_time
-from taser.rotations import quat_to_rotation_matrix
+from kontiki.rotations import quat_to_rotation_matrix
+from kontiki.sfm import Landmark, View
+from kontiki.utils import safe_time_span, safe_time
+from kontiki.rotations import quat_to_rotation_matrix
 
 from trajectories.test_general import trajectory_example
 

@@ -1,13 +1,13 @@
 #include <Eigen/Dense>
-#include <taser/sensors/imu.h>
-#include <taser/trajectories/linear_trajectory.h>
-#include <taser/measurements/gyroscope_measurement.h>
-#include <taser/trajectory_estimator.h>
+#include <kontiki/sensors/imu.h>
+#include <kontiki/trajectories/linear_trajectory.h>
+#include <kontiki/measurements/gyroscope_measurement.h>
+#include <kontiki/trajectory_estimator.h>
 
-using namespace taser;
-using namespace taser::sensors;
-using namespace taser::trajectories;
-using namespace taser::measurements;
+using namespace kontiki;
+using namespace kontiki::sensors;
+using namespace kontiki::trajectories;
+using namespace kontiki::measurements;
 
 int main() {
 

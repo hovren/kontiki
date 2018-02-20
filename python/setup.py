@@ -76,31 +76,31 @@ class CMakeBuild(build_ext):
         self.copy_file(source_path, dest_path)
 
 
-class TaserExtension(CMakeExtension):
+class KontikiExtension(CMakeExtension):
     def __init__(self, module):
-        super().__init__('taser.' + module)
+        super().__init__('kontiki.' + module)
 
 
-class TrajectoryExtension(TaserExtension):
+class TrajectoryExtension(KontikiExtension):
     def __init__(self, module):
         super().__init__('trajectories.' + module)
 
 
-class MeasurementExtension(TaserExtension):
+class MeasurementExtension(KontikiExtension):
     def __init__(self, module):
         super().__init__('measurements.' + module)
 
 
-class SensorExtension(TaserExtension):
+class SensorExtension(KontikiExtension):
     def __init__(self, module):
         super().__init__('sensors.' + module)
 
 
 ext_modules = [
-#    TaserExtension('dummy'),
-    TaserExtension('sfm'),
-    TaserExtension('_trajectory_estimator'),
-    TaserExtension('_ceres'),
+#    KontikiExtension('dummy'),
+    KontikiExtension('sfm'),
+    KontikiExtension('_trajectory_estimator'),
+    KontikiExtension('_ceres'),
     TrajectoryExtension('_linear_trajectory'),
     TrajectoryExtension('_uniform_r3_spline_trajectory'),
     TrajectoryExtension('_uniform_so3_spline_trajectory'),
@@ -120,11 +120,11 @@ ext_modules = [
 
 
 setup(
-    name='taser',
+    name='kontiki',
     version='1.0',
     author='Hannes Ovrén',
     author_email='hannes.ovren@liu.se',
-    description='Trajectory and structure estimation',
+    description='Continuous-time toolkit for trajectory estimation',
     long_description='',
     packages=find_packages(),
     ext_modules=ext_modules,

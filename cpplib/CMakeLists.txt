@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 
-project(Taser VERSION 0.1.0)
+project(Kontiki VERSION 0.1.0)
 
 include(CMakePackageConfigHelpers)
 
@@ -19,82 +19,82 @@ find_dependency(Sophus)
 find_package(Eigen3 REQUIRED)
 
 # Header-only library -> INTERFACE
-add_library(Taser INTERFACE)
+add_library(Kontiki INTERFACE)
 
 if(TARGET Eigen3::Eigen)
     message("Eigen: First option")
-    target_link_libraries(Taser INTERFACE Eigen3::Eigen)
+    target_link_libraries(Kontiki INTERFACE Eigen3::Eigen)
     set(Eigen3_DEPENDENCY "find_dependency (Eigen3 ${Eigen3_VERSION})")
 else(TARGET Eigen3::Eigen)
     message("Eigen: second option")
-    target_include_directories (Taser SYSTEM INTERFACE ${EIGEN3_INCLUDE_DIR})
+    target_include_directories (Kontiki SYSTEM INTERFACE ${EIGEN3_INCLUDE_DIR})
 endif(TARGET Eigen3::Eigen)
 
 #if (Sophus_FOUND)
 #    message("Has Sophus, building SE3 trajectory")
 #    message("Sophus dir: ${Sophus_DIR}")
 #    message("Sophus include dirs: ${Sophus_INCLUDE_DIRS}")
-#    target_link_libraries(Taser INTERFACE Sophus)
+#    target_link_libraries(Kontiki INTERFACE Sophus)
 #else()
 #    message("Sophus not found, not building SE3 trajectory")
 #endif(Sophus_FOUND)
 
 if(TARGET Sophus::Sophus)
-    target_link_libraries(Taser INTERFACE Sophus::Sophus)
+    target_link_libraries(Kontiki INTERFACE Sophus::Sophus)
 else()
     message("No sophus")
 endif()
 
-file(GLOB_RECURSE Taser_HEADER_FILES include/*.h)
+file(GLOB_RECURSE Kontiki_HEADER_FILES include/*.h)
 
 # Associate target with include directory
-target_include_directories(Taser INTERFACE
+target_include_directories(Kontiki INTERFACE
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
-target_include_directories(Taser INTERFACE ${CERES_INCLUDE_DIRS})
-target_link_libraries(Taser INTERFACE ${CERES_LIBRARIES})
+target_include_directories(Kontiki INTERFACE ${CERES_INCLUDE_DIRS})
+target_link_libraries(Kontiki INTERFACE ${CERES_LIBRARIES})
 
 include(GNUInstallDirs)
-set(Taser_CMAKE_EXPORT_DIR ${CMAKE_INSTALL_DATADIR}/Taser/cmake)
+set(Kontiki_CMAKE_EXPORT_DIR ${CMAKE_INSTALL_DATADIR}/Kontiki/cmake)
 
 # Not needed since the name is the same?
-#set_target_properties(Taser PROPERTIES EXPORT_NAME Taser)
+#set_target_properties(Kontiki PROPERTIES EXPORT_NAME Kontiki)
 
-install(TARGETS Taser EXPORT TaserTargets)
-install(EXPORT TaserTargets
-    NAMESPACE Taser::
-    DESTINATION ${Taser_CMAKE_EXPORT_DIR}
+install(TARGETS Kontiki EXPORT KontikiTargets)
+install(EXPORT KontikiTargets
+    NAMESPACE Kontiki::
+    DESTINATION ${Kontiki_CMAKE_EXPORT_DIR}
     )
 
-export(TARGETS Taser NAMESPACE Taser:: FILE TaserTargets.cmake)
-export(PACKAGE Taser)
+export(TARGETS Kontiki NAMESPACE Kontiki:: FILE KontikiTargets.cmake)
+export(PACKAGE Kontiki)
 
 configure_package_config_file(
-    TaserConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/TaserConfig.cmake
-    INSTALL_DESTINATION ${Taser_CMAKE_EXPORT_DIR}
+    KontikiConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/KontikiConfig.cmake
+    INSTALL_DESTINATION ${Kontiki_CMAKE_EXPORT_DIR}
     NO_CHECK_REQUIRED_COMPONENTS_MACRO
 )
 
 write_basic_package_version_file (
-    TaserConfigVersion.cmake
+    KontikiConfigVersion.cmake
     VERSION ${PROJECT_VERSION}
     COMPATIBILITY SameMajorVersion
 )
 
 # Install cmake targets
 install(
-    FILES ${CMAKE_CURRENT_BINARY_DIR}/TaserConfig.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/TaserConfigVersion.cmake
-    DESTINATION ${Taser_CMAKE_EXPORT_DIR}
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/KontikiConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/KontikiConfigVersion.cmake
+    DESTINATION ${Kontiki_CMAKE_EXPORT_DIR}
 )
 
 # Install header files
 install(
-    FILES ${Taser_HEADER_FILES}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/taser
+    FILES ${Kontiki_HEADER_FILES}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/kontiki
 )
 
-add_custom_target(taser_lib_ide_target SOURCES ${Taser_HEADER_FILES})
+add_custom_target(kontiki_lib_ide_target SOURCES ${Kontiki_HEADER_FILES})

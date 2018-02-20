@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 from numpy.testing import assert_equal
 
-from taser.sfm import Landmark, Observation, View
+from kontiki.sfm import Landmark, Observation, View
 
 def test_new_view():
     n = 34

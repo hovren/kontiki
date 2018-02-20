@@ -2,8 +2,8 @@ import pytest
 import numpy as np
 from numpy.testing import assert_equal
 
-from taser.sfm import Landmark, View
-from taser.io import save_structure, load_structure
+from kontiki.sfm import Landmark, View
+from kontiki.io import save_structure, load_structure
 
 def test_structure(tmpdir):
     frame_times = np.arange(0, 1.5, 1/30)

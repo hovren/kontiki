@@ -2,8 +2,8 @@ import pytest
 
 import numpy as np
 
-from taser.trajectory_estimator import TrajectoryEstimator
-from taser._ceres import CallbackReturnType, TerminationType
+from kontiki.trajectory_estimator import TrajectoryEstimator
+from kontiki._ceres import CallbackReturnType, TerminationType
 
 @pytest.fixture
 def estimator(trajectory):
@@ -101,8 +101,8 @@ def test_imu_locks(trajectory, imu_measurements, what):
 
 @pytest.fixture
 def callback_estimator():
-    from taser.trajectories import SplitTrajectory
-    from taser.measurements import PositionMeasurement
+    from kontiki.trajectories import SplitTrajectory
+    from kontiki.measurements import PositionMeasurement
     from conftest import trajectory as gen_trajectory
 
     class Dummy:

@@ -4,7 +4,7 @@ import numpy as np
 from numpy.testing import assert_equal, assert_almost_equal
 from conftest import relative_pose
 
-from taser.rotations import quat_to_rotation_matrix
+from kontiki.rotations import quat_to_rotation_matrix
 
 def test_relative_pose_init(sensor):
     q_ct, p_ct = sensor.relative_pose

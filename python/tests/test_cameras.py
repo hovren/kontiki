@@ -3,8 +3,8 @@ import pytest
 from numpy.testing import assert_almost_equal, assert_equal
 import scipy.misc
 
-from taser.sensors import AtanCamera
-from taser.rotations import random_quaternion, quat_to_rotation_matrix
+from kontiki.sensors import AtanCamera
+from kontiki.rotations import random_quaternion, quat_to_rotation_matrix
 from fixtures.camera_fixtures import CAMERA_READOUT, IMAGE_ROWS, IMAGE_COLS, ATAN_K, ATAN_WC, ATAN_GAMMA
 
 

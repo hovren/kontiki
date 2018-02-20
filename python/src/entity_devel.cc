@@ -6,25 +6,25 @@
 
 #include <Eigen/Dense>
 #include <entity/entity.h>
-#include <taser/trajectories/linear_trajectory.h>
-#include <taser/trajectories/uniform_r3_spline_trajectory.h>
-#include <taser/trajectories/uniform_so3_spline_trajectory.h>
-#include <taser/trajectories/split_trajectory.h>
+#include <kontiki/trajectories/linear_trajectory.h>
+#include <kontiki/trajectories/uniform_r3_spline_trajectory.h>
+#include <kontiki/trajectories/uniform_so3_spline_trajectory.h>
+#include <kontiki/trajectories/split_trajectory.h>
 
-#include <taser/trajectory_estimator.h>
-#include <taser/measurements/position_measurement.h>
-#include <taser/measurements/static_rscamera_measurement.h>
-#include <taser/sensors/pinhole_camera.h>
-#include <taser/sensors/atan_camera.h>
-#include <taser/sfm/view.h>
-#include <taser/sfm/landmark.h>
-#include <taser/sfm/observation.h>
+#include <kontiki/trajectory_estimator.h>
+#include <kontiki/measurements/position_measurement.h>
+#include <kontiki/measurements/static_rscamera_measurement.h>
+#include <kontiki/sensors/pinhole_camera.h>
+#include <kontiki/sensors/atan_camera.h>
+#include <kontiki/sfm/view.h>
+#include <kontiki/sfm/landmark.h>
+#include <kontiki/sfm/observation.h>
 #include <entity/paramstore/empty_pstore.h>
 
-using namespace taser;
-using namespace taser::trajectories;
-using namespace taser::sensors;
-using namespace taser::measurements;
+using namespace kontiki;
+using namespace kontiki::trajectories;
+using namespace kontiki::sensors;
+using namespace kontiki::measurements;
 
 template<typename TrajectoryModel>
 void do_trajectory(const type::Trajectory<TrajectoryModel, double> &trajectory) {

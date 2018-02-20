@@ -1,10 +1,10 @@
 import pytest
 import numpy as np
 
-from taser.utils import safe_time
-from taser.sensors import BasicImu, ConstantBiasImu
-from taser.trajectory_estimator import TrajectoryEstimator
-from taser.measurements import GyroscopeMeasurement, AccelerometerMeasurement
+from kontiki.utils import safe_time
+from kontiki.sensors import BasicImu, ConstantBiasImu
+from kontiki.trajectory_estimator import TrajectoryEstimator
+from kontiki.measurements import GyroscopeMeasurement, AccelerometerMeasurement
 
 # --- General tests -----------------------------
 

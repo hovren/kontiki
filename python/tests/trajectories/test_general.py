@@ -3,12 +3,12 @@ from collections import defaultdict, namedtuple
 import numpy as np
 import pytest
 
-from taser.utils import safe_time, safe_time_span
-from taser.trajectories import LinearTrajectory, UniformR3SplineTrajectory, UniformSO3SplineTrajectory, UniformSE3SplineTrajectory, SplitTrajectory
-from taser.rotations import quat_to_rotation_matrix
+from kontiki.utils import safe_time, safe_time_span
+from kontiki.trajectories import LinearTrajectory, UniformR3SplineTrajectory, UniformSO3SplineTrajectory, UniformSE3SplineTrajectory, SplitTrajectory
+from kontiki.rotations import quat_to_rotation_matrix
 
-from taser.trajectory_estimator import TrajectoryEstimator
-from taser.measurements import PositionMeasurement
+from kontiki.trajectory_estimator import TrajectoryEstimator
+from kontiki.measurements import PositionMeasurement
 
 ExampleData = namedtuple('ExampleData',
                          ['position', 'velocity', 'acceleration', 'orientation', 'angular_velocity',
@@ -201,7 +201,7 @@ def test_acceleration_numerical(trajectory):
 
 def test_angular_velocity_numerical(trajectory):
     import scipy.misc
-    from taser.rotations import quat_mult, quat_conj
+    from kontiki.rotations import quat_mult, quat_conj
     t = safe_time(trajectory)
     dt = 1e-3
     q = trajectory.orientation(t)

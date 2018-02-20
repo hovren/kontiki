@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(taser-python)
+project(kontiki-python)
 
 set(CMAKE_CXX_STANDARD 14)
 
@@ -11,9 +11,9 @@ message("--- PYTHON configuration")
 message("PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
 message("PYTHON_VERSION_STRING: ${PYTHON_VERSION_STRING}")
 
-#find_package(Taser REQUIRED)
-message("Taser found: ${TASER_FOUND}")
-message("Taser: ${Taser_INCLUDE_DIRS}")
+#find_package(Kontiki REQUIRED)
+message("Kontiki found: ${KONTIKI_FOUND}")
+message("Kontiki: ${Kontiki_INCLUDE_DIRS}")
 
 # Load pybind11
 add_subdirectory(deps/pybind11)
@@ -21,11 +21,11 @@ add_subdirectory(deps/pybind11)
 #add_subdirectory(deps/hana)
 
 # Build a Python extension module using pybind11
-#   taser_add_module(<module>)
+#   kontiki_add_module(<module>)
 # Here <module> should be the fully qualifued name for the module,
-# e.g. taser.trajectories._dummy_trajectory
+# e.g. kontiki.trajectories._dummy_trajectory
 # <module> becomes the target name in case you wish to do something to it later
-function(taser_add_module module)
+function(kontiki_add_module module)
     set(target_name ${module})
     string(REPLACE "." ";" modlist ${module})
 
@@ -53,46 +53,46 @@ function(taser_add_module module)
     set(outdir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${relpath})
     set_target_properties(${target_name} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${outdir})
     set_target_properties(${target_name} PROPERTIES OUTPUT_NAME ${modname})
-    target_link_libraries(${target_name} PRIVATE Taser)
+    target_link_libraries(${target_name} PRIVATE Kontiki)
     target_include_directories(${target_name} PRIVATE deps/hana/include)
 endfunction()
 
 # Dummy module for testing
-#taser_add_module(taser.dummy)
+#kontiki_add_module(kontiki.dummy)
 
 # Ceres types
-taser_add_module(taser._ceres)
+kontiki_add_module(kontiki._ceres)
 
 # Trajectories
-taser_add_module(taser.trajectories._linear_trajectory)
-taser_add_module(taser.trajectories._uniform_r3_spline_trajectory)
-taser_add_module(taser.trajectories._uniform_so3_spline_trajectory)
-taser_add_module(taser.trajectories._uniform_se3_spline_trajectory)
-taser_add_module(taser.trajectories._split_trajectory)
+kontiki_add_module(kontiki.trajectories._linear_trajectory)
+kontiki_add_module(kontiki.trajectories._uniform_r3_spline_trajectory)
+kontiki_add_module(kontiki.trajectories._uniform_so3_spline_trajectory)
+kontiki_add_module(kontiki.trajectories._uniform_se3_spline_trajectory)
+kontiki_add_module(kontiki.trajectories._split_trajectory)
 
 # Sensors
 # - Cameras
-taser_add_module(taser.sensors._pinhole_camera)
-taser_add_module(taser.sensors._atan_camera)
+kontiki_add_module(kontiki.sensors._pinhole_camera)
+kontiki_add_module(kontiki.sensors._atan_camera)
 
 # - IMUs
-taser_add_module(taser.sensors._basic_imu)
-taser_add_module(taser.sensors._constant_bias_imu)
+kontiki_add_module(kontiki.sensors._basic_imu)
+kontiki_add_module(kontiki.sensors._constant_bias_imu)
 
 # Structire from motion
-taser_add_module(taser.sfm)
+kontiki_add_module(kontiki.sfm)
 
 # Trajectory estimator
-taser_add_module(taser._trajectory_estimator)
+kontiki_add_module(kontiki._trajectory_estimator)
 
 # Measurements
-taser_add_module(taser.measurements._position_measurement)
-taser_add_module(taser.measurements._accelerometer_measurement)
-taser_add_module(taser.measurements._gyroscope_measurement)
-taser_add_module(taser.measurements._static_rscamera_measurement)
-taser_add_module(taser.measurements._lifting_rscamera_measurement)
-taser_add_module(taser.measurements._newton_rscamera_measurement)
+kontiki_add_module(kontiki.measurements._position_measurement)
+kontiki_add_module(kontiki.measurements._accelerometer_measurement)
+kontiki_add_module(kontiki.measurements._gyroscope_measurement)
+kontiki_add_module(kontiki.measurements._static_rscamera_measurement)
+kontiki_add_module(kontiki.measurements._lifting_rscamera_measurement)
+kontiki_add_module(kontiki.measurements._newton_rscamera_measurement)
 
 # IDE helper target
 file(GLOB_RECURSE python_sources src/*.cc src/*.h)
-add_custom_target(taser_python_ide_target SOURCES ${python_sources})
+add_custom_target(kontiki_python_ide_target SOURCES ${python_sources})

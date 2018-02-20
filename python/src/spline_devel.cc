@@ -3,16 +3,16 @@
 
 #include <sophus/se3.hpp>
 
-#include <taser/trajectories/uniform_se3_spline_trajectory.h>
-#include <taser/trajectory_estimator.h>
-#include <taser/measurements/position_measurement.h>
-#include <taser/sensors/pinhole_camera.h>
-#include <taser/measurements/static_rscamera_measurement.h>
-#include <taser/sfm/view.h>
+#include <kontiki/trajectories/uniform_se3_spline_trajectory.h>
+#include <kontiki/trajectory_estimator.h>
+#include <kontiki/measurements/position_measurement.h>
+#include <kontiki/sensors/pinhole_camera.h>
+#include <kontiki/measurements/static_rscamera_measurement.h>
+#include <kontiki/sfm/view.h>
 
-using namespace taser;
-using namespace taser::trajectories;
-using namespace taser::measurements;
+using namespace kontiki;
+using namespace kontiki::trajectories;
+using namespace kontiki::measurements;
 
 int main() {
   std::cout << "Begin" << std::endl;
@@ -50,18 +50,18 @@ int main() {
   TrajectoryEstimator<UniformSE3SplineTrajectory> estimator(traj);
 
 
-  auto v1 = std::make_shared<taser::View>(0, 1.22);
-  auto v2 = std::make_shared<taser::View>(3, 3.1);
-  auto v3 = std::make_shared<taser::View>(2, 1.93);
-  auto lm = std::make_shared<taser::Landmark>();
+  auto v1 = std::make_shared<kontiki::View>(0, 1.22);
+  auto v2 = std::make_shared<kontiki::View>(3, 3.1);
+  auto v3 = std::make_shared<kontiki::View>(2, 1.93);
+  auto lm = std::make_shared<kontiki::Landmark>();
   auto ref = v1->create_observation(lm, 100, 100);
   auto obs = v2->create_observation(lm, 200, 200);
   auto obs2 = v3->create_observation(lm, 103, 110);
   lm->set_reference(ref);
 
-  auto camera = std::make_shared<taser::sensors::PinholeCamera>(640, 480, 0.1);
+  auto camera = std::make_shared<kontiki::sensors::PinholeCamera>(640, 480, 0.1);
 
-  using MClass = taser::measurements::StaticRsCameraMeasurement<taser::sensors::PinholeCamera>;
+  using MClass = kontiki::measurements::StaticRsCameraMeasurement<kontiki::sensors::PinholeCamera>;
 
   auto m1 = std::make_shared<MClass>(camera, obs);
   auto m2 = std::make_shared<MClass>(camera, obs2);

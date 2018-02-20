@@ -2,8 +2,8 @@ import pytest
 
 import numpy as np
 
-from taser.sensors import PinholeCamera, AtanCamera
-from taser.rotations import random_quaternion
+from kontiki.sensors import PinholeCamera, AtanCamera
+from kontiki.rotations import random_quaternion
 
 IMAGE_ROWS = 1080
 IMAGE_COLS = 1920

@@ -2,8 +2,8 @@ import pytest
 import numpy as np
 from scipy.interpolate import BSpline
 
-from taser.trajectories import UniformR3SplineTrajectory, UniformSO3SplineTrajectory, UniformSE3SplineTrajectory
-from taser.rotations import random_quaternion, identity_quaternion, quat_to_rotation_matrix
+from kontiki.trajectories import UniformR3SplineTrajectory, UniformSO3SplineTrajectory, UniformSE3SplineTrajectory
+from kontiki.rotations import random_quaternion, identity_quaternion, quat_to_rotation_matrix
 
 spline_classes = (UniformR3SplineTrajectory, UniformSO3SplineTrajectory)
 
@@ -166,7 +166,7 @@ def test_extend_to_fill(cls):
     if cls == UniformR3SplineTrajectory:
         fill_value = np.zeros(3)
     elif cls == UniformSO3SplineTrajectory:
-        from taser.rotations import identity_quaternion
+        from kontiki.rotations import identity_quaternion
         fill_value = identity_quaternion()
     else:
         raise NotImplementedError(f"Test case not implemented for {cls}")

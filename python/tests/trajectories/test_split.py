@@ -1,8 +1,8 @@
 import pytest
 import numpy as np
 
-from taser.trajectories import SplitTrajectory, UniformR3SplineTrajectory, UniformSO3SplineTrajectory
-from taser.utils import safe_time
+from kontiki.trajectories import SplitTrajectory, UniformR3SplineTrajectory, UniformSO3SplineTrajectory
+from kontiki.utils import safe_time
 
 def test_default_constructor():
     trajectory = SplitTrajectory()

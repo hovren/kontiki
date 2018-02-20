@@ -5,12 +5,12 @@ import numpy as np
 from fixtures.camera_fixtures import *
 from fixtures.sfm_fixtures import *
 
-from taser.trajectories import LinearTrajectory, UniformR3SplineTrajectory, UniformSO3SplineTrajectory, SplitTrajectory, \
+from kontiki.trajectories import LinearTrajectory, UniformR3SplineTrajectory, UniformSO3SplineTrajectory, SplitTrajectory, \
     UniformSE3SplineTrajectory
-from taser.measurements import PositionMeasurement, NewtonRsCameraMeasurement, LiftingRsCameraMeasurement, StaticRsCameraMeasurement, GyroscopeMeasurement, AccelerometerMeasurement
-from taser.sensors import BasicImu, ConstantBiasImu
-from taser.utils import safe_time_span
-from taser.rotations import quat_to_rotation_matrix, random_quaternion
+from kontiki.measurements import PositionMeasurement, NewtonRsCameraMeasurement, LiftingRsCameraMeasurement, StaticRsCameraMeasurement, GyroscopeMeasurement, AccelerometerMeasurement
+from kontiki.sensors import BasicImu, ConstantBiasImu
+from kontiki.utils import safe_time_span
+from kontiki.rotations import quat_to_rotation_matrix, random_quaternion
 
 trajectory_classes = [
     LinearTrajectory,

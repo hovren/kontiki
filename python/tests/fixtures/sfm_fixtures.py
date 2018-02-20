@@ -5,9 +5,9 @@ import pytest
 import numpy as np
 import h5py
 
-from taser.sfm import View, Landmark
-from taser.io import load_structure, save_structure
-from taser.utils import safe_time_span
+from kontiki.sfm import View, Landmark
+from kontiki.io import load_structure, save_structure
+from kontiki.utils import safe_time_span
 
 def project_camera_trajectory(X_world, t0, trajectory, camera):
     def project(t):
