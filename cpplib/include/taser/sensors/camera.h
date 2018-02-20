@@ -50,14 +50,20 @@ class CameraView : public SensorView<T, MetaType> {
  public:
   using SensorView<T, MetaType>::SensorView;
 
+  // Evaluate the camera projection for a point X (and its derivative) in the camera coordinate frame.
+  // Note: This function does NOT apply the camera relative pose!
   virtual Result EvaluateProjection(const Vector3 &X, const Vector3 &dX, bool derive) const = 0;
 
+  // Project a point X in the camera coordinate frame
+  // Note: This function does NOT apply the camera relative pose!
   Vector2 Project(const Vector3 &X) const {
     Vector3 dX;
     auto result = EvaluateProjection(X, dX, false);
     return result->y;
   };
 
+  // Inverse projection of an image point to a point (x, y, 1) in the camera coordinate frame
+  // Note: This function does NOT apply the camera relative pose!
   virtual Vector3 Unproject(const Vector2& y) const = 0;
 
   size_t rows() const {
