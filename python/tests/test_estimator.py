@@ -75,6 +75,30 @@ def test_trajectory_lock(trajectory, simple_measurements):
     assert summary_locked.num_parameters_reduced == 0, "Not locked"
 
 
+@pytest.mark.parametrize('what', ['relative_orientation', 'relative_position', 'time_offset'])
+def test_imu_locks(trajectory, imu_measurements, what):
+    estimator_locked = TrajectoryEstimator(trajectory)
+    imus = {m.imu for m in imu_measurements}
+    assert len(imus) == 1
+    imu = next(i for i in imus)
+
+    assert getattr(imu, f'{what}_locked')  # Should be locked from start
+
+    for m in imu_measurements:
+        estimator_locked.add_measurement(m)
+
+    summary_locked = estimator_locked.solve()
+
+    estimator_unlocked = TrajectoryEstimator(trajectory)
+    setattr(imu, f'{what}_locked', False)  # Lock it
+    for m in imu_measurements:
+        estimator_unlocked.add_measurement(m)
+
+    summary_unlocked = estimator_unlocked.solve()
+
+    assert summary_unlocked.num_parameter_blocks_reduced == summary_locked.num_parameter_blocks_reduced + 1
+
+
 @pytest.fixture
 def callback_estimator():
     from taser.trajectories import SplitTrajectory

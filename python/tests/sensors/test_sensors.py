@@ -10,6 +10,16 @@ def test_relative_pose_init(sensor):
     q_ct, p_ct = sensor.relative_pose
     assert_equal(p_ct, np.zeros(3))
     assert_equal(q_ct, [1, 0, 0, 0])
+    assert sensor.time_offset == 0.
+
+
+@pytest.mark.parametrize('what', ['relative_orientation', 'relative_position', 'time_offset'])
+def test_locks_set(what, sensor):
+    is_locked = lambda: getattr(sensor, f'{what}_locked')
+    set_locked = lambda x: setattr(sensor, f'{what}_locked', x)
+    assert is_locked()
+    set_locked(False)
+    assert not is_locked()
 
 
 def test_relative_pose_set_get(sensor):

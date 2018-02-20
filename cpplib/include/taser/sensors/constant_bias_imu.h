@@ -24,9 +24,9 @@ class ConstantBiasImuView : public ImuView<T, MetaType, ConstantBiasImuView<T, M
   using Vector3Map = Eigen::Map<Vector3>;
   using Base = ImuView<T, MetaType, ConstantBiasImuView<T, MetaType>>;
  protected:
-  // Parameter indices. 0 and 1 are rel pose set by SensorEntity
-  const size_t PARAM_ABIAS = 2;
-  const size_t PARAM_GBIAS = 3;
+  // Parameter indices. First three are set by SensorEntity
+  const size_t PARAM_ABIAS = 3;
+  const size_t PARAM_GBIAS = 4;
  public:
   using Base::ImuView;
 

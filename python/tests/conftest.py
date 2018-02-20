@@ -10,7 +10,7 @@ from taser.trajectories import LinearTrajectory, UniformR3SplineTrajectory, Unif
 from taser.measurements import PositionMeasurement, NewtonRsCameraMeasurement, LiftingRsCameraMeasurement, StaticRsCameraMeasurement, GyroscopeMeasurement, AccelerometerMeasurement
 from taser.sensors import BasicImu, ConstantBiasImu
 from taser.utils import safe_time_span
-from taser.rotations import quat_to_rotation_matrix
+from taser.rotations import quat_to_rotation_matrix, random_quaternion
 
 trajectory_classes = [
     LinearTrajectory,
@@ -20,15 +20,16 @@ trajectory_classes = [
     SplitTrajectory,
 ]
 
+
+class DummyRequest:
+    def __init__(self, cls):
+        self.param = cls
+
+
 @pytest.fixture(params=trajectory_classes)
 def trajectory(request):
     "Handcrafted 'simple' trajectory which is at least 5 seconds long"
     cls = request.param
-
-    # Used to get trajectory from this function, from within it
-    class DummyRequest:
-        def __init__(self, cls):
-            self.param = cls
 
     if cls == LinearTrajectory:
         t0 = 2
@@ -118,6 +119,15 @@ def trajectory(request):
         return instance
     else:
         raise ValueError(f"Fixture simple_trajectory not available for {cls}")
+
+
+@pytest.fixture
+def split_trajectory():
+    trajectory = SplitTrajectory(0.5, 0.5)
+    for i in range(10):
+        trajectory.R3_spline.append_knot(np.random.uniform(-2, 2, size=3))
+        trajectory.SO3_spline.append_knot(random_quaternion())
+    return trajectory
 
 
 imu_classes = [

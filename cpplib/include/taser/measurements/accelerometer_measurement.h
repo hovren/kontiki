@@ -82,10 +82,12 @@ class AccelerometerMeasurement {
     std::vector<entity::ParameterInfo<double>> parameter_info;
 
     // Add trajectory to problem
-    estimator.AddTrajectoryForTimes({{t,t}}, residual->trajectory_meta, parameter_info);
+    double tmin = t - this->imu_->max_time_offset();
+    double tmax = t + this->imu_->max_time_offset();
+    estimator.AddTrajectoryForTimes({{tmin, tmax}}, residual->trajectory_meta, parameter_info);
 
     // Add IMU to problem
-    imu_->AddToProblem(estimator.problem(), {{t, t}}, residual->imu_meta, parameter_info);
+    imu_->AddToProblem(estimator.problem(), {{tmin, tmax}}, residual->imu_meta, parameter_info);
 
     // Let cost function know about the number and sizes of parameters dynamically added
     for (auto& pi : parameter_info) {

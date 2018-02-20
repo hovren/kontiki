@@ -22,6 +22,8 @@ static void declare_sensors_common(PyClass &cls) {
                      self.set_relative_position(pose.second);
                    });
 
+  cls.def_property("relative_orientation_locked", &Class::RelativeOrientationIsLocked, &Class::LockRelativeOrientation);
+  cls.def_property("relative_position_locked", &Class::RelativePositionIsLocked, &Class::LockRelativePosition);
   cls.def_property("time_offset_locked", &Class::TimeOffsetIsLocked, &Class::LockTimeOffset);
 
   cls.def_property("time_offset", &Class::time_offset, &Class::set_time_offset);

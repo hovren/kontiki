@@ -5,12 +5,13 @@ from taser.measurements import StaticRsCameraMeasurement, LiftingRsCameraMeasure
     PositionMeasurement, GyroscopeMeasurement, AccelerometerMeasurement
 from taser.rotations import quat_to_rotation_matrix
 from taser.sfm import Landmark, View
-from taser.utils import safe_time_span
+from taser.utils import safe_time_span, safe_time
 from taser.rotations import quat_to_rotation_matrix
 
 from trajectories.test_general import trajectory_example
 
 projection_types = [StaticRsCameraMeasurement, LiftingRsCameraMeasurement, NewtonRsCameraMeasurement]
+imu_measurement_types = [AccelerometerMeasurement, GyroscopeMeasurement]
 
 @pytest.mark.parametrize('cls', projection_types)
 def test_rscamera_measurements(cls, small_sfm):
@@ -130,9 +131,24 @@ def test_accelerometer_measurements(trajectory, imu):
         np.testing.assert_almost_equal(acc_hat, acc)
 
 
-@pytest.mark.parametrize('mcls', [AccelerometerMeasurement, GyroscopeMeasurement])
+@pytest.mark.parametrize('mcls', imu_measurement_types)
 def test_imu_measurement_same_imu(mcls, imu):
     t = 1.0
     m = mcls(imu, t, np.random.uniform(-1, 1, size=3))
     print(imu, m.imu)
     assert m.imu is imu
+
+
+@pytest.mark.parametrize('mcls', imu_measurement_types)
+def test_imu_measurement_time_offset(mcls, imu, split_trajectory):
+    t = safe_time(split_trajectory)
+    d = np.random.uniform(-imu.max_time_offset, imu.max_time_offset)
+    v = np.random.uniform(-1, 1, size=3)
+    m1 = mcls(imu, t, v)
+    y1 = m1.measure(split_trajectory)
+
+    imu.time_offset = d
+    m2 = mcls(imu, t - d, v)
+    y2 = m2.measure(split_trajectory)
+    np.testing.assert_equal(y1, y2)
+

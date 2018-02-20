@@ -46,7 +46,7 @@ class ImuView : public SensorView<T, MetaType> {
   // Standard gyroscope function
   template<typename TrajectoryModel>
   Vector3 StandardGyroscope(const type::Trajectory<TrajectoryModel, T> &trajectory, T t) const {
-    auto result = trajectory.Evaluate(t, Flags::EvalOrientation | Flags::EvalAngularVelocity);
+    auto result = trajectory.Evaluate(t + this->time_offset(), Flags::EvalOrientation | Flags::EvalAngularVelocity);
     // Rotate from world to body coordinate frame
     return result->orientation.conjugate()*result->angular_velocity;
   }
@@ -54,7 +54,7 @@ class ImuView : public SensorView<T, MetaType> {
   // Standard gyroscope function
   template<typename TrajectoryModel>
   Vector3 StandardAccelerometer(const type::Trajectory<TrajectoryModel, T> &trajectory, T t) const {
-    auto result = trajectory.Evaluate(t, Flags::EvalOrientation | Flags::EvalAcceleration);
+    auto result = trajectory.Evaluate(t + this->time_offset(), Flags::EvalOrientation | Flags::EvalAcceleration);
     return result->orientation.conjugate() * (result->acceleration + Constants<T>::Gravity);
   }
 
