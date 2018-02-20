@@ -28,9 +28,10 @@ Eigen::Matrix<T, 2, 1> reproject_lifting(const sfm::Observation& ref,
   using Vector2 = Eigen::Matrix<T, 2, 1>;
   using Flags = trajectories::EvaluationFlags;
 
+  T time_offset = camera.time_offset();
   T row_delta = camera.readout() / T(camera.rows());
-  T t_ref = ref.view()->t0() + ref.v() * row_delta;
-  T t_obs = obs.view()->t0() + vt * camera.readout();
+  T t_ref = ref.view()->t0() + time_offset + ref.v() * row_delta;
+  T t_obs = obs.view()->t0() + time_offset + vt * camera.readout();
 
   int flags = Flags::EvalPosition | Flags::EvalOrientation;
   auto eval_ref = trajectory.Evaluate(t_ref, flags);
@@ -164,6 +165,13 @@ Eigen::Matrix<T, 2, 1> reproject_lifting(const sfm::Observation& ref,
         t1 = t0_obs;
         t2 = t0_ref;
       }
+
+      // Add time offset margins, if neccessary
+      if (!camera->TimeOffsetIsLocked()) {
+        t1 -= camera->max_time_offset();
+        t2 += camera->max_time_offset();
+      }
+
 
       const double margin = 1e-3;
 

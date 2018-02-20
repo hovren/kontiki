@@ -152,3 +152,31 @@ def test_imu_measurement_time_offset(mcls, imu, split_trajectory):
     y2 = m2.measure(split_trajectory)
     np.testing.assert_equal(y1, y2)
 
+
+@pytest.mark.parametrize('mcls', projection_types)
+def test_camera_measurement_time_offset(mcls, camera, split_trajectory):
+    t1, t2 = safe_time_span(split_trajectory, 1)
+    t1 += camera.max_time_offset
+    t2 -= camera.max_time_offset
+
+    d = np.random.uniform(-camera.max_time_offset, camera.max_time_offset)
+
+    lm = Landmark()
+    lm.inverse_depth = np.random.uniform(0.01, 1)
+    views = [View(i, t) for i, t in enumerate([t1, t1+0.23])]
+    ref, obs = [v.create_observation(lm, np.random.uniform(100, 900, size=2)) for v in views]
+    lm.reference = ref
+
+    m1 = mcls(camera, obs)
+    y1 = m1.measure(split_trajectory)
+
+    new_lm = Landmark()
+    new_lm.inverse_depth = lm.inverse_depth
+    new_views = [View(v.frame_nr, v.t0 - d) for v in views]
+    new_ref, new_obs = [v.create_observation(new_lm, o.uv) for v, o in zip(new_views, [ref, obs])]
+    new_lm.reference = new_ref
+
+    camera.time_offset = d
+    m2 = mcls(camera, new_obs)
+    y2 = m2.measure(split_trajectory)
+    np.testing.assert_almost_equal(y1, y2)

@@ -32,9 +32,10 @@ Eigen::Matrix<T, 2, 1> reproject_newton(const sfm::Observation& ref,
   using QuaternionMap = Eigen::Map<Quaternion>;
   using Flags = trajectories::EvaluationFlags;
 
+  T time_offset = camera.time_offset();
   T row_delta = camera.readout() / T(camera.rows());
-  T t0_obs = T(obs.view()->t0());
-  T t_ref = T(ref.view()->t0()) + T(ref.v()) * row_delta; // constant value
+  T t0_obs = T(obs.view()->t0()) + time_offset;
+  T t_ref = T(ref.view()->t0()) + time_offset + T(ref.v()) * row_delta; // constant value
   T t_obs = t0_obs + T(obs.v()) * row_delta; // initial value
 
   // We need only first derivatives
@@ -216,6 +217,12 @@ Eigen::Matrix<T, 2, 1> reproject_newton(const sfm::Observation& ref,
       else {
         t1 = t0_obs;
         t2 = t0_ref;
+      }
+
+      // Add time offset margins, if neccessary
+      if (!camera->TimeOffsetIsLocked()) {
+        t1 -= camera->max_time_offset();
+        t2 += camera->max_time_offset();
       }
 
       const double margin = 1e-3;
