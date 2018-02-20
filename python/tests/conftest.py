@@ -167,7 +167,10 @@ def imu_measurements(request, imu, trajectory):
     cls = request.param
     length = 5.
     n = int(length * 3)
-    times = np.linspace(*safe_time_span(trajectory, length), num=n)
+    t1, t2 = safe_time_span(trajectory, length)
+    t1 = max(t1, trajectory.min_time + imu.max_time_offset)
+    t2 = min(t2, trajectory.max_time - imu.max_time_offset)
+    times = np.linspace(t1, t2, endpoint=False, num=n)
     print('Creating from imu', imu)
     return [cls(imu, t, np.random.uniform(-1, 1, size=3)) for t in times]
 

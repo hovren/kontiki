@@ -22,6 +22,11 @@ static void declare_sensors_common(PyClass &cls) {
                      self.set_relative_position(pose.second);
                    });
 
+  cls.def_property("time_offset_locked", &Class::TimeOffsetIsLocked, &Class::LockTimeOffset);
+
+  cls.def_property("time_offset", &Class::time_offset, &Class::set_time_offset);
+  cls.def_property("max_time_offset", &Class::max_time_offset, &Class::set_max_time_offset);
+
   cls.def("from_trajectory", &Class::FromTrajectory);
   cls.def("to_trajectory", &Class::ToTrajectory);
 
