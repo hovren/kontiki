@@ -3,7 +3,7 @@ import numpy as np
 
 from kontiki.utils import safe_time
 from kontiki.sensors import BasicImu, ConstantBiasImu
-from kontiki.trajectory_estimator import TrajectoryEstimator
+from kontiki import TrajectoryEstimator
 from kontiki.measurements import GyroscopeMeasurement, AccelerometerMeasurement
 
 # --- General tests -----------------------------

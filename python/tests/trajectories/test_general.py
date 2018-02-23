@@ -7,7 +7,7 @@ from kontiki.utils import safe_time, safe_time_span
 from kontiki.trajectories import LinearTrajectory, UniformR3SplineTrajectory, UniformSO3SplineTrajectory, UniformSE3SplineTrajectory, SplitTrajectory
 from kontiki.rotations import quat_to_rotation_matrix
 
-from kontiki.trajectory_estimator import TrajectoryEstimator
+from kontiki import TrajectoryEstimator
 from kontiki.measurements import PositionMeasurement
 
 ExampleData = namedtuple('ExampleData',

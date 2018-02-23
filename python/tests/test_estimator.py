@@ -2,7 +2,7 @@ import pytest
 
 import numpy as np
 
-from kontiki.trajectory_estimator import TrajectoryEstimator
+from kontiki import TrajectoryEstimator
 from kontiki._ceres import CallbackReturnType, TerminationType
 
 @pytest.fixture
