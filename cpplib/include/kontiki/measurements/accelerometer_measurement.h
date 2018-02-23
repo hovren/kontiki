@@ -82,8 +82,16 @@ class AccelerometerMeasurement {
     std::vector<entity::ParameterInfo<double>> parameter_info;
 
     // Add trajectory to problem
-    double tmin = t - this->imu_->max_time_offset();
-    double tmax = t + this->imu_->max_time_offset();
+    double tmin, tmax;
+    if (this->imu_->TimeOffsetIsLocked()) {
+      tmin = t;
+      tmax = t;
+    }
+    else {
+      tmin = t - this->imu_->max_time_offset();
+      tmax = t + this->imu_->max_time_offset();
+    }
+
     estimator.AddTrajectoryForTimes({{tmin, tmax}}, residual->trajectory_meta, parameter_info);
 
     // Add IMU to problem
