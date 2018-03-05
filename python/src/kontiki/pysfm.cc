@@ -24,6 +24,7 @@ static void declare_landmark(py::module &m) {
   cls.def_property("reference", &Landmark::reference, &Landmark::set_reference, "Reference observation");
   cls.def_property_readonly("observations", &Landmark::observations, "Observations");
   cls.def_property("inverse_depth", &Landmark::inverse_depth, &Landmark::set_inverse_depth, "Inverse depth");
+  cls.def_property("locked", &Class::IsLocked, &Class::Lock, "Lock landmark");
   cls.def("__repr__", [](Landmark& self) {
     std::stringstream ss;
     ss << "<Landmark num_obs=" << self.observations().size() <<

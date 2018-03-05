@@ -10,7 +10,10 @@
 namespace kontiki {
 namespace sfm {
 
-Landmark::Landmark() : inverse_depth_(0), id_(new_id()) {}
+Landmark::Landmark() :
+    inverse_depth_(0),
+    locked_(false),
+    id_(new_id()) {}
 
 size_t Landmark::id() const {
   return id_;
@@ -56,6 +59,14 @@ void Landmark::set_inverse_depth(double x) {
 
 double* Landmark::inverse_depth_ptr() {
   return &inverse_depth_;
+}
+
+bool Landmark::IsLocked() const {
+  return locked_;
+}
+
+void Landmark::Lock(bool flag) {
+  locked_ = flag;
 }
 
 

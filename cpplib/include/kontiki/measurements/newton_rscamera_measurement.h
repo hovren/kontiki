@@ -248,6 +248,9 @@ Eigen::Matrix<T, 2, 1> reproject_newton(const sfm::Observation& ref,
       estimator.problem().AddParameterBlock(p_rho, 1);
       estimator.problem().SetParameterLowerBound(p_rho, 0, 0.); // Only positive inverse depths please
       parameters.push_back(entity::ParameterInfo<double>(p_rho, 1));
+      if (landmark->IsLocked()) {
+        estimator.problem().SetParameterBlockConstant(p_rho);
+      }
 
       // Add parameters to cost function
       for (auto& pi : parameters) {

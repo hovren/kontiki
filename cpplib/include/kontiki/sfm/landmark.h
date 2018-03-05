@@ -39,6 +39,9 @@ class Landmark {
   void set_inverse_depth(double x);
   double* inverse_depth_ptr();
 
+  bool IsLocked() const;
+  void Lock(bool flag);
+
  protected:
   void AddObservation(std::shared_ptr<Observation> obs);
   void RemoveObservation(std::shared_ptr<Observation> obs);
@@ -47,6 +50,7 @@ class Landmark {
   double inverse_depth_;
   std::weak_ptr<Observation> reference_observation_;
   std::vector<std::weak_ptr<Observation>> observations_;
+  bool locked_;
 };
 
 } // namespace sfm
