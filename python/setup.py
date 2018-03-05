@@ -111,6 +111,7 @@ ext_modules = [
     SensorExtension('_basic_imu'),
     SensorExtension('_constant_bias_imu'),
     MeasurementExtension('_position_measurement'),
+    MeasurementExtension('_orientation_measurement'),
     MeasurementExtension('_static_rscamera_measurement'),
     MeasurementExtension('_lifting_rscamera_measurement'),
     MeasurementExtension('_newton_rscamera_measurement'),

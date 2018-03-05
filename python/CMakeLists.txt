@@ -87,6 +87,7 @@ kontiki_add_module(kontiki._trajectory_estimator)
 
 # Measurements
 kontiki_add_module(kontiki.measurements._position_measurement)
+kontiki_add_module(kontiki.measurements._orientation_measurement)
 kontiki_add_module(kontiki.measurements._accelerometer_measurement)
 kontiki_add_module(kontiki.measurements._gyroscope_measurement)
 kontiki_add_module(kontiki.measurements._static_rscamera_measurement)
