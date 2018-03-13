@@ -105,7 +105,7 @@ def trajectory(request):
             p = np.array(p).reshape(3, 1)
             R = quat_to_rotation_matrix(q)
             T = np.block([[R, p],
-                          [np.array([[0, 0, 0, 1]])]])
+                          [np.array([[0., 0., 0., 1.]])]])
             instance.append_knot(T)
 
         return instance

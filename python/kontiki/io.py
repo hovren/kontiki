@@ -1,10 +1,13 @@
 from pathlib import Path
+from contextlib import contextmanager
+import warnings
 
 import h5py
 import numpy as np
 
 from .sfm import Landmark, View
 from .sensors import AtanCamera
+from .trajectories import SplitTrajectory, UniformSO3SplineTrajectory, UniformR3SplineTrajectory, UniformSE3SplineTrajectory
 
 
 def save_structure(fileobj, landmarks, *, landmark_colors=None):
@@ -120,4 +123,106 @@ def load_atan_camera(path):
                             f['wc'].value,
                             f['lgamma'].value)
     return camera    
+
+
+def save_spline(group, spline):
+    """Save a spine to file or HDF5 group
+
+    Parameters
+    -------------
+    location : path or h5py.Group or h5py.File
+        Location to save the spline to.
+    """
+    group['dt'] = spline.dt
+    group['t0'] = spline.t0
+    knots = np.vstack([np.expand_dims(v, 0) for v in spline])
+
+    group['knots'] = knots
+
+
+def load_spline(group, cls):
+    instance = cls(group['dt'].value, group['t0'].value)
+    for v in group['knots'].value:
+        instance.append_knot(v)
+    return instance
+
+
+@contextmanager
+def create_h5_group(location, group_name):
+    try:
+        # Create in existing h5py File handle
+        yield location.create_group(group_name)
+    except AttributeError:
+        # Create file and return the group
+        f = h5py.File(location, 'w')
+        g = f.create_group(group_name)
+        yield g
+        f.close()
+
+
+@contextmanager
+def open_h5_group(location, group_name):
+    print('Location:', location)
+    try:
+        yield location[group_name]
+    except (AttributeError, KeyError, TypeError):
+        f = h5py.File(location, 'r')
+        yield f[group_name]
+        f.close()
+
+
+def save_trajectory(location, trajectory, group_name="trajectory"):
+    """Save trajectory to HDF5 file
+
+    Parameters
+    ------------------
+    location: path to new file, or an open h5py.File or h5py.Group
+        Where to save the trajectory
+    trajectory: A kontiki Trajectory
+        The trajectory to save
+    group_name: str
+        Name of the group where the trajectory is saved. If location is a path, it is a group under the root, otherwise
+        it is created as a subgroup of the location.
+    """
+    with create_h5_group(location, group_name) as g:
+        g['type'] = trajectory.__class__.__name__
+        if type(trajectory) == SplitTrajectory:
+            save_spline(g.create_group("R3_spline"), trajectory.R3_spline)
+            save_spline(g.create_group("SO3_spline"), trajectory.SO3_spline)
+        else:
+            save_spline(g, trajectory)
+
+        if type(trajectory) == UniformSE3SplineTrajectory:
+            warnings.warn("SE3 trajectories currently has precison loss in the order of 10^-16 when saving to HDF5. Patches welcome!")
+
+
+
+def load_trajectory(location, group_name="trajectory"):
+    """Load trajectory from HDF5 file
+
+    Parameters
+    --------------
+    location: path, or an open h5py.File or h5py.Group
+        Where to save the trajectory
+    group_name: str
+        The name of the group under which the trajectory is stored. If location is a path it is a group directly under the root.
+
+    Returns
+    -------------
+    trajectory : A kontiki trajectory instance
+    """
+    with open_h5_group(location, group_name) as g:
+        trajectory_class_name = g['type'].value
+        print('traj_class_name:', trajectory_class_name)
+        if trajectory_class_name == 'SplitTrajectory':
+            r3_spline = load_spline(g['R3_spline'], UniformR3SplineTrajectory)
+            so3_spline = load_spline(g['SO3_spline'], UniformSO3SplineTrajectory)
+            return SplitTrajectory(r3_spline, so3_spline)
+        elif trajectory_class_name == 'UniformSE3SplineTrajectory':
+            warnings.warn("SE3 trajectories currently has precison loss in the order of 10^-16 when saving to HDF5. Patches welcome!")
+            return load_spline(g, UniformSE3SplineTrajectory)
+        elif trajectory_class_name == 'UniformSO3SplineTrajectory':
+            return load_spline(g, UniformSO3SplineTrajectory)
+        elif trajectory_class_name == 'UniformR3SplineTrajectory':
+            return load_spline(g, UniformR3SplineTrajectory)
 
