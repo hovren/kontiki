@@ -90,7 +90,6 @@ def load_trajectory(location, group_name="trajectory"):
     """
     with __open_h5_group(location, group_name) as g:
         trajectory_class_name = g['type'].value
-        print('traj_class_name:', trajectory_class_name)
         if trajectory_class_name == 'SplitTrajectory':
             r3_spline = __load_spline(g['R3_spline'], UniformR3SplineTrajectory)
             so3_spline = __load_spline(g['SO3_spline'], UniformSO3SplineTrajectory)
@@ -139,7 +138,7 @@ def __open_h5_group(location, group_name):
 
 
 def __save_structure_impl(fileobj, landmarks, landmark_colors=None):
-    groot = fileobj.create_group('structure')
+    groot = fileobj
 
     views = list({obs.view for lm in landmarks for obs in lm.observations})
     views.sort(key=lambda v: v.frame_nr)
@@ -176,7 +175,7 @@ def __save_structure_impl(fileobj, landmarks, landmark_colors=None):
 
 
 def __load_structure_impl(fileobj):
-    groot = fileobj['structure']
+    groot = fileobj
     gviews = groot['views']
 
     views = [View(fnr, t0) for fnr, t0 in zip(gviews['frame_nr'].value, gviews['t0'])]
