@@ -61,13 +61,17 @@ Eigen::Matrix<T, 2, 1> reproject_lifting(const sfm::Observation& ref,
     using Vector2 = Eigen::Vector2d;
     using Vector3 = Eigen::Vector3d;
    public:
-    LiftingRsCameraMeasurement(std::shared_ptr<CameraModel> camera, std::shared_ptr<sfm::Observation> obs, double huber_loss)
+    LiftingRsCameraMeasurement(std::shared_ptr<CameraModel> camera, std::shared_ptr<sfm::Observation> obs, double huber_loss, double weight)
         : camera(camera),
           observation(obs),
           loss_function_(huber_loss),
+          weight(weight),
           vt_orig_(observation->v() / camera->rows()){
       vt_ = vt_orig_;
     };
+
+    LiftingRsCameraMeasurement(std::shared_ptr<CameraModel> camera, std::shared_ptr<sfm::Observation> obs, double huber_loss)
+        : LiftingRsCameraMeasurement(camera, obs, huber_loss, 1.) { };
 
     LiftingRsCameraMeasurement(std::shared_ptr<CameraModel> camera, std::shared_ptr<sfm::Observation> obs)
         : LiftingRsCameraMeasurement(camera, obs, 5.) { };
@@ -76,6 +80,7 @@ Eigen::Matrix<T, 2, 1> reproject_lifting(const sfm::Observation& ref,
     // Measurement data
     double vt_;
     std::shared_ptr<sfm::Observation> observation;
+    double weight;
 
     template<typename TrajectoryModel, typename T>
     Eigen::Matrix<T, 2, 1> Project(const type::Trajectory<TrajectoryModel, T> &trajectory,
@@ -104,7 +109,7 @@ Eigen::Matrix<T, 2, 1> reproject_lifting(const sfm::Observation& ref,
       // Timing error (in pixels)
       e(2) = T(camera.rows()) * (vt - T(vt_orig_));
 
-      return e;
+      return T(weight) * e;
     }
 
     template<typename TrajectoryModel>

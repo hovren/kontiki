@@ -30,11 +30,13 @@ PYBIND11_MODULE(_lifting_rscamera_measurement, m) {
     auto cls = py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str());
 
     declare_measurement_common<Class>(cls);
+    cls.def(py::init<std::shared_ptr<CameraModel>, std::shared_ptr<kontiki::sfm::Observation>, double, double>());
     cls.def(py::init<std::shared_ptr<CameraModel>, std::shared_ptr<kontiki::sfm::Observation>, double>());
     cls.def(py::init<std::shared_ptr<CameraModel>, std::shared_ptr<kontiki::sfm::Observation>>());
 
     cls.def_readonly("camera", &Class::camera);
     cls.def_readonly("observation", &Class::observation);
+    cls.def_readwrite("weight", &Class::weight, "Image residual weight (applied before loss)");
     cls.def_readonly("vt", &Class::vt_);
 
     // Declare the project() function for all trajectory types
