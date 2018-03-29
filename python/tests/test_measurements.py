@@ -65,10 +65,74 @@ def test_rscamera_measurements_attribute_access(cls, camera):
     ref, obs = [v.create_observation(lm, random_point()) for v in views]
     lm.reference = ref
 
-    m = StaticRsCameraMeasurement(camera, obs)
+    m = cls(camera, obs)
     assert m.camera is camera
     assert m.observation is obs
 
+
+@pytest.mark.parametrize('cls', projection_types)
+def test_rscamera_measurements_weights(cls, small_sfm):
+    views, trajectory, camera = small_sfm
+
+    lm = np.random.choice(list({obs.landmark for v in views for obs in v.observations}))
+    obs = np.random.choice(lm.observations[1:])
+    assert not obs.is_reference
+
+    huber_c = 2.
+    m0 = cls(camera, obs, huber_c)
+    assert m0.weight == 1.
+    e0 = m0.error(trajectory)
+
+    for w in [1, 2, 0.43]:
+        m = cls(camera, obs, huber_c, w)
+        e = m.error(trajectory)
+        np.testing.assert_equal(e, e0 * w)
+
+
+@pytest.mark.parametrize('cls', projection_types)
+def test_rscamera_measurements_weights_estimation(cls, small_sfm):
+    from kontiki import TrajectoryEstimator
+
+    views, trajectory_orig, camera = small_sfm
+
+    landmarks = {obs.landmark for v in views for obs in v.observations}
+
+
+
+    #trajectory.locked = True  # Same trajectory for all iterations
+    huber_c = 2.
+
+    weight_measurements = {}
+
+    weight_costs = {}
+
+    for w in [1, 2, 0.5]:
+        trajectory = trajectory_orig.clone()
+        # Reset landmarks
+        for lm in landmarks:
+            lm.inverse_depth = 0
+
+        measurements = [cls(camera, obs, huber_c, w)
+                        for obs in lm.observations for lm in landmarks
+                        if not obs.is_reference]
+
+        weight_measurements[w] = (trajectory, measurements)
+
+        estimator = TrajectoryEstimator(trajectory)
+        for m in measurements:
+            estimator.add_measurement(m)
+
+        summary = estimator.solve(max_iterations=100, progress=True)
+        print(summary.FullReport())
+        weight_costs[w] = (summary.initial_cost, summary.final_cost)
+
+    trajectory1, meas1 = weight_measurements[1]
+    for w, (trajectory, meas) in weight_measurements.items():
+        print(w, weight_costs[w])
+        if w == 1:
+            continue
+        for m0, m in zip(meas1, meas):
+            np.testing.assert_almost_equal(m.error(trajectory), w * m0.error(trajectory1), decimal=4)
 
 def test_camera_errors_size(trajectory, camera_measurements):
     for m in camera_measurements:
