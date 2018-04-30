@@ -45,6 +45,10 @@ PYBIND11_MODULE(_uniform_se3_spline_trajectory, m) {
   using Class = TT::UniformSE3SplineTrajectory;
   using Helper = PySE3SplineHelper;
   auto cls = py::class_<Class, std::shared_ptr<Class>>(m, "UniformSE3SplineTrajectory");
+  cls.doc() = R"pbdoc( A spline with control points in SE(3)
+
+  Control points are 4x4 matrices T = [R, p; 0, 1].
+  )pbdoc";
 
   cls.def("evaluate", [](Class &self, double t){
     Sophus::SE3d P_SE3;

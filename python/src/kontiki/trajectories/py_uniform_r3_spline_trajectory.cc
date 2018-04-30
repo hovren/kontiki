@@ -30,6 +30,10 @@ PYBIND11_MODULE(_uniform_r3_spline_trajectory, m) {
   using Class = TT::UniformR3SplineTrajectory;
   using Helper = PyR3SplineHelper;
   auto cls = py::class_<Class, std::shared_ptr<Class>>(m, "UniformR3SplineTrajectory");
+  cls.doc() = R"pbdoc( A spline with control points in R3
+
+  Control points are vectors in R3.
+  )pbdoc";
 
   // Common attributes
   declare_spline_common<Class, Helper>(cls);

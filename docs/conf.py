@@ -48,8 +48,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'taser'
-copyright = u'2017, Hannes Ovrén'
+project = u'kontiki'
+copyright = u'2018, Hannes Ovrén'
 author = u'Hannes Ovrén'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -202,7 +202,7 @@ html_static_path = ['_static']
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'taserdoc'
+htmlhelp_basename = 'kontikidoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -224,7 +224,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'taser.tex', u'taser Documentation',
+    (master_doc, 'kontiki.tex', u'Kontiki Documentation',
      u'Hannes Ovrén', 'manual'),
 ]
 
@@ -254,7 +254,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'taser', u'taser Documentation',
+    (master_doc, 'kontiki', u'kontiki Documentation',
      [author], 1)
 ]
 
@@ -268,8 +268,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'taser', u'taser Documentation',
-     author, 'taser', 'One line description of project.',
+    (master_doc, 'kontiki', u'kontiki Documentation',
+     author, 'kontiki', 'One line description of project.',
      'Miscellaneous'),
 ]
 

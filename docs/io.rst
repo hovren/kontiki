@@ -1,5 +1,5 @@
 Input and output functions
 ----------------------------
 
-.. automodule:: taser.io
+.. automodule:: kontiki.io
     :members:

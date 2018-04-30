@@ -39,6 +39,10 @@ PYBIND11_MODULE(_uniform_so3_spline_trajectory, m) {
   using Class = TT::UniformSO3SplineTrajectory;
   using Helper = PySO3SplineHelper;
   auto cls = py::class_<Class, std::shared_ptr<Class>>(m, "UniformSO3SplineTrajectory");
+  cls.doc() = R"pbdoc( A spline with control points in SO(3)
+
+  Control points are unit quaternions q=(w, x, y, z).
+ )pbdoc";
 
   // Common attributes
   declare_spline_common<Class, Helper>(cls);

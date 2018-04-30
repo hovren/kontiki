@@ -1,9 +1,11 @@
+###################
 Trajectories
-================
-.. py:currentmodule:: taser.trajectories
+###################
+.. py:currentmodule:: kontiki.trajectories
+
 
 Trajectory base class
---------------------------
+==========================
 All trajectories inherit the methods and attributes from this base class.
 Note that the base class is not exported and can thus not be used.
 
@@ -37,15 +39,81 @@ Note that the base class is not exported and can thus not be used.
 
         Transform a 3D point from the trajectory to the world coordinate frame.
 
+    .. py:method:: clone() -> Trajectory
+
+        Clone the trajectory
+
+    .. py:attribute:: min_time
+
+        Minimum time (including) that the trajectory is valid
+
+    .. py:attribute:: max_time
+
+        Maximum time (excluding) that the trajectory is valid
+
+    .. py:attribute:: valid_time
+
+        Tuple of (:py:attr:`min_time`, :py:attr:`max_time`)
+
+    .. py:attribute:: locked
+
+        If `True` then the trajectory is unchanged during estimation
 
 
-Subclasses
+Splined trajectories
+============================
+The splined trajectories all implement the following common functionality
+
+.. py:class:: SplinedTrajectoryBase
+
+    .. py:attribute:: dt
+
+        Spline knot spacing
+
+    .. py:attribute:: t0
+
+        Spline time offset  (always same as :py:attr:`.TrajectoryBase.min_time`)
+
+    .. py:method:: __len__() -> int
+
+        Number of spline knots and control points
+
+    .. py:method:: __getitem__(k : int) -> ndarray
+
+        Return control point k
+
+    .. py:method:: __setitem__(k : int, cp : ndarray)
+
+        Set control point k
+
+    .. py:method:: append_knot(cp : ndarray)
+
+        Append a new control point (and knot)
+
+    .. py:method:: extend_to(t : float, cp : ndarray)
+
+        Extend the spline to be valid at least up to `t` by appending control points `cp`
+
+Splined trajectory classes
 --------------------------
-.. autoclass:: taser.trajectories.LinearTrajectory
+
+.. autoclass:: kontiki.trajectories.UniformSE3SplineTrajectory
     :members:
-    :exclude-members: position, velocity, acceleration, orientation, angular_velocity, to_world, from_world
+    :exclude-members: position, velocity, acceleration, orientation, angular_velocity, to_world, from_world, clone, locked, min_time, max_time, valid_time, append_knot, evaluate, extend_to
+
+.. autoclass:: kontiki.trajectories.UniformR3SplineTrajectory
+    :members:
+    :exclude-members: position, velocity, acceleration, orientation, angular_velocity, to_world, from_world, clone, locked, min_time, max_time, valid_time, append_knot, evaluate, extend_to
+
+.. autoclass:: kontiki.trajectories.UniformSO3SplineTrajectory
+    :members:
+    :exclude-members: position, velocity, acceleration, orientation, angular_velocity, to_world, from_world, clone, locked, min_time, max_time, valid_time, append_knot, evaluate, extend_to
 
 
-.. autoclass:: taser.trajectories.ConstantTrajectory
+Other trajectories
+==========================
+
+.. autoclass:: kontiki.trajectories.SplitTrajectory
     :members:
-    :exclude-members: position, velocity, acceleration, orientation, angular_velocity, to_world, from_world
+    :special-members: __init__
+    :exclude-members: position, velocity, acceleration, orientation, angular_velocity, to_world, from_world, clone, locked, min_time, max_time, valid_time
