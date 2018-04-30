@@ -66,6 +66,10 @@ The splined trajectories all implement the following common functionality
 
 .. py:class:: SplinedTrajectoryBase
 
+    .. py:method:: __init__(dt=1, t0=0)
+
+    Create a new splined trajectory with knot spacing `dt` and time offset `t0`.
+
     .. py:attribute:: dt
 
         Spline knot spacing
@@ -115,5 +119,13 @@ Other trajectories
 
 .. autoclass:: kontiki.trajectories.SplitTrajectory
     :members:
-    :special-members: __init__
     :exclude-members: position, velocity, acceleration, orientation, angular_velocity, to_world, from_world, clone, locked, min_time, max_time, valid_time
+
+    .. py:method:: __init__(r3_dt=1, so3_dt=1, r3_t0=0, so3_t0=0)
+
+        Construct new split trajectory from specified knot spacings and time offsets.
+
+    .. py:method:: __init__(r3_trajectory, so3_trajectory)
+
+        Construct split trajectory by wrapping two previously created
+        :py:class:`.UniformR3SplineTrajectory` and :py:class:`.UniformSO3SplineTrajectory` instances.

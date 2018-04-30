@@ -36,9 +36,6 @@ PYBIND11_MODULE(_split_trajectory, m) {
   This trajectory is implemented using two splines: one in R3 and one in SO3.
   )pbdoc";
 
-  py::options options;
-  options.disable_function_signatures();
-
   cls.def(py::init<>());
   cls.def(py::init<std::shared_ptr<TT::UniformR3SplineTrajectory>,
                    std::shared_ptr<TT::UniformSO3SplineTrajectory>>());
