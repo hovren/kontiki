@@ -18,6 +18,7 @@ Contents:
 
    kontiki
    trajectories
+   estimator
    io
 
 Indices and tables

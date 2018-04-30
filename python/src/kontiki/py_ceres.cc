@@ -59,10 +59,10 @@ void declare_summary(py::module& m) {
 }
 
 void declare_iteration_callback(py::module& m) {
-  py::enum_<ceres::CallbackReturnType> e(m, "CallbackReturnType");
-  e.value("Abort", ceres::CallbackReturnType::SOLVER_ABORT);
-  e.value("Continue", ceres::CallbackReturnType::SOLVER_CONTINUE);
-  e.value("TerminateSuccessfully", ceres::CallbackReturnType::SOLVER_TERMINATE_SUCCESSFULLY);
+  py::enum_<ceres::CallbackReturnType> e(m, "CallbackReturnType", "Return types for iteration callbacks");
+  e.value("Abort", ceres::CallbackReturnType::SOLVER_ABORT, "Abort the optimization");
+  e.value("Continue", ceres::CallbackReturnType::SOLVER_CONTINUE, "Continue the optimization");
+  e.value("TerminateSuccessfully", ceres::CallbackReturnType::SOLVER_TERMINATE_SUCCESSFULLY, "Stop the optimization, marking it as success");
 }
 
 void declare_iteration_summary(py::module& m) {
