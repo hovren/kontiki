@@ -13,16 +13,10 @@ a continuous-time trajectory.
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
-
-   kontiki
-   trajectories
-   sensors
-   measurements
-   estimator
-   sfm
-   io
+   users/toctree
+   developers/toctree
 
 Indices and tables
 ==================
