@@ -10,7 +10,8 @@ Kontiki is a toolkit for optimization-based, continuous-time, structure from mot
 In short, it can estimate a camera trajectory and 3D structure from a set of measurements, and it does so using
 a continuous-time trajectory.
 
-Contents:
+Contents
+--------
 
 .. toctree::
    :maxdepth: 2
