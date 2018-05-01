@@ -21,6 +21,7 @@ Contents:
    sensors
    measurements
    estimator
+   sfm
    io
 
 Indices and tables
