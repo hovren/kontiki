@@ -105,7 +105,7 @@ IMUs
 
 All inertial measurement units share the following (unavailable) base class:
 
-.. py:class:: IMU
+.. py:class:: Imu
 
     .. py:method:: accelerometer(trajectory : Trajectory, t : float) -> ndarray
 
