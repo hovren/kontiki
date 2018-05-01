@@ -9,7 +9,7 @@ Trajectory base class
 All trajectories inherit the methods and attributes from this base class.
 Note that the base class is not exported and can thus not be used.
 
-.. py:class:: TrajectoryBase
+.. py:class:: Trajectory
 
     .. py:method:: position(t : float) -> ndarray
 
@@ -64,7 +64,7 @@ Splined trajectories
 ============================
 The splined trajectories all implement the following common functionality
 
-.. py:class:: SplinedTrajectoryBase
+.. py:class:: SplinedTrajectory
 
     .. py:method:: __init__(dt=1, t0=0)
 
@@ -76,7 +76,7 @@ The splined trajectories all implement the following common functionality
 
     .. py:attribute:: t0
 
-        Spline time offset  (always same as :py:attr:`.TrajectoryBase.min_time`)
+        Spline time offset  (always same as :py:attr:`.Trajectory.min_time`)
 
     .. py:method:: __len__() -> int
 
