@@ -5,9 +5,6 @@ Trajectories
 ###################
 .. py:currentmodule:: kontiki.trajectories
 
-
-Trajectory base class
-==========================
 All trajectories inherit the methods and attributes from this base class.
 Note that the base class is not exported and can thus not be used.
 
@@ -64,13 +61,12 @@ Note that the base class is not exported and can thus not be used.
 
 Splined trajectories
 ============================
-The splined trajectories all implement the following common functionality
+The splined trajectories are cubic B-splines, defined as in [Qin2000]_.
 
-.. py:class:: SplinedTrajectory
+.. py:class:: SplinedTrajectory(dt=1, t0=0)
 
-    .. py:method:: __init__(dt=1, t0=0)
-
-    Create a new splined trajectory with knot spacing `dt` and time offset `t0`.
+        A splined trajectory with knot spacing `dt` and time offset `t0`.
+        The time offset `t0` is the first valid time of the spline.
 
     .. py:attribute:: dt
 
@@ -123,11 +119,19 @@ Other trajectories
     :members:
     :exclude-members: position, velocity, acceleration, orientation, angular_velocity, to_world, from_world, clone, locked, min_time, max_time, valid_time
 
-    .. py:method:: __init__(r3_dt=1, so3_dt=1, r3_t0=0, so3_t0=0)
+    .. py:method:: SplitTrajectory(r3_dt=1, so3_dt=1, r3_t0=0, so3_t0=0)
 
         Construct new split trajectory from specified knot spacings and time offsets.
 
-    .. py:method:: __init__(r3_trajectory, so3_trajectory)
+    .. py:method:: SplitTrajectory(r3_trajectory, so3_trajectory)
 
         Construct split trajectory by wrapping two previously created
         :py:class:`.UniformR3SplineTrajectory` and :py:class:`.UniformSO3SplineTrajectory` instances.
+
+
+.. rubric:: References
+
+.. [Qin2000]
+    Qin, K.
+    *General matrix representations for b-splines*
+    The Visual Computer, 16(3–4)

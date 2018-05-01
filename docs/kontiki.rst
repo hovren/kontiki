@@ -18,10 +18,10 @@ To use kontiki you need to understand, and create, objects of the following type
 
 Data objects
     Some measurements are connected to more complex objects, which might in turn be available for estimation.
-    A prime example are camera measurements, where the associated landmark is an object that we want to estimate as well.
+    A prime example are :ref:`sec_camera_measurements`, where the associated :class:`.Landmark` is an object that we want to estimate as well.
 
 
-The trajectory, and set of measurements, are then added to a :py:class:`TrajectoryEstimator` instance that can then minimize
+The trajectory, and set of measurements, are then added to a :py:class:`.TrajectoryEstimator` instance that can then minimize
 the measurement errors.
 
 

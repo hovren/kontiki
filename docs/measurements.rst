@@ -19,6 +19,8 @@ They share the functionality of the following (unavailable) base class.
 
         The measured quantity, e.g. IMU accelerometer, or camera image projection.
 
+.. _sec_camera_measurements:
+
 Camera measurements
 ====================
 

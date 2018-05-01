@@ -37,7 +37,7 @@ Behind the scenes, the estimator builds a Ceres-Solver optimization problem that
 
         The callback function should accepts a single :py:class:`IterationSummary` instance as argument,
         and return either `None`, or a :py:class:`CallbackReturnType` value.
-        `None` is the same as :py:attr:`.CallbackReturnType.Continue`.
+        `None` is the same as :py:attr:`CallbackReturnType.Continue`.
 
         If your callbacks need to access the objects currently being optimized (e.g. the trajectory),
         you must set `update_state=True`.
@@ -45,7 +45,7 @@ Behind the scenes, the estimator builds a Ceres-Solver optimization problem that
 
 Estimator helper classes
 ==========================
-The following classes are wrappers around the Ceres-Solver classes of the same name.
+The following classes are wrappers around the `Ceres-Solver <http://ceres-solver.org/>`_ classes of the same name.
 
 .. autoclass:: kontiki.CallbackReturnType
     :members:
