@@ -6,13 +6,13 @@ Kontiki was created to estimate a continuous-time trajectory, and any auxiliary 
 
 To use kontiki you need to understand, and create, objects of the following types:
 
-Trajectory
+:ref:`sec_trajectories`
     A continuous-time trajectory that you want to estimate
 
 Measurements
     The optimizer tries to estimate the trajectory (and other optimizable entities) such that the measurement errors are minimized.
 
-Sensors
+:ref:`sec_sensors`
     A sensor, such as a camera or an IMU, models how a measurement was created.
     Some sensors have parameters that can be estimated if you want to.
 
