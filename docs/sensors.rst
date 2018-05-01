@@ -98,3 +98,26 @@ Camera classes
 .. autoclass:: AtanCamera
     :members: wc, gamma
 
+IMUs
+============
+
+All inertial measurement units share the following (unavailable) base class:
+
+.. py:class:: IMU
+
+    .. py:method:: accelerometer(trajectory : Trajectory, t : float) -> ndarray
+
+        A single accelerometer measurement at time t, using the specified trajectory.
+
+    .. py:method:: gyroscope(trajectory : Trajectory, t : float) -> ndarray
+
+        A single gyroscope measurement at time t, using the specified trajectory.
+
+
+IMU classes
+-----------------
+.. autoclass:: BasicImu
+
+.. autoclass:: ConstantBiasImu
+    :members: accelerometer_bias, gyroscope_bias, accelerometer_bias_locked, gyroscope_bias_locked
+

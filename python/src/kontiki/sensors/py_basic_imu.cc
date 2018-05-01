@@ -13,6 +13,10 @@ namespace TS = kontiki::sensors;
 PYBIND11_MODULE(_basic_imu, m) {
   using Class = TS::BasicImu;
   auto cls = py::class_<Class, std::shared_ptr<Class>>(m, "BasicImu");
+  cls.doc() = R"pbdoc( Basic IMU
+
+  This IMU model produces ideal IMU measurements.
+   )pbdoc";
 
   cls.def(py::init<>());
 
