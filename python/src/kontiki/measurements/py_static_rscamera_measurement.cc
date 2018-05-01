@@ -29,6 +29,14 @@ PYBIND11_MODULE(_static_rscamera_measurement, m) {
     std::string pyclass_name = "StaticRsCameraMeasurement_" + std::string(CameraModel::CLASS_ID);
     auto cls = py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str());
 
+    cls.doc() = R"pbdoc( Static rolling shutter projection
+
+    Projects a landmark into a rolling shutter camera by simply setting the
+    projection time from the observed image row.
+    This method does in general not fulfill the rolling shutter projection time
+    constraint, but is fast.
+    )pbdoc";
+
     declare_measurement_common<Class>(cls);
     cls.def(py::init<std::shared_ptr<CameraModel>, std::shared_ptr<kontiki::sfm::Observation>, double, double>());
     cls.def(py::init<std::shared_ptr<CameraModel>, std::shared_ptr<kontiki::sfm::Observation>, double>());

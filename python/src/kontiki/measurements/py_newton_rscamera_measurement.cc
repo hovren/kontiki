@@ -29,6 +29,16 @@ PYBIND11_MODULE(_newton_rscamera_measurement, m) {
     std::string pyclass_name = "NewtonRsCameraMeasurement_" + std::string(CameraModel::CLASS_ID);
     auto cls = py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str());
 
+    cls.doc() = R"pbdoc( Newton-based rolling shutter projection
+
+    Projects a landmark into a rolling shutter camera using the Newton method.
+    This method should produce measurements such that the projected image row
+    is consistent with the projection time.
+    However, this is not a guarantee, so if you really need to make sure that the
+    rolling shutter prjection time constraint is fulfilled, we recommend to at least
+    check the result before accepting it.
+    )pbdoc";
+
     declare_measurement_common<Class>(cls);
     cls.def(py::init<std::shared_ptr<CameraModel>, std::shared_ptr<kontiki::sfm::Observation>, double, double>());
     cls.def(py::init<std::shared_ptr<CameraModel>, std::shared_ptr<kontiki::sfm::Observation>, double>());

@@ -9,7 +9,7 @@ To use kontiki you need to understand, and create, objects of the following type
 :ref:`sec_trajectories`
     A continuous-time trajectory that you want to estimate
 
-Measurements
+:ref:`sec_measurements`
     The optimizer tries to estimate the trajectory (and other optimizable entities) such that the measurement errors are minimized.
 
 :ref:`sec_sensors`

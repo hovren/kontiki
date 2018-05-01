@@ -29,6 +29,14 @@ PYBIND11_MODULE(_lifting_rscamera_measurement, m) {
     std::string pyclass_name = "LiftingRsCameraMeasurement_" + std::string(CameraModel::CLASS_ID);
     auto cls = py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str());
 
+    cls.doc() = R"pbdoc( Rolling shutter projection by time optimization
+
+    Projects a landmark into a rolling shutter camera by adding the projection time
+    as an additional parameter to the optimization problem.
+
+    In general, this does not fulfill the rolling shutter projection time constraint exactly.
+    )pbdoc";
+
     declare_measurement_common<Class>(cls);
     cls.def(py::init<std::shared_ptr<CameraModel>, std::shared_ptr<kontiki::sfm::Observation>, double, double>());
     cls.def(py::init<std::shared_ptr<CameraModel>, std::shared_ptr<kontiki::sfm::Observation>, double>());
@@ -37,7 +45,7 @@ PYBIND11_MODULE(_lifting_rscamera_measurement, m) {
     cls.def_readonly("camera", &Class::camera);
     cls.def_readonly("observation", &Class::observation);
     cls.def_readwrite("weight", &Class::weight, "Image residual weight (applied before loss)");
-    cls.def_readonly("vt", &Class::vt_);
+    cls.def_readonly("vt", &Class::vt_, "Row projection time (to be optimized)");
 
     // Declare the project() function for all trajectory types
     hana::for_each(trajectory_types, [&](auto tt) {
