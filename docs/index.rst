@@ -18,6 +18,7 @@ Contents:
 
    kontiki
    trajectories
+   sensors
    estimator
    io
 
