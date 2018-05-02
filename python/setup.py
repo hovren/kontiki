@@ -127,6 +127,7 @@ setup(
     author_email='hannes.ovren@liu.se',
     description='Continuous-time toolkit for trajectory estimation',
     long_description='',
+    license='MIT',
     packages=find_packages(),
     ext_modules=ext_modules,
     cmdclass=dict(build_ext=CMakeBuild),
