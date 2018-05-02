@@ -5,6 +5,7 @@ import sysconfig
 import platform
 import subprocess
 from pathlib import Path
+import re
 
 from distutils.version import LooseVersion
 from setuptools import setup, Extension, find_packages
@@ -119,12 +120,20 @@ ext_modules = [
     MeasurementExtension('_gyroscope_measurement'),
 ]
 
-with open(Path(__file__).parents[0] / '../README.md') as f:
+here = Path(__file__).parents[0]
+with open(here / '../README.md') as f:
     long_description = f.read()
+
+# Version is defined by C++ library
+with open(here / '../cpplib/CMakeLists.txt') as f:
+    m = re.search(r'project\(Kontiki VERSION ([\w\.]+)\)', f.read())
+    version = m.groups(0)[0]
+
+print(version)
 
 setup(
     name='kontiki',
-    version='1.0',
+    version=version,
     author='Hannes Ovrén',
     author_email='hannes.ovren@liu.se',
     description='Continuous-time toolkit for trajectory estimation',

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 
-project(Kontiki VERSION 0.1.0)
+project(Kontiki VERSION 0.9)
 
 include(CMakePackageConfigHelpers)
 
