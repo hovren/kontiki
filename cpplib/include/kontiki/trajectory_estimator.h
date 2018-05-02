@@ -58,8 +58,6 @@ class TrajectoryEstimator {
         options.update_state_every_iteration = true;
     }
 
-    options.sparse_linear_algebra_library_type = ceres::SparseLinearAlgebraLibraryType::SUITE_SPARSE;
-
     ceres::Solver::Summary summary;
     ceres::Solve(options, &problem_, &summary);
     return summary;
