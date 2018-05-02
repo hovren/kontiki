@@ -4,3 +4,6 @@
 [submodule "python/deps/hana"]
 	path = python/deps/hana
 	url = https://github.com/boostorg/hana
+[submodule "cpplib/deps/sophus"]
+	path = cpplib/deps/sophus
+	url = https://github.com/strasdat/sophus

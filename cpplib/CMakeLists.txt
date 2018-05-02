@@ -14,9 +14,10 @@ set(CMAKE_CXX_STANDARD 14)
 
 include(CMakeFindDependencyMacro)
 find_dependency(Ceres REQUIRED)
-find_dependency(Sophus)
 
 find_package(Eigen3 REQUIRED)
+find_package(Sophus REQUIRED
+             PATHS deps/sophus)
 
 # Header-only library -> INTERFACE
 add_library(Kontiki INTERFACE)
