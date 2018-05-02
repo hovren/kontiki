@@ -52,6 +52,8 @@ the *spline segment* (number of knots, start time, knot spacing) which is requir
 When the optimizer calls the residual cost function, a View of this spline segment is created from the metadata object,
 and a parameter vector.
 
+.. _sec_new_trajectories:
+
 New trajectories
 ================
 
@@ -84,5 +86,32 @@ For Python bindings you also need to
 #. Add ``MyTrajectory`` to the trajectory list in ``python/src/kontiki/trajectory_defs.h``.
    This makes sure support for the trajectory is compiled into all sensors, estimators, etc.
 #. Add ``kontiki_add_module(kontiki.trajectories._my_trajectory)`` to ``pyhon/CMakeLists.txt``.
-#. Add ``TrajectoryExtension('_split_trajectory')`` to the extensions list in ``pyhon/setup.py``.
+#. Add ``TrajectoryExtension('_my_measurement')`` to the extensions list in ``pyhon/setup.py``.
 
+New measurements
+================
+
+#. Create a new ``my_measurement.h`` file in ``cpplib/include/kontiki/measurements/``
+#. Implement your measurement class ``MyMeasurement``.
+   The class may need to be templated, e.g. as ``MyMeasurement<ImuModel>`` if it needs an IMU.
+#. Implement the templated measurement function ``MyMeasurement::Measure<TrajectoryModel, T>()`` with
+   trajectory as the only argument.
+#. Similarly implement the templated error function ``MyMeasurement::Error<TrajectoryModel, T>()`` which calls
+   the measurement function.
+#. Implement the residual struct ``MyMeasurement::Residual<TrajectoryModel>``.
+   As per the Ceres-Solver documentation, it must have a method ``Residual::operator<T>()(...)``
+   which evaluates the residual. This function should unpack the current trajectory, and any other entity
+   used by the residual, and compute the residual value (using ``::Error()`` defined above).
+#. Implement ``MyMeasurement::AddToEstimator<TrajectoryModel>()``.
+   This function should create the ``MyMeasurement::Residual`` instance, and give it to
+   the ``ceres::Problem`` contained in the :py:class:`kontiki.TrajectoryEstimator`.
+#. Declare ``kontiki::TrajectoryEstimator`` a ``friend class``.
+
+For Python bindings you also need to
+
+#. Create a new ``py_my_measurement.cc`` file in ``python/src/kontiki/measurements/``
+#. Wrap the class using pybind11.
+#. Add ``MyMeasurement`` to the correct measurement list in ``python/src/kontiki/measurement_defs.h``.
+   This makes sure support for the measurement is compiled into the trajectory estimator.
+#. Add ``kontiki_add_module(kontiki.measurements._my_measurement)`` to ``pyhon/CMakeLists.txt``.
+#. Add ``MeasurementExtension('_my_measurement')`` to the extensions list in ``pyhon/setup.py``.
