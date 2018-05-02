@@ -15,36 +15,11 @@ set(CMAKE_CXX_STANDARD 14)
 include(CMakeFindDependencyMacro)
 find_dependency(Ceres REQUIRED)
 
-find_package(Eigen3 REQUIRED)
 find_package(Sophus REQUIRED
              PATHS deps/sophus)
 
 # Header-only library -> INTERFACE
 add_library(Kontiki INTERFACE)
-
-if(TARGET Eigen3::Eigen)
-    message("Eigen: First option")
-    target_link_libraries(Kontiki INTERFACE Eigen3::Eigen)
-    set(Eigen3_DEPENDENCY "find_dependency (Eigen3 ${Eigen3_VERSION})")
-else(TARGET Eigen3::Eigen)
-    message("Eigen: second option")
-    target_include_directories (Kontiki SYSTEM INTERFACE ${EIGEN3_INCLUDE_DIR})
-endif(TARGET Eigen3::Eigen)
-
-#if (Sophus_FOUND)
-#    message("Has Sophus, building SE3 trajectory")
-#    message("Sophus dir: ${Sophus_DIR}")
-#    message("Sophus include dirs: ${Sophus_INCLUDE_DIRS}")
-#    target_link_libraries(Kontiki INTERFACE Sophus)
-#else()
-#    message("Sophus not found, not building SE3 trajectory")
-#endif(Sophus_FOUND)
-
-if(TARGET Sophus::Sophus)
-    target_link_libraries(Kontiki INTERFACE Sophus::Sophus)
-else()
-    message("No sophus")
-endif()
 
 file(GLOB_RECURSE Kontiki_HEADER_FILES include/*.h)
 
@@ -54,6 +29,8 @@ target_include_directories(Kontiki INTERFACE
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
+# Link / include dirs for dependencies
+target_link_libraries(Kontiki INTERFACE Sophus::Sophus)
 target_include_directories(Kontiki INTERFACE ${CERES_INCLUDE_DIRS})
 target_link_libraries(Kontiki INTERFACE ${CERES_LIBRARIES})
 

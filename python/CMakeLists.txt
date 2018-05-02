@@ -4,8 +4,6 @@ project(kontiki-python)
 
 set(CMAKE_CXX_STANDARD 14)
 
-list(APPEND SEARCH_HEADERS ${EIGEN3_INCLUDE_DIR})
-
 # The following is only used for debug prints
 find_package(PythonInterp)
 message("--- PYTHON configuration")
@@ -18,8 +16,6 @@ message("Kontiki: ${Kontiki_INCLUDE_DIRS}")
 
 # Load pybind11
 add_subdirectory(deps/pybind11)
-
-#add_subdirectory(deps/hana)
 
 # Build a Python extension module using pybind11
 #   kontiki_add_module(<module>)
