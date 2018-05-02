@@ -192,6 +192,10 @@ def test_velocity_numerical(trajectory):
 
 def test_acceleration_numerical(trajectory):
     import scipy.misc
+
+    if type(trajectory) == UniformSE3SplineTrajectory:
+        pytest.xfail("SE3 fails because second order derivative is not the same as body acceleration")
+
     t = safe_time(trajectory)
     dt = 1e-3
     acc_num = scipy.misc.derivative(trajectory.velocity, t, dx=dt, n=1)

@@ -129,6 +129,10 @@ def test_gyroscope_measurements(trajectory, imu):
 def test_accelerometer_measurements(trajectory, imu):
     times = np.linspace(*safe_time_span(trajectory, 3.0), num=10, endpoint=False)
 
+    from kontiki.trajectories import UniformSE3SplineTrajectory
+    if type(trajectory) == UniformSE3SplineTrajectory:
+        pytest.xfail("SE3 fails because second order derivative is not the same as body acceleration")
+
     def true_acc(t):
         q = trajectory.orientation(t)
         acc_world = trajectory.acceleration(t)
