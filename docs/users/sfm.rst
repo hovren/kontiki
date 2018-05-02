@@ -51,8 +51,7 @@ Classes
     :members:
 
 
-References
-----------
+.. rubric:: References
 
 .. [Lovegrove2013]
     Lovegrove, S.; Patron-Perez, A.; and Sibley, G.

@@ -2,6 +2,8 @@
 Overview
 ########
 
+.. py:currentmodule:: kontiki
+
 Kontiki was created to estimate a continuous-time trajectory, and any auxiliary parameters, given a set of measurements.
 
 To use kontiki you need to understand, and create, objects of the following types:
@@ -21,7 +23,7 @@ Data objects
     A prime example are :ref:`sec_camera_measurements`, where the associated :class:`.Landmark` is an object that we want to estimate as well.
 
 
-The trajectory, and set of measurements, are then added to a :py:class:`.TrajectoryEstimator` instance that can then minimize
+The trajectory, and set of measurements, are then added to a :py:class:`TrajectoryEstimator` instance that can then minimize
 the measurement errors.
 
 

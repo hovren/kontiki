@@ -11,7 +11,7 @@ The estimation of the trajectory, and all auxilliary parameters, are performed t
 
 Behind the scenes, the estimator builds a Ceres-Solver optimization problem that is then solved.
 
-.. py:class:: kontiki.TrajectoryEstimator
+.. py:class:: TrajectoryEstimator
 
     Class that performs trajectory estimation.
 
