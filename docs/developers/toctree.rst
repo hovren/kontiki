@@ -6,3 +6,4 @@ Developer's guide
     :maxdepth: 2
 
     extending
+    ide
