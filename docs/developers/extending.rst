@@ -115,3 +115,11 @@ For Python bindings you also need to
    This makes sure support for the measurement is compiled into the trajectory estimator.
 #. Add ``kontiki_add_module(kontiki.measurements._my_measurement)`` to ``pyhon/CMakeLists.txt``.
 #. Add ``MeasurementExtension('_my_measurement')`` to the extensions list in ``pyhon/setup.py``.
+
+New sensors
+===========
+Implementing new sensors are done mostly the same as when implementing :ref:`sec_new_trajectories`.
+If you are implementing a sensor which is a specialization of *Foo*, then you should implement
+a new View and Entity that inherits `FooView` and `FooEntity`, respectively.
+For the Python bindings, you need to add your newly created class to the correct `xxx_defs.h` file
+to make sure support for it is compiled into the system.
