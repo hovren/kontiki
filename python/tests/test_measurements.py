@@ -88,52 +88,6 @@ def test_rscamera_measurements_weights(cls, small_sfm):
         e = m.error(trajectory)
         np.testing.assert_equal(e, e0 * w)
 
-
-@pytest.mark.parametrize('cls', projection_types)
-def test_rscamera_measurements_weights_estimation(cls, small_sfm):
-    from kontiki import TrajectoryEstimator
-
-    views, trajectory_orig, camera = small_sfm
-
-    landmarks = {obs.landmark for v in views for obs in v.observations}
-
-
-
-    #trajectory.locked = True  # Same trajectory for all iterations
-    huber_c = 2.
-
-    weight_measurements = {}
-
-    weight_costs = {}
-
-    for w in [1, 2, 0.5]:
-        trajectory = trajectory_orig.clone()
-        # Reset landmarks
-        for lm in landmarks:
-            lm.inverse_depth = 0
-
-        measurements = [cls(camera, obs, huber_c, w)
-                        for obs in lm.observations for lm in landmarks
-                        if not obs.is_reference]
-
-        weight_measurements[w] = (trajectory, measurements)
-
-        estimator = TrajectoryEstimator(trajectory)
-        for m in measurements:
-            estimator.add_measurement(m)
-
-        summary = estimator.solve(max_iterations=100, progress=True)
-        print(summary.FullReport())
-        weight_costs[w] = (summary.initial_cost, summary.final_cost)
-
-    trajectory1, meas1 = weight_measurements[1]
-    for w, (trajectory, meas) in weight_measurements.items():
-        print(w, weight_costs[w])
-        if w == 1:
-            continue
-        for m0, m in zip(meas1, meas):
-            np.testing.assert_almost_equal(m.error(trajectory), w * m0.error(trajectory1), decimal=4)
-
 def test_camera_errors_size(trajectory, camera_measurements):
     for m in camera_measurements:
         e = m.error(trajectory)
