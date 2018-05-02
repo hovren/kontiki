@@ -119,6 +119,8 @@ ext_modules = [
     MeasurementExtension('_gyroscope_measurement'),
 ]
 
+with open(Path(__file__).parents[0] / '../README.md') as f:
+    long_description = f.read()
 
 setup(
     name='kontiki',
@@ -126,7 +128,7 @@ setup(
     author='Hannes Ovrén',
     author_email='hannes.ovren@liu.se',
     description='Continuous-time toolkit for trajectory estimation',
-    long_description='',
+    long_description=long_description,
     license='MIT',
     packages=find_packages(),
     ext_modules=ext_modules,
