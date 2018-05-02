@@ -47,7 +47,7 @@ def generate_landmark(views, camera, trajectory, view_probs=None, tries=1000):
 
         lm = Landmark()
         lm.inverse_depth = 1 / z0
-        ref = vi.create_observation(lm, u, v)
+        ref = vi.create_observation(lm, y0)
         lm.reference = ref
 
         for v in views[i+1:]:
@@ -55,7 +55,7 @@ def generate_landmark(views, camera, trajectory, view_probs=None, tries=1000):
                 (x, y), _ = project_camera_trajectory(X_world, v.t0, trajectory, camera)
 
                 if 0 <= x < camera.cols and 0 <= y < camera.rows:
-                    v.create_observation(lm, x, y)
+                    v.create_observation(lm, (x, y))
             except ValueError:
                 pass
 
