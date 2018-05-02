@@ -1,0 +1,8 @@
+If you use Kontiki for a scientific publication, please cite it using the following Bibtex entry::
+
+    @misc{kontiki,
+      author = {Hannes Ovr\'en},
+      title = "Kontiki - the continuous time toolkit",
+      howpublished = "\url{https://github.com/hovren/kontiki}",
+      year = {2018}
+    }
