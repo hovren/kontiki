@@ -128,13 +128,13 @@ except FileNotFoundError:
     long_description = "Omitting long_description since `README.md` is in a parent path."
 
 # Version is defined by C++ library
-#with open(here / '../cpplib/CMakeLists.txt') as f:
-#    m = re.search(r'project\(Kontiki VERSION ([\w\.]+)\)', f.read())
-#    version = m.groups(0)[0]
+with open(here / '../cpplib/CMakeLists.txt') as f:
+    m = re.search(r'project\(Kontiki VERSION ([\w\.]+)\)', f.read())
+    version = m.groups(0)[0]
 
 setup(
     name='kontiki',
-    version='0.9.1-dev5',
+    version=version,
     author='Hannes Ovrén',
     author_email='hannes.ovren@liu.se',
     description='Continuous-time toolkit for trajectory estimation',
