@@ -129,8 +129,6 @@ with open(here / '../cpplib/CMakeLists.txt') as f:
     m = re.search(r'project\(Kontiki VERSION ([\w\.]+)\)', f.read())
     version = m.groups(0)[0]
 
-print(version)
-
 setup(
     name='kontiki',
     version=version,
@@ -143,4 +141,9 @@ setup(
     ext_modules=ext_modules,
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
+    install_requires=[
+        'scipy',
+        'numpy',
+        'h5py',
+    ],
 )
