@@ -39,4 +39,4 @@ jobs:
             cd python
             python3 setup.py install
             cd /tmp
-            python3 -m pytest python/tests
+            python3 -m pytest ~/repo/python/tests
