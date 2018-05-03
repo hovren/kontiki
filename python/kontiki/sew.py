@@ -1,9 +1,44 @@
+""" Spline Error Weighting
+##########################
+
+This module implements Spline Error Weighting, introduced by [Ovren2018a]_.
+
+.. rubric:: References
+
+.. [Ovren2018a]
+   Ovrén, H. and Forssén, P-E.
+   *Spline Error Weighting for Robust Visual-Inertial Fusion*
+   In Proceedings of the IEEE on Computer Vision and Pattern Recognition (CVPR)
+   June 2018
+
+.. [Mihajlovic1999]
+   Mihajlovic, Z.; Goluban, A.; and Zagar, M.
+   *Frequency Domain Analysis of B-Spline Interpolation*
+   In Proceedings of the IEEE International Symposium on Industrial Electronics
+   July 1999
+
+"""
 import numpy as np
 import scipy.optimize
 
 
 def bspline_interp_freq_func(w, dt=1.0):
-    """Cubic B-spline interpolation frequency function of Mihajlovic1999"""
+    """Cubic B-spline interpolation frequency function
+
+    Implements the frequency response function of a cubic B-spline according to [Mihajlovic1999]_
+
+    Parameters
+    ------------
+    w : ndarray
+        Angular frequencies in rad/s
+    dt : float
+        Spline knot spacing
+
+    Returns
+    -------------
+    H : ndarray
+        Frequency response function for frequencies `w`
+    """
     sinc = lambda x: 1.0 if x == 0 else np.sin(np.pi*x)/(np.pi*x)
     sinc = np.vectorize(sinc)
     def H(w):
@@ -14,6 +49,22 @@ def bspline_interp_freq_func(w, dt=1.0):
 
 
 def spline_interpolation_response(freqs, dt):
+    """Cubic B-spline interpolation frequency function
+
+    Implements the frequency response function of a cubic B-spline according to [Mihajlovic1999]_
+
+    Parameters
+    ------------
+    freqs : ndarray
+        Frequencies in Hz
+    dt : float
+        Spline knot spacing
+
+    Returns
+    -------------
+    H : ndarray
+        Frequency response function for frequencies `freqs`
+    """
     H = bspline_interp_freq_func(2*np.pi*freqs, dt)
     return H / H[0]
 
@@ -136,6 +187,34 @@ def dt_to_variance_spectrum(spectrum, freqs, spline_dt):
     
     
 def knot_spacing_and_variance(signal, times, quality, *, min_dt=None, max_dt=None, verbose=False):
+    """Find knot spacing and variance from signal
+
+    Given a quality value, this function first determines the maximum knot spacing
+    that achieves this quality, given the data in signal.
+    It then computes the estimated variance of the spline fit error, using this knot spacing.
+
+    Parameters
+    ------------
+    signal : ndarray
+            Signal to fit to (e.g. accelerometer or gyroscope)
+    times : ndarray
+            Timestamps of signal
+    quality : float
+            Requested quality, in the range 0-1. A good value is usually around 0.99.
+    min_dt : float
+            Lowest acceptable value of knot spacing
+    max_dt : float
+            Highest acceptable value of knot spacing
+    verbose: bool
+            Print search steps
+
+    Returns
+    -------------
+    dt : float
+        The found knot spacing
+    var : float
+        The spline fit error for this signal and knot spacing
+    """
     Xhat = make_reference_spectrum(signal)
     dt = find_uniform_knot_spacing_spectrum(Xhat, times, quality, min_dt=min_dt, max_dt=max_dt, verbose=verbose)
     #variance = quality_to_variance_spectrum(Xhat, quality)

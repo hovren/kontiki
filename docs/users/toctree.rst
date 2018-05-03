@@ -12,4 +12,5 @@ User's guide
     measurements
     estimator
     sfm
+    sew
     io
