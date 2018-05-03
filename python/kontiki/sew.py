@@ -217,51 +217,7 @@ def knot_spacing_and_variance(signal, times, quality, *, min_dt=None, max_dt=Non
     """
     Xhat = make_reference_spectrum(signal)
     dt = find_uniform_knot_spacing_spectrum(Xhat, times, quality, min_dt=min_dt, max_dt=max_dt, verbose=verbose)
-    #variance = quality_to_variance_spectrum(Xhat, quality)
     sample_rate = 1 / np.mean(np.diff(times))
     freqs = np.fft.fftfreq(len(Xhat), d=1/sample_rate)
     variance = dt_to_variance_spectrum(Xhat, freqs, dt)
     return dt, variance
-
-
-def estimate_variance_of_fit(signal, sample_rate, spline_dt, noise_std, *,
-                             spectrum=None, full_output=False):
-    Xhat = spectrum if spectrum is not None else np.fft.fft(signal)
-    nsample = len(signal)
-    freqs = np.fft.fftfreq(nsample, d=1/sample_rate)
-
-    samples_per_knot = sample_rate * spline_dt
-    H = spline_interpolation_response(freqs, spline_dt)
-
-    E = (1 - H) * Xhat
-    e = np.fft.ifft(E)
-    HN = H * np.sqrt(nsample) * noise_std
-    hn = np.fft.ifft(HN)
-    var_exp = np.std(e)**2 + np.std(hn)**2
-
-    if full_output:
-        return var_exp, e
-    else:
-        return var_exp
-
-
-def joint_knot_spacing_variance(x_acc, x_gyro, times, q_gyro, *, acc_factor=2.):
-    sample_rate = 1 / np.mean(np.diff(times))
-    freqs = np.fft.fftfreq(len(times), d=1/sample_rate)
-    Xa = make_reference_spectrum(x_acc)
-    Xg = make_reference_spectrum(x_gyro)
-    dt_gyro, var_gyro = knot_spacing_and_variance(x_gyro, times, q_gyro)
-
-    dt_acc = acc_factor * dt_gyro
-
-    GRAVITY = 9.8065
-    EG = var_gyro * len(Xg) * (2 * GRAVITY**2 / 3)
-    H = spline_interpolation_response(freqs, dt_acc)
-    EA = signal_energy(Xa)
-    EHA = signal_energy(H * Xa)
-    EHG = signal_energy(np.sqrt(EG) / len(H) * np.ones_like(H) * H)
-    EE = EA - EG - EHA + EHG
-    var_acc = EE / len(Xa)
-
-    return dt_gyro, var_gyro, dt_acc, var_acc
-    
