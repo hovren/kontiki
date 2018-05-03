@@ -4,7 +4,13 @@ Installation
 
 Using pip
 =========
-Coming soon.
+
+The package is installable from pip::
+
+    pip install kontiki
+
+Note that this requires that you have `Ceres-Solver <https://ceres-solver.org>` installed on your system.
+
 
 Using conda
 ===========
