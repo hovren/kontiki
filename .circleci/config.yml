@@ -32,4 +32,5 @@ jobs:
             python3 -m pytest ~/repo/python/tests
 
       - store_artifacts:
-          path: python/dist dist
+          path: python/dist
+          destination: dist
