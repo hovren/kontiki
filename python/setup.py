@@ -121,26 +121,31 @@ ext_modules = [
 ]
 
 here = Path(__file__).parents[0]
-with open(here / '../README.md') as f:
-    long_description = f.read()
+try:
+    with open(here / '../README.md') as f:
+        long_description = f.read()
+except FileNotFoundError:
+    long_description = "Omitting long_description since `README.md` is in a parent path."
 
 # Version is defined by C++ library
-with open(here / '../cpplib/CMakeLists.txt') as f:
-    m = re.search(r'project\(Kontiki VERSION ([\w\.]+)\)', f.read())
-    version = m.groups(0)[0]
+#with open(here / '../cpplib/CMakeLists.txt') as f:
+#    m = re.search(r'project\(Kontiki VERSION ([\w\.]+)\)', f.read())
+#    version = m.groups(0)[0]
 
 setup(
     name='kontiki',
-    version=version,
+    version='0.9.1-dev5',
     author='Hannes Ovrén',
     author_email='hannes.ovren@liu.se',
     description='Continuous-time toolkit for trajectory estimation',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     license='MIT',
     packages=find_packages(),
     ext_modules=ext_modules,
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
+    python_requires='~=3.6',  # Require Python 3.6 and up
     install_requires=[
         'scipy',
         'numpy',
