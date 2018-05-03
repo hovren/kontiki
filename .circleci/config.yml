@@ -19,7 +19,7 @@ jobs:
       - run: git submodule update --init
 
       - run:
-          name: Build extensions
+          name: Build Kontiki Python package
           command: |
             cd python
             python3 setup.py build
@@ -33,16 +33,10 @@ jobs:
       - store_artifacts:
           path: python/dist
 
-      # run tests!
-      # this example uses Django's built-in test-runner
-      # other common Python testing frameworks include pytest and nose
-      # https://pytest.org
-      # https://nose.readthedocs.io
       - run:
-          name: run tests
+          name: Run tests
           command: |
+            cd python
+            python3 setup.py install
+            cd /tmp
             python3 -m pytest python/tests
-
-      #- store_artifacts:
-      #    path: test-reports
-      #    destination: test-reports
