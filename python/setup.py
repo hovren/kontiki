@@ -146,4 +146,17 @@ setup(
         'numpy',
         'h5py',
     ],
+    classifiers=[
+        'Development Status :: 4 - Beta',
+
+        'Intended Audience :: Developers',
+        'Intended Audience :: Science/Research',
+        'Topic :: Scientific/Engineering',
+
+        'License :: OSI Approved :: MIT License',
+
+        # Specify the Python versions you support here.
+        # Currently we use f-strings, so at least 3.6
+        'Programming Language :: Python :: 3.6',
+    ],
 )
