@@ -19,10 +19,19 @@ jobs:
       - run: git submodule update --init
 
       - run:
-          name: build
+          name: Build extensions
           command: |
             cd python
-            python3 setup.py install
+            python3 setup.py build
+
+      - run:
+        name: Build wheel
+        command: |
+          cd python
+          python3 setup.py bdist_wheel
+
+      - store_artifacts:
+          path: python/dist
 
       # run tests!
       # this example uses Django's built-in test-runner
