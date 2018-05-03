@@ -1,7 +1,16 @@
 """ Spline Error Weighting
 ##########################
 
-This module implements Spline Error Weighting, introduced by [Ovren2018a]_.
+This module implements Spline Error Weighting (SEW), introduced by [Ovren2018a]_.
+
+SEW is a method to automatically set knot spacing, and estimate the spline fit error (approximation error),
+using gyroscope and accelerometer data.
+
+To estimate the knot spacings for a :py:class:`.SplitTrajectory` you would do the following::
+
+    so3_dt, so3_var = knot_spacing_and_variance(gyro_data, gyro_timestamps, q_gyro)
+    r3_dt, r3_var = knot_spacing_and_variance(acc_data, acc_timestamps, q_acc)
+    trajectory = SplitTrajectory(r3_dt, so3_dt)
 
 .. rubric:: References
 
