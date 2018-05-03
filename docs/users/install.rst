@@ -2,14 +2,17 @@
 Installation
 ############
 
-Using pip
-=========
+Precompiled wheel
+=================
 
-The package is installable from pip::
+We build precompiled binary wheels that should hopefully work on most newer Linux distributions.
+Download the ``kontiki-X.Y-cp36-cp36m-linux_x86_64.whl`` file from the GitHub release page.
+The run::
 
-    pip install kontiki
+    pip install /path/to/kontiki-X.Y-cp36-cp36m-linux_x86_64.whl
 
-Note that this requires that you have `Ceres-Solver <https://ceres-solver.org>`_ installed on your system.
+Note that this requires that you have the `Ceres-Solver <https://ceres-solver.org>`_ shared library
+(``libceres.so.1``), and its dependencies, installed on your system.
 
 From source
 ============
