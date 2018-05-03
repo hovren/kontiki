@@ -9,12 +9,7 @@ The package is installable from pip::
 
     pip install kontiki
 
-Note that this requires that you have `Ceres-Solver <https://ceres-solver.org>` installed on your system.
-
-
-Using conda
-===========
-Coming soon.
+Note that this requires that you have `Ceres-Solver <https://ceres-solver.org>`_ installed on your system.
 
 From source
 ============
@@ -30,21 +25,12 @@ Requirements
 * scipy
 * numpy
 * h5py
-* `Sophus <https://github.com/strasdat/Sophus>`_ (optional)
+* `Sophus <https://github.com/strasdat/Sophus>`_  (use commit ``00f3fd91c153ef04``)
 * pytest (optional)
 
-Ubuntu packages
----------------
-git
-build-essential
-cmake
-python3
-python3-dev
-python3-setuptools
-python3-pytest
-python3-scipy
-python3-h5py
-libceres-dev
+To install all dependencies (except Sophus) on Ubuntu 18.04 run::
+
+    apt-get install git build-essential cmake python3-dev python3-setuptools python3-pytest python3-scipy python3-h5py libceres-dev
 
 
 Instructions
