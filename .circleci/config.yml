@@ -25,10 +25,10 @@ jobs:
             python3 setup.py build
 
       - run:
-        name: Build wheel
-        command: |
-          cd python
-          python3 setup.py bdist_wheel
+          name: Build wheel
+          command: |
+            cd python
+            python3 setup.py bdist_wheel
 
       - store_artifacts:
           path: python/dist
