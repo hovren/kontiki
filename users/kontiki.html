@@ -1,0 +1,289 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Overview &mdash; kontiki 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Trajectories" href="trajectories.html" />
+    <link rel="prev" title="Installation" href="install.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> kontiki
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="toctree.html">User’s guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#example-visual-inertial-structure-from-motion-estimation">Example visual-inertial structure from motion estimation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trajectories.html">Trajectories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sensors.html">Sensors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="measurements.html">Measurements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="estimator.html">Trajectory estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfm.html">Structure from motion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="io.html">Input and output functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../developers/toctree.html">Developer’s guide</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">kontiki</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="toctree.html">User’s guide</a> &raquo;</li>
+        
+      <li>Overview</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/users/kontiki.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
+<p>Kontiki was created to estimate a continuous-time trajectory, and any auxiliary parameters, given a set of measurements.</p>
+<p>To use kontiki you need to understand, and create, objects of the following types:</p>
+<dl class="docutils">
+<dt><a class="reference internal" href="trajectories.html#sec-trajectories"><span class="std std-ref">Trajectories</span></a></dt>
+<dd>A continuous-time trajectory that you want to estimate</dd>
+<dt><a class="reference internal" href="measurements.html#sec-measurements"><span class="std std-ref">Measurements</span></a></dt>
+<dd>The optimizer tries to estimate the trajectory (and other optimizable entities) such that the measurement errors are minimized.</dd>
+<dt><a class="reference internal" href="sensors.html#sec-sensors"><span class="std std-ref">Sensors</span></a></dt>
+<dd>A sensor, such as a camera or an IMU, models how a measurement was created.
+Some sensors have parameters that can be estimated if you want to.</dd>
+<dt>Data objects</dt>
+<dd>Some measurements are connected to more complex objects, which might in turn be available for estimation.
+A prime example are <a class="reference internal" href="measurements.html#sec-camera-measurements"><span class="std std-ref">Camera measurements</span></a>, where the associated <a class="reference internal" href="sfm.html#kontiki.sfm.Landmark" title="kontiki.sfm.Landmark"><code class="xref py py-class docutils literal notranslate"><span class="pre">Landmark</span></code></a> is an object that we want to estimate as well.</dd>
+</dl>
+<p>The trajectory, and set of measurements, are then added to a <a class="reference internal" href="estimator.html#kontiki.TrajectoryEstimator" title="kontiki.TrajectoryEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrajectoryEstimator</span></code></a> instance that can then minimize
+the measurement errors.</p>
+<div class="section" id="example-visual-inertial-structure-from-motion-estimation">
+<h2>Example visual-inertial structure from motion estimation<a class="headerlink" href="#example-visual-inertial-structure-from-motion-estimation" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">from</span> <span class="nn">kontiki</span> <span class="kn">import</span> <span class="n">trajectories</span><span class="p">,</span> <span class="n">sensors</span><span class="p">,</span> <span class="n">TrajectoryEstimator</span>
+<span class="kn">import</span> <span class="nn">kontiki.measurements</span> <span class="kn">as</span> <span class="nn">M</span>
+
+<span class="n">views</span><span class="p">,</span> <span class="n">landmarks</span> <span class="o">=</span> <span class="n">load_my_sfm_data</span><span class="p">()</span>
+
+<span class="n">trajectory</span> <span class="o">=</span> <span class="n">trajectories</span><span class="o">.</span><span class="n">UniformSE3SplineTrajectory</span><span class="p">()</span>
+<span class="n">trajectory</span><span class="o">.</span><span class="n">extend_to</span><span class="p">(</span><span class="n">some_max_time</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+
+<span class="n">imu</span> <span class="o">=</span> <span class="n">sensors</span><span class="o">.</span><span class="n">BasicImu</span><span class="p">()</span>
+
+<span class="n">camera</span> <span class="o">=</span> <span class="n">sensors</span><span class="o">.</span><span class="n">PinholeCamera</span><span class="p">(</span><span class="mi">720</span><span class="p">,</span> <span class="mi">1280</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">,</span> <span class="n">my_camera_matrix</span><span class="p">)</span>
+
+<span class="n">gyro_meas</span> <span class="o">=</span> <span class="p">[</span><span class="n">M</span><span class="o">.</span><span class="n">GyroscopeMeasurement</span><span class="p">(</span><span class="n">imu</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+             <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">my_gyro_data</span><span class="p">]</span>
+<span class="n">acc_meas</span> <span class="o">=</span> <span class="p">[</span><span class="n">M</span><span class="o">.</span><span class="n">AccelerometerMeasurement</span><span class="p">(</span><span class="n">imu</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">my_acc_data</span><span class="p">]</span>
+<span class="n">im_meas</span> <span class="o">=</span> <span class="p">[</span><span class="n">M</span><span class="o">.</span><span class="n">StaticRsCameraMeasurement</span><span class="p">(</span><span class="n">camera</span><span class="p">,</span> <span class="n">obs</span><span class="p">)</span>
+           <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">view</span> <span class="k">for</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">v</span><span class="o">.</span><span class="n">observations</span><span class="p">]</span>
+
+<span class="n">estimator</span> <span class="o">=</span> <span class="n">TrajectoryEstimator</span><span class="p">(</span><span class="n">trajectory</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">gyro_meas</span><span class="p">,</span> <span class="n">acc_meas</span><span class="p">,</span> <span class="n">im_meas</span><span class="p">):</span>
+    <span class="n">estimator</span><span class="o">.</span><span class="n">add_measurement</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+<span class="n">summary</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="trajectories.html" class="btn btn-neutral float-right" title="Trajectories" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="install.html" class="btn btn-neutral" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Hannes Ovrén.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          
+          SphinxRtdTheme.Navigation.enableSticky();
+          
+      });
+  </script> 
+
+</body>
+</html>

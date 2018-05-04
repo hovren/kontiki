@@ -1,0 +1,462 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Trajectory estimation &#8212; kontiki 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Structure from motion" href="sfm.html" />
+    <link rel="prev" title="Measurements" href="measurements.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="trajectory-estimation">
+<span id="sec-estimator"></span><h1>Trajectory estimation<a class="headerlink" href="#trajectory-estimation" title="Permalink to this headline">¶</a></h1>
+<p>The estimation of the trajectory, and all auxilliary parameters, are performed through the
+<code class="xref py py-class docutils literal notranslate"><span class="pre">TrajectoryEstimator</span></code> class.</p>
+<p>Behind the scenes, the estimator builds a Ceres-Solver optimization problem that is then solved.</p>
+<dl class="class">
+<dt id="kontiki.kontiki.TrajectoryEstimator">
+<em class="property">class </em><code class="descclassname">kontiki.</code><code class="descname">TrajectoryEstimator</code><a class="headerlink" href="#kontiki.kontiki.TrajectoryEstimator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class that performs trajectory estimation.</p>
+<dl class="method">
+<dt id="kontiki.kontiki.TrajectoryEstimator.solve">
+<code class="descname">solve</code><span class="sig-paren">(</span><em>progress=True</em>, <em>max_iterations=50</em><span class="sig-paren">)</span><a class="headerlink" href="#kontiki.kontiki.TrajectoryEstimator.solve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solve the estimation problem by minimizing the measurement residuals.
+Returns a <a class="reference internal" href="#kontiki.Summary" title="kontiki.Summary"><code class="xref py py-class docutils literal notranslate"><span class="pre">Summary</span></code></a> instance.</p>
+<p>If progress is <cite>True</cite>, then a progress report is written to <cite>stdout</cite> while the optimization in progressing.</p>
+<p><cite>max_iterations</cite> specify the number of steps the optimizer is allowed to take.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kontiki.kontiki.TrajectoryEstimator.add_measurement">
+<code class="descname">add_measurement</code><span class="sig-paren">(</span><em>m : Measurement</em><span class="sig-paren">)</span><a class="headerlink" href="#kontiki.kontiki.TrajectoryEstimator.add_measurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a measurement to the optimization problem.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Make sure the measurement m is alive until <a class="reference internal" href="#kontiki.kontiki.TrajectoryEstimator.solve" title="kontiki.kontiki.TrajectoryEstimator.solve"><code class="xref py py-meth docutils literal notranslate"><span class="pre">solve()</span></code></a> has been called,
+e.g. by putting it in a list.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="kontiki.kontiki.TrajectoryEstimator.add_callback">
+<code class="descname">add_callback</code><span class="sig-paren">(</span><em>func</em>, <em>update_state=False</em><span class="sig-paren">)</span><a class="headerlink" href="#kontiki.kontiki.TrajectoryEstimator.add_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a callback function which is called after every iteration of the optimizer.</p>
+<p>The callback function should accepts a single <a class="reference internal" href="#kontiki.IterationSummary" title="kontiki.IterationSummary"><code class="xref py py-class docutils literal notranslate"><span class="pre">IterationSummary</span></code></a> instance as argument,
+and return either <cite>None</cite>, or a <a class="reference internal" href="#kontiki.CallbackReturnType" title="kontiki.CallbackReturnType"><code class="xref py py-class docutils literal notranslate"><span class="pre">CallbackReturnType</span></code></a> value.
+<cite>None</cite> is the same as <code class="xref py py-attr docutils literal notranslate"><span class="pre">CallbackReturnType.Continue</span></code>.</p>
+<p>If your callbacks need to access the objects currently being optimized (e.g. the trajectory),
+you must set <cite>update_state=True</cite>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="section" id="estimator-helper-classes">
+<h2>Estimator helper classes<a class="headerlink" href="#estimator-helper-classes" title="Permalink to this headline">¶</a></h2>
+<p>The following classes are wrappers around the <a class="reference external" href="http://ceres-solver.org/">Ceres-Solver</a> classes of the same name.</p>
+<dl class="class">
+<dt id="kontiki.CallbackReturnType">
+<em class="property">class </em><code class="descclassname">kontiki.</code><code class="descname">CallbackReturnType</code><a class="headerlink" href="#kontiki.CallbackReturnType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return types for iteration callbacks</p>
+<p>Members:</p>
+<blockquote>
+<div><p>Abort : Abort the optimization</p>
+<p>Continue : Continue the optimization</p>
+<p>TerminateSuccessfully : Stop the optimization, marking it as success</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="class">
+<dt id="kontiki.Summary">
+<em class="property">class </em><code class="descclassname">kontiki.</code><code class="descname">Summary</code><a class="headerlink" href="#kontiki.Summary" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="kontiki.Summary.BriefReport">
+<code class="descname">BriefReport</code><span class="sig-paren">(</span><em>self: kontiki._ceres.Summary</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#kontiki.Summary.BriefReport" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="kontiki.Summary.FullReport">
+<code class="descname">FullReport</code><span class="sig-paren">(</span><em>self: kontiki._ceres.Summary</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#kontiki.Summary.FullReport" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="kontiki.Summary.IsSolutionUsable">
+<code class="descname">IsSolutionUsable</code><span class="sig-paren">(</span><em>self: kontiki._ceres.Summary</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#kontiki.Summary.IsSolutionUsable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.final_cost">
+<code class="descname">final_cost</code><a class="headerlink" href="#kontiki.Summary.final_cost" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.fixed_cost">
+<code class="descname">fixed_cost</code><a class="headerlink" href="#kontiki.Summary.fixed_cost" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.initial_cost">
+<code class="descname">initial_cost</code><a class="headerlink" href="#kontiki.Summary.initial_cost" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.inner_iteration_time_in_seconds">
+<code class="descname">inner_iteration_time_in_seconds</code><a class="headerlink" href="#kontiki.Summary.inner_iteration_time_in_seconds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.is_constrained">
+<code class="descname">is_constrained</code><a class="headerlink" href="#kontiki.Summary.is_constrained" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.iterations">
+<code class="descname">iterations</code><a class="headerlink" href="#kontiki.Summary.iterations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.jacobian_evaluation_time_in_seconds">
+<code class="descname">jacobian_evaluation_time_in_seconds</code><a class="headerlink" href="#kontiki.Summary.jacobian_evaluation_time_in_seconds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.line_search_cost_evaluation_time_in_seconds">
+<code class="descname">line_search_cost_evaluation_time_in_seconds</code><a class="headerlink" href="#kontiki.Summary.line_search_cost_evaluation_time_in_seconds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.line_search_gradient_evaluation_time_in_seconds">
+<code class="descname">line_search_gradient_evaluation_time_in_seconds</code><a class="headerlink" href="#kontiki.Summary.line_search_gradient_evaluation_time_in_seconds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.line_search_polynomial_minimization_time_in_seconds">
+<code class="descname">line_search_polynomial_minimization_time_in_seconds</code><a class="headerlink" href="#kontiki.Summary.line_search_polynomial_minimization_time_in_seconds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.line_search_total_time_in_seconds">
+<code class="descname">line_search_total_time_in_seconds</code><a class="headerlink" href="#kontiki.Summary.line_search_total_time_in_seconds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.linear_solver_time_in_seconds">
+<code class="descname">linear_solver_time_in_seconds</code><a class="headerlink" href="#kontiki.Summary.linear_solver_time_in_seconds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.message">
+<code class="descname">message</code><a class="headerlink" href="#kontiki.Summary.message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.minimizer_time_in_seconds">
+<code class="descname">minimizer_time_in_seconds</code><a class="headerlink" href="#kontiki.Summary.minimizer_time_in_seconds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.num_effective_parameters">
+<code class="descname">num_effective_parameters</code><a class="headerlink" href="#kontiki.Summary.num_effective_parameters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.num_effective_parameters_reduced">
+<code class="descname">num_effective_parameters_reduced</code><a class="headerlink" href="#kontiki.Summary.num_effective_parameters_reduced" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.num_inner_iteration_steps">
+<code class="descname">num_inner_iteration_steps</code><a class="headerlink" href="#kontiki.Summary.num_inner_iteration_steps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.num_linear_solver_threads_given">
+<code class="descname">num_linear_solver_threads_given</code><a class="headerlink" href="#kontiki.Summary.num_linear_solver_threads_given" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.num_linear_solver_threads_used">
+<code class="descname">num_linear_solver_threads_used</code><a class="headerlink" href="#kontiki.Summary.num_linear_solver_threads_used" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.num_parameter_blocks">
+<code class="descname">num_parameter_blocks</code><a class="headerlink" href="#kontiki.Summary.num_parameter_blocks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.num_parameter_blocks_reduced">
+<code class="descname">num_parameter_blocks_reduced</code><a class="headerlink" href="#kontiki.Summary.num_parameter_blocks_reduced" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.num_parameters">
+<code class="descname">num_parameters</code><a class="headerlink" href="#kontiki.Summary.num_parameters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.num_parameters_reduced">
+<code class="descname">num_parameters_reduced</code><a class="headerlink" href="#kontiki.Summary.num_parameters_reduced" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.num_residual_blocks">
+<code class="descname">num_residual_blocks</code><a class="headerlink" href="#kontiki.Summary.num_residual_blocks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.num_residual_blocks_reduced">
+<code class="descname">num_residual_blocks_reduced</code><a class="headerlink" href="#kontiki.Summary.num_residual_blocks_reduced" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.num_residuals">
+<code class="descname">num_residuals</code><a class="headerlink" href="#kontiki.Summary.num_residuals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.num_residuals_reduced">
+<code class="descname">num_residuals_reduced</code><a class="headerlink" href="#kontiki.Summary.num_residuals_reduced" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.num_successful_steps">
+<code class="descname">num_successful_steps</code><a class="headerlink" href="#kontiki.Summary.num_successful_steps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.num_threads_given">
+<code class="descname">num_threads_given</code><a class="headerlink" href="#kontiki.Summary.num_threads_given" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.num_threads_used">
+<code class="descname">num_threads_used</code><a class="headerlink" href="#kontiki.Summary.num_threads_used" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.num_unsuccessful_steps">
+<code class="descname">num_unsuccessful_steps</code><a class="headerlink" href="#kontiki.Summary.num_unsuccessful_steps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.postprocessor_time_in_seconds">
+<code class="descname">postprocessor_time_in_seconds</code><a class="headerlink" href="#kontiki.Summary.postprocessor_time_in_seconds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.preprocessor_time_in_seconds">
+<code class="descname">preprocessor_time_in_seconds</code><a class="headerlink" href="#kontiki.Summary.preprocessor_time_in_seconds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.residual_evaluation_time_in_seconds">
+<code class="descname">residual_evaluation_time_in_seconds</code><a class="headerlink" href="#kontiki.Summary.residual_evaluation_time_in_seconds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.termination_type">
+<code class="descname">termination_type</code><a class="headerlink" href="#kontiki.Summary.termination_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.Summary.total_time_in_seconds">
+<code class="descname">total_time_in_seconds</code><a class="headerlink" href="#kontiki.Summary.total_time_in_seconds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="kontiki.IterationSummary">
+<em class="property">class </em><code class="descclassname">kontiki.</code><code class="descname">IterationSummary</code><a class="headerlink" href="#kontiki.IterationSummary" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="kontiki.IterationSummary.cost">
+<code class="descname">cost</code><a class="headerlink" href="#kontiki.IterationSummary.cost" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.IterationSummary.cost_change">
+<code class="descname">cost_change</code><a class="headerlink" href="#kontiki.IterationSummary.cost_change" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.IterationSummary.cumulative_time_in_seconds">
+<code class="descname">cumulative_time_in_seconds</code><a class="headerlink" href="#kontiki.IterationSummary.cumulative_time_in_seconds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.IterationSummary.eta">
+<code class="descname">eta</code><a class="headerlink" href="#kontiki.IterationSummary.eta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.IterationSummary.gradient_max_norm">
+<code class="descname">gradient_max_norm</code><a class="headerlink" href="#kontiki.IterationSummary.gradient_max_norm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.IterationSummary.gradient_norm">
+<code class="descname">gradient_norm</code><a class="headerlink" href="#kontiki.IterationSummary.gradient_norm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.IterationSummary.iteration">
+<code class="descname">iteration</code><a class="headerlink" href="#kontiki.IterationSummary.iteration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current iteration</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.IterationSummary.iteration_time_in_seconds">
+<code class="descname">iteration_time_in_seconds</code><a class="headerlink" href="#kontiki.IterationSummary.iteration_time_in_seconds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.IterationSummary.line_search_function_evaluations">
+<code class="descname">line_search_function_evaluations</code><a class="headerlink" href="#kontiki.IterationSummary.line_search_function_evaluations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.IterationSummary.line_search_gradient_evaluations">
+<code class="descname">line_search_gradient_evaluations</code><a class="headerlink" href="#kontiki.IterationSummary.line_search_gradient_evaluations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.IterationSummary.line_search_iterations">
+<code class="descname">line_search_iterations</code><a class="headerlink" href="#kontiki.IterationSummary.line_search_iterations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.IterationSummary.linear_solver_iterations">
+<code class="descname">linear_solver_iterations</code><a class="headerlink" href="#kontiki.IterationSummary.linear_solver_iterations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.IterationSummary.relative_decrease">
+<code class="descname">relative_decrease</code><a class="headerlink" href="#kontiki.IterationSummary.relative_decrease" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.IterationSummary.step_is_nonmonotonic">
+<code class="descname">step_is_nonmonotonic</code><a class="headerlink" href="#kontiki.IterationSummary.step_is_nonmonotonic" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.IterationSummary.step_is_successful">
+<code class="descname">step_is_successful</code><a class="headerlink" href="#kontiki.IterationSummary.step_is_successful" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.IterationSummary.step_is_valid">
+<code class="descname">step_is_valid</code><a class="headerlink" href="#kontiki.IterationSummary.step_is_valid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Step was numerically valid</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.IterationSummary.step_norm">
+<code class="descname">step_norm</code><a class="headerlink" href="#kontiki.IterationSummary.step_norm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.IterationSummary.step_size">
+<code class="descname">step_size</code><a class="headerlink" href="#kontiki.IterationSummary.step_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.IterationSummary.step_solver_time_in_seconds">
+<code class="descname">step_solver_time_in_seconds</code><a class="headerlink" href="#kontiki.IterationSummary.step_solver_time_in_seconds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.IterationSummary.trust_region_radius">
+<code class="descname">trust_region_radius</code><a class="headerlink" href="#kontiki.IterationSummary.trust_region_radius" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Trajectory estimation</a><ul>
+<li><a class="reference internal" href="#estimator-helper-classes">Estimator helper classes</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="measurements.html" title="previous chapter">Measurements</a></li>
+      <li>Next: <a href="sfm.html" title="next chapter">Structure from motion</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/estimator.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Hannes Ovrén.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/estimator.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,479 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Sensors &mdash; kontiki 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Measurements" href="measurements.html" />
+    <link rel="prev" title="Trajectories" href="trajectories.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> kontiki
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="toctree.html">User’s guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kontiki.html">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trajectories.html">Trajectories</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Sensors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#general">General</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cameras">Cameras</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#camera-classes">Camera classes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#imus">IMUs</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#imu-classes">IMU classes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="measurements.html">Measurements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="estimator.html">Trajectory estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfm.html">Structure from motion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sew.html">Spline Error Weighting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="io.html">Input and output functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../developers/toctree.html">Developer’s guide</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">kontiki</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="toctree.html">User’s guide</a> &raquo;</li>
+        
+      <li>Sensors</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/users/sensors.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="sensors">
+<span id="sec-sensors"></span><h1>Sensors<a class="headerlink" href="#sensors" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="general">
+<h2>General<a class="headerlink" href="#general" title="Permalink to this headline">¶</a></h2>
+<p>All sensors derive from a common base class.
+This base class is not available from Python.</p>
+<dl class="class">
+<dt id="kontiki.sensors.Sensor">
+<em class="property">class </em><code class="descclassname">kontiki.sensors.</code><code class="descname">Sensor</code><a class="headerlink" href="#kontiki.sensors.Sensor" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="kontiki.sensors.Sensor.relative_pose">
+<code class="descname">relative_pose</code><a class="headerlink" href="#kontiki.sensors.Sensor.relative_pose" title="Permalink to this definition">¶</a></dt>
+<dd><p>A tuple (q, p) where p is the relative position, and q the relative orientation between the sensor coordinate
+frame, and the trajectory coordinate frame such that X_sensor = R * X_world + p.
+q is a unit quaternion representing the orientation R.
+Defaults to the identity orientation, and zero, respectively.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sensors.Sensor.time_offset">
+<code class="descname">time_offset</code><a class="headerlink" href="#kontiki.sensors.Sensor.time_offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>The time offset <cite>d</cite> between a reference time frame, and the sensor.
+Any function <cite>foo(t)</cite> of the sensor is instead called as <cite>foo(t + d)</cite>.
+Defaults to 0.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sensors.Sensor.max_time_offset">
+<code class="descname">max_time_offset</code><a class="headerlink" href="#kontiki.sensors.Sensor.max_time_offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>When optimizing the time offset, this is the maximum deviation from 0.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kontiki.sensors.Sensor.from_trajectory">
+<code class="descname">from_trajectory</code><span class="sig-paren">(</span><em>X : ndarray</em><span class="sig-paren">)</span> &#x2192; ndarray<a class="headerlink" href="#kontiki.sensors.Sensor.from_trajectory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves the 3D point X from the trajectory to the sensor coordinate frame,
+by applying the relative pose.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kontiki.sensors.Sensor.to_trajectory">
+<code class="descname">to_trajectory</code><span class="sig-paren">(</span><em>X : ndarray</em><span class="sig-paren">)</span> &#x2192; ndarray<a class="headerlink" href="#kontiki.sensors.Sensor.to_trajectory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves the 3D point X from the sensor to the trajectory coordinate frame,
+by applying the relative pose.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sensors.Sensor.relative_orientation_locked">
+<code class="descname">relative_orientation_locked</code><a class="headerlink" href="#kontiki.sensors.Sensor.relative_orientation_locked" title="Permalink to this definition">¶</a></dt>
+<dd><p>If <cite>True</cite>, the orientation part of the relative pose can not be changed during optimization.
+Defaults to True.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sensors.Sensor.relative_position_locked">
+<code class="descname">relative_position_locked</code><a class="headerlink" href="#kontiki.sensors.Sensor.relative_position_locked" title="Permalink to this definition">¶</a></dt>
+<dd><p>If <cite>True</cite>, the translation part of the relative pose can not be changed during optimization.
+Defaults to True.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sensors.Sensor.time_offset_locked">
+<code class="descname">time_offset_locked</code><a class="headerlink" href="#kontiki.sensors.Sensor.time_offset_locked" title="Permalink to this definition">¶</a></dt>
+<dd><p>If <cite>True</cite>, the time offset can not be changed during optimization.
+Defaults to True.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="cameras">
+<h2>Cameras<a class="headerlink" href="#cameras" title="Permalink to this headline">¶</a></h2>
+<p>All cameras share the following (unavailable) base class</p>
+<dl class="class">
+<dt id="kontiki.sensors.Camera">
+<em class="property">class </em><code class="descclassname">kontiki.sensors.</code><code class="descname">Camera</code><a class="headerlink" href="#kontiki.sensors.Camera" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="kontiki.sensors.Camera.rows">
+<code class="descname">rows</code><a class="headerlink" href="#kontiki.sensors.Camera.rows" title="Permalink to this definition">¶</a></dt>
+<dd><p>The number of image rows</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sensors.Camera.cols">
+<code class="descname">cols</code><a class="headerlink" href="#kontiki.sensors.Camera.cols" title="Permalink to this definition">¶</a></dt>
+<dd><p>The number of image columns</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sensors.Camera.readout">
+<code class="descname">readout</code><a class="headerlink" href="#kontiki.sensors.Camera.readout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rolling shutter readout time. Set to 0 for global shutter.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kontiki.sensors.Camera.project">
+<code class="descname">project</code><span class="sig-paren">(</span><em>X : ndarray</em><span class="sig-paren">)</span> &#x2192; ndarray<a class="headerlink" href="#kontiki.sensors.Camera.project" title="Permalink to this definition">¶</a></dt>
+<dd><p>Projects the 3D point <cite>X</cite> in camera coordinates, to its 2D image plane location using the camera projection model.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This does not apply the relative pose of the camera</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="kontiki.sensors.Camera.unproject">
+<code class="descname">unproject</code><span class="sig-paren">(</span><em>y : ndarray</em><span class="sig-paren">)</span> &#x2192; ndarray<a class="headerlink" href="#kontiki.sensors.Camera.unproject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply inverse projection on image (2D) location y, to get a 3D point X=(x, y, z), where z=1.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This does not apply the relative pose of the camera</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="kontiki.sensors.Camera.to_trajectory">
+<code class="descname">to_trajectory</code><span class="sig-paren">(</span><em>X : ndarray</em><span class="sig-paren">)</span> &#x2192; ndarray<a class="headerlink" href="#kontiki.sensors.Camera.to_trajectory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves the 3D point X in camera coordinates t</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="section" id="camera-classes">
+<h3>Camera classes<a class="headerlink" href="#camera-classes" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="kontiki.sensors.PinholeCamera">
+<em class="property">class </em><code class="descclassname">kontiki.sensors.</code><code class="descname">PinholeCamera</code><a class="headerlink" href="#kontiki.sensors.PinholeCamera" title="Permalink to this definition">¶</a></dt>
+<dd><p>Standard pinhole camera</p>
+<dl class="attribute">
+<dt id="kontiki.sensors.PinholeCamera.camera_matrix">
+<code class="descname">camera_matrix</code><a class="headerlink" href="#kontiki.sensors.PinholeCamera.camera_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>The 3x3 internal camera calibration matrix</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="kontiki.sensors.AtanCamera">
+<em class="property">class </em><code class="descclassname">kontiki.sensors.</code><code class="descname">AtanCamera</code><a class="headerlink" href="#kontiki.sensors.AtanCamera" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arc-tan camera model for wide-angle cameras</p>
+<p>Implementation of the 3-parameter FOV model of <a class="reference internal" href="#devernay2001" id="id1">[Devernay2001]</a>.</p>
+<p>Subclass of <a class="reference internal" href="#kontiki.sensors.PinholeCamera" title="kontiki.sensors.PinholeCamera"><code class="xref py py-class docutils literal notranslate"><span class="pre">PinholeCamera</span></code></a>.</p>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="devernay2001" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[Devernay2001]</a></td><td>Devernay, F. and Faugeras, O.
+<em>Straight lines have to be straight: Automatic calibration and removal of distortion
+from scenes of structured environments</em>
+Machie Vision and Applications, Vol 13., 2001</td></tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="kontiki.sensors.AtanCamera.gamma">
+<code class="descname">gamma</code><a class="headerlink" href="#kontiki.sensors.AtanCamera.gamma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Distortion parameter</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sensors.AtanCamera.wc">
+<code class="descname">wc</code><a class="headerlink" href="#kontiki.sensors.AtanCamera.wc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Distortion center</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="imus">
+<h2>IMUs<a class="headerlink" href="#imus" title="Permalink to this headline">¶</a></h2>
+<p>All inertial measurement units share the following (unavailable) base class:</p>
+<dl class="class">
+<dt id="kontiki.sensors.Imu">
+<em class="property">class </em><code class="descclassname">kontiki.sensors.</code><code class="descname">Imu</code><a class="headerlink" href="#kontiki.sensors.Imu" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="kontiki.sensors.Imu.accelerometer">
+<code class="descname">accelerometer</code><span class="sig-paren">(</span><em>trajectory : Trajectory</em>, <em>t : float</em><span class="sig-paren">)</span> &#x2192; ndarray<a class="headerlink" href="#kontiki.sensors.Imu.accelerometer" title="Permalink to this definition">¶</a></dt>
+<dd><p>A single accelerometer measurement at time t, using the specified trajectory.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kontiki.sensors.Imu.gyroscope">
+<code class="descname">gyroscope</code><span class="sig-paren">(</span><em>trajectory : Trajectory</em>, <em>t : float</em><span class="sig-paren">)</span> &#x2192; ndarray<a class="headerlink" href="#kontiki.sensors.Imu.gyroscope" title="Permalink to this definition">¶</a></dt>
+<dd><p>A single gyroscope measurement at time t, using the specified trajectory.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="section" id="imu-classes">
+<h3>IMU classes<a class="headerlink" href="#imu-classes" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="kontiki.sensors.BasicImu">
+<em class="property">class </em><code class="descclassname">kontiki.sensors.</code><code class="descname">BasicImu</code><a class="headerlink" href="#kontiki.sensors.BasicImu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basic IMU</p>
+<p>This IMU model produces ideal IMU measurements.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="kontiki.sensors.ConstantBiasImu">
+<em class="property">class </em><code class="descclassname">kontiki.sensors.</code><code class="descname">ConstantBiasImu</code><a class="headerlink" href="#kontiki.sensors.ConstantBiasImu" title="Permalink to this definition">¶</a></dt>
+<dd><p>IMU with constant biases</p>
+<p>Both biases are modeled as constants.</p>
+<dl class="attribute">
+<dt id="kontiki.sensors.ConstantBiasImu.accelerometer_bias">
+<code class="descname">accelerometer_bias</code><a class="headerlink" href="#kontiki.sensors.ConstantBiasImu.accelerometer_bias" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accelerometer bias</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sensors.ConstantBiasImu.accelerometer_bias_locked">
+<code class="descname">accelerometer_bias_locked</code><a class="headerlink" href="#kontiki.sensors.ConstantBiasImu.accelerometer_bias_locked" title="Permalink to this definition">¶</a></dt>
+<dd><p>If True (default), then the accelerometer bias is not changed during optimization.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sensors.ConstantBiasImu.gyroscope_bias">
+<code class="descname">gyroscope_bias</code><a class="headerlink" href="#kontiki.sensors.ConstantBiasImu.gyroscope_bias" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gyroscope bias</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sensors.ConstantBiasImu.gyroscope_bias_locked">
+<code class="descname">gyroscope_bias_locked</code><a class="headerlink" href="#kontiki.sensors.ConstantBiasImu.gyroscope_bias_locked" title="Permalink to this definition">¶</a></dt>
+<dd><p>If True (default), then the gyrocope bias is not changed during optimization.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="measurements.html" class="btn btn-neutral float-right" title="Measurements" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="trajectories.html" class="btn btn-neutral" title="Trajectories" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Hannes Ovrén.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          
+          SphinxRtdTheme.Navigation.enableSticky();
+          
+      });
+  </script> 
+
+</body>
+</html>

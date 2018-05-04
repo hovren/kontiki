@@ -1,0 +1,325 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Spline Error Weighting &mdash; kontiki 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Input and output functions" href="io.html" />
+    <link rel="prev" title="Structure from motion" href="sfm.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> kontiki
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="toctree.html">User’s guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kontiki.html">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trajectories.html">Trajectories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sensors.html">Sensors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="measurements.html">Measurements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="estimator.html">Trajectory estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfm.html">Structure from motion</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Spline Error Weighting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="io.html">Input and output functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../developers/toctree.html">Developer’s guide</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">kontiki</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="toctree.html">User’s guide</a> &raquo;</li>
+        
+      <li>Spline Error Weighting</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/users/sew.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <span class="target" id="module-kontiki.sew"></span><div class="section" id="spline-error-weighting">
+<h1>Spline Error Weighting<a class="headerlink" href="#spline-error-weighting" title="Permalink to this headline">¶</a></h1>
+<p>This module implements Spline Error Weighting (SEW), introduced by <a class="reference internal" href="#ovren2018a" id="id1">[Ovren2018a]</a>.</p>
+<p>SEW is a method to automatically set knot spacing, and estimate the spline fit error (approximation error),
+using gyroscope and accelerometer data.</p>
+<p>To estimate the knot spacings for a <a class="reference internal" href="trajectories.html#kontiki.trajectories.SplitTrajectory" title="kontiki.trajectories.SplitTrajectory"><code class="xref py py-class docutils literal notranslate"><span class="pre">SplitTrajectory</span></code></a> you would do the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">so3_dt</span><span class="p">,</span> <span class="n">so3_var</span> <span class="o">=</span> <span class="n">knot_spacing_and_variance</span><span class="p">(</span><span class="n">gyro_data</span><span class="p">,</span> <span class="n">gyro_timestamps</span><span class="p">,</span> <span class="n">q_gyro</span><span class="p">)</span>
+<span class="n">r3_dt</span><span class="p">,</span> <span class="n">r3_var</span> <span class="o">=</span> <span class="n">knot_spacing_and_variance</span><span class="p">(</span><span class="n">acc_data</span><span class="p">,</span> <span class="n">acc_timestamps</span><span class="p">,</span> <span class="n">q_acc</span><span class="p">)</span>
+<span class="n">trajectory</span> <span class="o">=</span> <span class="n">SplitTrajectory</span><span class="p">(</span><span class="n">r3_dt</span><span class="p">,</span> <span class="n">so3_dt</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="ovren2018a" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[Ovren2018a]</a></td><td>Ovrén, H. and Forssén, P-E.
+<em>Spline Error Weighting for Robust Visual-Inertial Fusion</em>
+In Proceedings of the IEEE on Computer Vision and Pattern Recognition (CVPR)
+June 2018</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="mihajlovic1999" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[Mihajlovic1999]</a></td><td>Mihajlovic, Z.; Goluban, A.; and Zagar, M.
+<em>Frequency Domain Analysis of B-Spline Interpolation</em>
+In Proceedings of the IEEE International Symposium on Industrial Electronics
+July 1999</td></tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="kontiki.sew.knot_spacing_and_variance">
+<code class="descclassname">kontiki.sew.</code><code class="descname">knot_spacing_and_variance</code><span class="sig-paren">(</span><em>signal</em>, <em>times</em>, <em>quality</em>, <em>*</em>, <em>min_dt=None</em>, <em>max_dt=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#kontiki.sew.knot_spacing_and_variance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find knot spacing and variance from signal</p>
+<p>Given a quality value, this function first determines the maximum knot spacing
+that achieves this quality, given the data in signal.
+It then computes the estimated variance of the spline fit error, using this knot spacing.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>signal</strong> (<em>ndarray</em>) – Signal to fit to (e.g. accelerometer or gyroscope)</li>
+<li><strong>times</strong> (<em>ndarray</em>) – Timestamps of signal</li>
+<li><strong>quality</strong> (<em>float</em>) – Requested quality, in the range 0-1. A good value is usually around 0.99.</li>
+<li><strong>min_dt</strong> (<em>float</em>) – Lowest acceptable value of knot spacing</li>
+<li><strong>max_dt</strong> (<em>float</em>) – Highest acceptable value of knot spacing</li>
+<li><strong>verbose</strong> (<em>bool</em>) – Print search steps</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>dt</strong> (<em>float</em>) – The found knot spacing</li>
+<li><strong>var</strong> (<em>float</em>) – The spline fit error for this signal and knot spacing</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="kontiki.sew.spline_interpolation_response">
+<code class="descclassname">kontiki.sew.</code><code class="descname">spline_interpolation_response</code><span class="sig-paren">(</span><em>freqs</em>, <em>dt</em><span class="sig-paren">)</span><a class="headerlink" href="#kontiki.sew.spline_interpolation_response" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cubic B-spline interpolation frequency function</p>
+<p>Implements the frequency response function of a cubic B-spline according to <a class="reference internal" href="#mihajlovic1999" id="id2">[Mihajlovic1999]</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>freqs</strong> (<em>ndarray</em>) – Frequencies in Hz</li>
+<li><strong>dt</strong> (<em>float</em>) – Spline knot spacing</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>H</strong> – Frequency response function for frequencies <cite>freqs</cite></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="io.html" class="btn btn-neutral float-right" title="Input and output functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="sfm.html" class="btn btn-neutral" title="Structure from motion" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Hannes Ovrén.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          
+          SphinxRtdTheme.Navigation.enableSticky();
+          
+      });
+  </script> 
+
+</body>
+</html>

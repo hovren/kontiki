@@ -1,0 +1,242 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Measurements &#8212; kontiki 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Trajectory estimation" href="estimator.html" />
+    <link rel="prev" title="Sensors" href="sensors.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="measurements">
+<span id="sec-measurements"></span><h1>Measurements<a class="headerlink" href="#measurements" title="Permalink to this headline">¶</a></h1>
+<p>A measurement defines a residual that is added to the optimization problem.
+They share the functionality of the following (unavailable) base class.</p>
+<dl class="class">
+<dt id="kontiki.measurements.Measurement">
+<em class="property">class </em><code class="descclassname">kontiki.measurements.</code><code class="descname">Measurement</code><a class="headerlink" href="#kontiki.measurements.Measurement" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="kontiki.measurements.Measurement.error">
+<code class="descname">error</code><span class="sig-paren">(</span><em>trajectory : Trajectory</em><span class="sig-paren">)</span> &#x2192; ndarray<a class="headerlink" href="#kontiki.measurements.Measurement.error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the error (a ND-vector), before application of any loss function.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kontiki.measurements.Measurement.measure">
+<code class="descname">measure</code><span class="sig-paren">(</span><em>trajectory : Trajectory</em><span class="sig-paren">)</span> &#x2192; ndarray<a class="headerlink" href="#kontiki.measurements.Measurement.measure" title="Permalink to this definition">¶</a></dt>
+<dd><p>The measured quantity, e.g. IMU accelerometer, or camera image projection.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="section" id="camera-measurements">
+<span id="sec-camera-measurements"></span><h2>Camera measurements<a class="headerlink" href="#camera-measurements" title="Permalink to this headline">¶</a></h2>
+<p>The camera classes share the following base class:</p>
+<dl class="class">
+<dt id="kontiki.measurements.CameraMeasurement">
+<em class="property">class </em><code class="descclassname">kontiki.measurements.</code><code class="descname">CameraMeasurement</code><span class="sig-paren">(</span><em>camera</em>, <em>observation</em>, <em>huber_c=1</em><span class="sig-paren">)</span><a class="headerlink" href="#kontiki.measurements.CameraMeasurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measurement of an <a class="reference internal" href="sfm.html#kontiki.sfm.Observation" title="kontiki.sfm.Observation"><code class="xref py py-class docutils literal notranslate"><span class="pre">sfm.Observation</span></code></a> instance, using a <a class="reference internal" href="sensors.html#kontiki.sensors.Camera" title="kontiki.sensors.Camera"><code class="xref py py-class docutils literal notranslate"><span class="pre">sensors.Camera</span></code></a>.
+<cite>huber_c</cite> specifies the design parameter of the used Huber loss function.</p>
+<dl class="attribute">
+<dt id="kontiki.measurements.CameraMeasurement.observation">
+<code class="descname">observation</code><a class="headerlink" href="#kontiki.measurements.CameraMeasurement.observation" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="sfm.html#kontiki.sfm.Observation" title="kontiki.sfm.Observation"><code class="xref py py-class docutils literal notranslate"><span class="pre">sfm.Observation</span></code></a> instance that is measured.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.measurements.CameraMeasurement.camera">
+<code class="descname">camera</code><a class="headerlink" href="#kontiki.measurements.CameraMeasurement.camera" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="sensors.html#kontiki.sensors.Camera" title="kontiki.sensors.Camera"><code class="xref py py-class docutils literal notranslate"><span class="pre">sensors.Camera</span></code></a> used.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="section" id="camera-measurement-classes">
+<h3>Camera measurement classes<a class="headerlink" href="#camera-measurement-classes" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="kontiki.measurements.StaticRsCameraMeasurement">
+<em class="property">class </em><code class="descclassname">kontiki.measurements.</code><code class="descname">StaticRsCameraMeasurement</code><a class="headerlink" href="#kontiki.measurements.StaticRsCameraMeasurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Static rolling shutter projection</p>
+<p>Projects a landmark into a rolling shutter camera by simply setting the
+projection time from the observed image row.
+This method does in general not fulfill the rolling shutter projection time
+constraint, but is fast.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="kontiki.measurements.NewtonRsCameraMeasurement">
+<em class="property">class </em><code class="descclassname">kontiki.measurements.</code><code class="descname">NewtonRsCameraMeasurement</code><a class="headerlink" href="#kontiki.measurements.NewtonRsCameraMeasurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Newton-based rolling shutter projection</p>
+<p>Projects a landmark into a rolling shutter camera using the Newton method.
+This method should produce measurements such that the projected image row
+is consistent with the projection time.
+However, this is not a guarantee, so if you really need to make sure that the
+rolling shutter prjection time constraint is fulfilled, we recommend to at least
+check the result before accepting it.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="kontiki.measurements.LiftingRsCameraMeasurement">
+<em class="property">class </em><code class="descclassname">kontiki.measurements.</code><code class="descname">LiftingRsCameraMeasurement</code><a class="headerlink" href="#kontiki.measurements.LiftingRsCameraMeasurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rolling shutter projection by time optimization</p>
+<p>Projects a landmark into a rolling shutter camera by adding the projection time
+as an additional parameter to the optimization problem.</p>
+<p>In general, this does not fulfill the rolling shutter projection time constraint exactly.</p>
+<dl class="attribute">
+<dt id="kontiki.measurements.LiftingRsCameraMeasurement.vt">
+<code class="descname">vt</code><a class="headerlink" href="#kontiki.measurements.LiftingRsCameraMeasurement.vt" title="Permalink to this definition">¶</a></dt>
+<dd><p>The row projection time (to be optimized)</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="imu-measurements">
+<h2>IMU measurements<a class="headerlink" href="#imu-measurements" title="Permalink to this headline">¶</a></h2>
+<p>The IMU measurements share the following base class</p>
+<dl class="class">
+<dt id="kontiki.measurements.ImuMeasurement">
+<em class="property">class </em><code class="descclassname">kontiki.measurements.</code><code class="descname">ImuMeasurement</code><span class="sig-paren">(</span><em>imu</em>, <em>t</em>, <em>x</em>, <em>weight=1</em><span class="sig-paren">)</span><a class="headerlink" href="#kontiki.measurements.ImuMeasurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>A measurement <cite>x</cite> (3D) at time <cite>t</cite> using the specified <a class="reference internal" href="sensors.html#kontiki.sensors.Imu" title="kontiki.sensors.Imu"><code class="xref py py-class docutils literal notranslate"><span class="pre">sensors.Imu</span></code></a> instance.
+The scalar <cite>weight</cite> is applied to the residual, before being squared.</p>
+<dl class="attribute">
+<dt id="kontiki.measurements.ImuMeasurement.imu">
+<code class="descname">imu</code><a class="headerlink" href="#kontiki.measurements.ImuMeasurement.imu" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="sensors.html#kontiki.sensors.Imu" title="kontiki.sensors.Imu"><code class="xref py py-class docutils literal notranslate"><span class="pre">sensors.Imu</span></code></a> instance used.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.measurements.ImuMeasurement.t">
+<code class="descname">t</code><a class="headerlink" href="#kontiki.measurements.ImuMeasurement.t" title="Permalink to this definition">¶</a></dt>
+<dd><p>The timestamp of the measurement</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.measurements.ImuMeasurement.weight">
+<code class="descname">weight</code><a class="headerlink" href="#kontiki.measurements.ImuMeasurement.weight" title="Permalink to this definition">¶</a></dt>
+<dd><p>The (scalar) residual weight</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="section" id="imu-measurement-classes">
+<h3>IMU measurement classes<a class="headerlink" href="#imu-measurement-classes" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="kontiki.measurements.AccelerometerMeasurement">
+<em class="property">class </em><code class="descclassname">kontiki.measurements.</code><code class="descname">AccelerometerMeasurement</code><a class="headerlink" href="#kontiki.measurements.AccelerometerMeasurement" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="kontiki.measurements.AccelerometerMeasurement.a">
+<code class="descname">a</code><a class="headerlink" href="#kontiki.measurements.AccelerometerMeasurement.a" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measured acceleration</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="kontiki.measurements.GyroscopeMeasurement">
+<em class="property">class </em><code class="descclassname">kontiki.measurements.</code><code class="descname">GyroscopeMeasurement</code><a class="headerlink" href="#kontiki.measurements.GyroscopeMeasurement" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="kontiki.measurements.GyroscopeMeasurement.w">
+<code class="descname">w</code><a class="headerlink" href="#kontiki.measurements.GyroscopeMeasurement.w" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measured angular velocity</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Measurements</a><ul>
+<li><a class="reference internal" href="#camera-measurements">Camera measurements</a><ul>
+<li><a class="reference internal" href="#camera-measurement-classes">Camera measurement classes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#imu-measurements">IMU measurements</a><ul>
+<li><a class="reference internal" href="#imu-measurement-classes">IMU measurement classes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="sensors.html" title="previous chapter">Sensors</a></li>
+      <li>Next: <a href="estimator.html" title="next chapter">Trajectory estimation</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/measurements.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Hannes Ovrén.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/measurements.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

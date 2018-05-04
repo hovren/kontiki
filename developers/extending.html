@@ -1,0 +1,376 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Extending Kontiki &mdash; kontiki 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Developer’s guide" href="toctree.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> kontiki
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../users/toctree.html">User’s guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="toctree.html">Developer’s guide</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Extending Kontiki</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#general">General</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#extending-by-forking">Extending by forking</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#views-and-entitites">Views and Entitites</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#new-trajectories">New trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#new-measurements">New measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#new-sensors">New sensors</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">kontiki</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="toctree.html">Developer’s guide</a> &raquo;</li>
+        
+      <li>Extending Kontiki</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/developers/extending.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="extending-kontiki">
+<h1><a class="toc-backref" href="#id1">Extending Kontiki</a><a class="headerlink" href="#extending-kontiki" title="Permalink to this headline">¶</a></h1>
+<p>Kontiki can look tricky to work with because of its close ties to C++ and Ceres-Solver, which makes some parts of the
+code base a bit complicated.
+Here we will try to explain the steps necessary to implement new functionality.
+This documentation is not a tutorial, but gives a high-level view of the steps involve to create new
+trajectories, measurements, etc.
+For details, look at the source code for an existing class of the type you wish to implement.</p>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#extending-kontiki" id="id1">Extending Kontiki</a><ul>
+<li><a class="reference internal" href="#general" id="id2">General</a><ul>
+<li><a class="reference internal" href="#extending-by-forking" id="id3">Extending by forking</a></li>
+<li><a class="reference internal" href="#views-and-entitites" id="id4">Views and Entitites</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#new-trajectories" id="id5">New trajectories</a></li>
+<li><a class="reference internal" href="#new-measurements" id="id6">New measurements</a></li>
+<li><a class="reference internal" href="#new-sensors" id="id7">New sensors</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="general">
+<h2><a class="toc-backref" href="#id2">General</a><a class="headerlink" href="#general" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="extending-by-forking">
+<h3><a class="toc-backref" href="#id3">Extending by forking</a><a class="headerlink" href="#extending-by-forking" title="Permalink to this headline">¶</a></h3>
+<p>The first thing to note is that to extend Kontiki you must currently fork it, and implement your new features.
+This is because making an extension system that allows external modules is very tricky.
+Ideas on how to solve it are very welcome!</p>
+</div>
+<div class="section" id="views-and-entitites">
+<h3><a class="toc-backref" href="#id4">Views and Entitites</a><a class="headerlink" href="#views-and-entitites" title="Permalink to this headline">¶</a></h3>
+<p>To make it easier to work with Ceres-Solver, our optimization backend, we have implemented a general system for
+creating optimizable entities.
+To do so we introduce two concepts:</p>
+<dl class="docutils">
+<dt>Views</dt>
+<dd>The View is the workhorse of the entity system.
+It implements all the behaviour of an object, as well as data accessors.
+The view contents are defined by a <code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">ParameterStore</span></code>, and a <code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">Metadata</span></code> instance.</dd>
+<dt>Parameter stores</dt>
+<dd>The parameter store is an abstraction layer to allow the view to access the actual data required, from different sources.</dd>
+<dt>Metadata</dt>
+<dd>The metadata holds all information necessary to create/define the object together with the data in the parmaeter store.
+The metadata instance is used when adding a residual to the optimization problem, in order to allow it to be recreated
+at evaluation time.</dd>
+<dt>Entities</dt>
+<dd>Where the View is created on the fly by wrapping a <code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">ParameterStore</span></code>, and a <code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">Metadata</span></code>,
+the Entity is a concrete instantiation of it.
+It is the interface which users are supposed to instantiate and work with.
+Entities own their data, but Views do not.</dd>
+</dl>
+<p>As an example, the <a class="reference internal" href="../users/trajectories.html#kontiki.trajectories.UniformSE3SplineTrajectory" title="kontiki.trajectories.UniformSE3SplineTrajectory"><code class="xref py py-class docutils literal notranslate"><span class="pre">kontiki.trajectories.UniformSE3SplineTrajectory</span></code></a> is an entity.
+The entity instance contains an owning parameter store, and a metadata object that defines the full trajectory.
+When we add a measurement that uses the splined trajectory, the residual struct is given a metadata object that defines
+the <em>spline segment</em> (number of knots, start time, knot spacing) which is required by the measurement.
+When the optimizer calls the residual cost function, a View of this spline segment is created from the metadata object,
+and a parameter vector.</p>
+</div>
+</div>
+<div class="section" id="new-trajectories">
+<span id="sec-new-trajectories"></span><h2><a class="toc-backref" href="#id5">New trajectories</a><a class="headerlink" href="#new-trajectories" title="Permalink to this headline">¶</a></h2>
+<p>To create a new directory the following steps should be performed.</p>
+<ol class="arabic simple">
+<li>Create a new <code class="docutils literal notranslate"><span class="pre">my_trajectory.h</span></code> file in <code class="docutils literal notranslate"><span class="pre">cpplib/include/kontiki/trajectories/</span></code></li>
+<li><dl class="first docutils">
+<dt>Define what kind of metadata your new trajectory requires. In short this means to define</dt>
+<dd><ol class="first last arabic">
+<li>Any data that is not a parameter to optimize, e.g. spline knot spacing.</li>
+<li>Information required to recreate (part of) the trajectory, e.g. the number of spline segment control points.</li>
+<li>Implement the <code class="docutils literal notranslate"><span class="pre">NumParameters()</span></code> function that computes the number of parameters used by this metadata object.</li>
+</ol>
+</dd>
+</dl>
+</li>
+<li>Create your view template <code class="docutils literal notranslate"><span class="pre">MyTrajectoryView&lt;T,</span> <span class="pre">MetaType&gt;</span></code>, that inherits from <code class="docutils literal notranslate"><span class="pre">TrajectoryView&lt;T,</span> <span class="pre">MetaType&gt;</span></code>.
+Implement getter and setter functions to access data in either the view metadata, or parameter store.</li>
+<li>Implement <code class="docutils literal notranslate"><span class="pre">MyTrajectoryView::Evaluate(const</span> <span class="pre">T</span> <span class="pre">t,</span> <span class="pre">const</span> <span class="pre">int</span> <span class="pre">flags)</span></code>.
+Begin by creating the <code class="docutils literal notranslate"><span class="pre">TrajectoryEvaluation</span></code> to be returned, by giving it the <code class="docutils literal notranslate"><span class="pre">flags</span></code> argument.
+Fill <code class="docutils literal notranslate"><span class="pre">result.position</span></code>, <code class="docutils literal notranslate"><span class="pre">result.velocity</span></code>, etc. with whatever result your trajectory should give at time t.</li>
+<li>Implement  <code class="docutils literal notranslate"><span class="pre">MyTrajectory::MinTime()</span></code> and <code class="docutils literal notranslate"><span class="pre">MyTrajectory::MaxTime()</span></code>.</li>
+<li>Implement <code class="docutils literal notranslate"><span class="pre">MyTrajectoryEntity&lt;...&gt;</span></code> by inheriting from <code class="docutils literal notranslate"><span class="pre">TrajectoryEntity&lt;...&gt;</span></code>.
+Here you must define
+1. The constructor(s), used by users of your code to construct the object.
+2. The <code class="docutils literal notranslate"><span class="pre">AddToProblem(...)</span></code> method, which adds (part of) the trajectory to the optimization problem.</li>
+<li>Create <code class="docutils literal notranslate"><span class="pre">MyTrajectory</span></code> class by inheriting from <code class="docutils literal notranslate"><span class="pre">LinearEntity</span></code>.
+Here you must…
+1. add the constructor by <code class="docutils literal notranslate"><span class="pre">using</span> <span class="pre">MyTrajectoryEntity&lt;...&gt;::MyTrajectoryEntity</span></code>.
+2. Define the trajectory ID, <code class="docutils literal notranslate"><span class="pre">static</span> <span class="pre">constexpr</span> <span class="pre">const</span> <span class="pre">char*</span> <span class="pre">CLASS_ID</span> <span class="pre">=</span> <span class="pre">&quot;MyTrajectory&quot;</span></code></li>
+</ol>
+<p>For Python bindings you also need to</p>
+<ol class="arabic simple">
+<li>Create a new <code class="docutils literal notranslate"><span class="pre">py_my_trajectory.cc</span></code> file in <code class="docutils literal notranslate"><span class="pre">python/src/kontiki/trajectories/</span></code></li>
+<li>Wrap the class using pybind11.</li>
+<li>Add <code class="docutils literal notranslate"><span class="pre">MyTrajectory</span></code> to the trajectory list in <code class="docutils literal notranslate"><span class="pre">python/src/kontiki/trajectory_defs.h</span></code>.
+This makes sure support for the trajectory is compiled into all sensors, estimators, etc.</li>
+<li>Add <code class="docutils literal notranslate"><span class="pre">kontiki_add_module(kontiki.trajectories._my_trajectory)</span></code> to <code class="docutils literal notranslate"><span class="pre">pyhon/CMakeLists.txt</span></code>.</li>
+<li>Add <code class="docutils literal notranslate"><span class="pre">TrajectoryExtension('_my_measurement')</span></code> to the extensions list in <code class="docutils literal notranslate"><span class="pre">pyhon/setup.py</span></code>.</li>
+</ol>
+</div>
+<div class="section" id="new-measurements">
+<h2><a class="toc-backref" href="#id6">New measurements</a><a class="headerlink" href="#new-measurements" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Create a new <code class="docutils literal notranslate"><span class="pre">my_measurement.h</span></code> file in <code class="docutils literal notranslate"><span class="pre">cpplib/include/kontiki/measurements/</span></code></li>
+<li>Implement your measurement class <code class="docutils literal notranslate"><span class="pre">MyMeasurement</span></code>.
+The class may need to be templated, e.g. as <code class="docutils literal notranslate"><span class="pre">MyMeasurement&lt;ImuModel&gt;</span></code> if it needs an IMU.</li>
+<li>Implement the templated measurement function <code class="docutils literal notranslate"><span class="pre">MyMeasurement::Measure&lt;TrajectoryModel,</span> <span class="pre">T&gt;()</span></code> with
+trajectory as the only argument.</li>
+<li>Similarly implement the templated error function <code class="docutils literal notranslate"><span class="pre">MyMeasurement::Error&lt;TrajectoryModel,</span> <span class="pre">T&gt;()</span></code> which calls
+the measurement function.</li>
+<li>Implement the residual struct <code class="docutils literal notranslate"><span class="pre">MyMeasurement::Residual&lt;TrajectoryModel&gt;</span></code>.
+As per the Ceres-Solver documentation, it must have a method <code class="docutils literal notranslate"><span class="pre">Residual::operator&lt;T&gt;()(...)</span></code>
+which evaluates the residual. This function should unpack the current trajectory, and any other entity
+used by the residual, and compute the residual value (using <code class="docutils literal notranslate"><span class="pre">::Error()</span></code> defined above).</li>
+<li>Implement <code class="docutils literal notranslate"><span class="pre">MyMeasurement::AddToEstimator&lt;TrajectoryModel&gt;()</span></code>.
+This function should create the <code class="docutils literal notranslate"><span class="pre">MyMeasurement::Residual</span></code> instance, and give it to
+the <code class="docutils literal notranslate"><span class="pre">ceres::Problem</span></code> contained in the <a class="reference internal" href="../users/estimator.html#kontiki.TrajectoryEstimator" title="kontiki.TrajectoryEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">kontiki.TrajectoryEstimator</span></code></a>.</li>
+<li>Declare <code class="docutils literal notranslate"><span class="pre">kontiki::TrajectoryEstimator</span></code> a <code class="docutils literal notranslate"><span class="pre">friend</span> <span class="pre">class</span></code>.</li>
+</ol>
+<p>For Python bindings you also need to</p>
+<ol class="arabic simple">
+<li>Create a new <code class="docutils literal notranslate"><span class="pre">py_my_measurement.cc</span></code> file in <code class="docutils literal notranslate"><span class="pre">python/src/kontiki/measurements/</span></code></li>
+<li>Wrap the class using pybind11.</li>
+<li>Add <code class="docutils literal notranslate"><span class="pre">MyMeasurement</span></code> to the correct measurement list in <code class="docutils literal notranslate"><span class="pre">python/src/kontiki/measurement_defs.h</span></code>.
+This makes sure support for the measurement is compiled into the trajectory estimator.</li>
+<li>Add <code class="docutils literal notranslate"><span class="pre">kontiki_add_module(kontiki.measurements._my_measurement)</span></code> to <code class="docutils literal notranslate"><span class="pre">pyhon/CMakeLists.txt</span></code>.</li>
+<li>Add <code class="docutils literal notranslate"><span class="pre">MeasurementExtension('_my_measurement')</span></code> to the extensions list in <code class="docutils literal notranslate"><span class="pre">pyhon/setup.py</span></code>.</li>
+</ol>
+</div>
+<div class="section" id="new-sensors">
+<h2><a class="toc-backref" href="#id7">New sensors</a><a class="headerlink" href="#new-sensors" title="Permalink to this headline">¶</a></h2>
+<p>Implementing new sensors are done mostly the same as when implementing <a class="reference internal" href="#sec-new-trajectories"><span class="std std-ref">New trajectories</span></a>.
+If you are implementing a sensor which is a specialization of <em>Foo</em>, then you should implement
+a new View and Entity that inherits <cite>FooView</cite> and <cite>FooEntity</cite>, respectively.
+For the Python bindings, you need to add your newly created class to the correct <cite>xxx_defs.h</cite> file
+to make sure support for it is compiled into the system.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="toctree.html" class="btn btn-neutral" title="Developer’s guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Hannes Ovrén.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          
+          SphinxRtdTheme.Navigation.enableSticky();
+          
+      });
+  </script> 
+
+</body>
+</html>

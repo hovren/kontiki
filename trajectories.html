@@ -1,0 +1,304 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Trajectories &#8212; kontiki 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Sensors" href="sensors.html" />
+    <link rel="prev" title="Overview" href="kontiki.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="trajectories">
+<span id="sec-trajectories"></span><h1>Trajectories<a class="headerlink" href="#trajectories" title="Permalink to this headline">¶</a></h1>
+<p>All trajectories inherit the methods and attributes from this base class.
+Note that the base class is not exported and can thus not be used.</p>
+<dl class="class">
+<dt id="kontiki.trajectories.Trajectory">
+<em class="property">class </em><code class="descclassname">kontiki.trajectories.</code><code class="descname">Trajectory</code><a class="headerlink" href="#kontiki.trajectories.Trajectory" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="kontiki.trajectories.Trajectory.position">
+<code class="descname">position</code><span class="sig-paren">(</span><em>t : float</em><span class="sig-paren">)</span> &#x2192; ndarray<a class="headerlink" href="#kontiki.trajectories.Trajectory.position" title="Permalink to this definition">¶</a></dt>
+<dd><p>Position (3D vector) at time t</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kontiki.trajectories.Trajectory.velocity">
+<code class="descname">velocity</code><span class="sig-paren">(</span><em>t : float</em><span class="sig-paren">)</span> &#x2192; ndarray<a class="headerlink" href="#kontiki.trajectories.Trajectory.velocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Velocity (3D vector) at time t</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kontiki.trajectories.Trajectory.acceleration">
+<code class="descname">acceleration</code><span class="sig-paren">(</span><em>t : float</em><span class="sig-paren">)</span> &#x2192; ndarray<a class="headerlink" href="#kontiki.trajectories.Trajectory.acceleration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Acceleration (3D vector) at time t</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kontiki.trajectories.Trajectory.orientation">
+<code class="descname">orientation</code><span class="sig-paren">(</span><em>t : float</em><span class="sig-paren">)</span> &#x2192; ndarray<a class="headerlink" href="#kontiki.trajectories.Trajectory.orientation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Orientation (unit quaternion) at time t</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kontiki.trajectories.Trajectory.angular_velocity">
+<code class="descname">angular_velocity</code><span class="sig-paren">(</span><em>t : float</em><span class="sig-paren">)</span> &#x2192; ndarray<a class="headerlink" href="#kontiki.trajectories.Trajectory.angular_velocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>The angular velocity at time t</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kontiki.trajectories.Trajectory.from_world">
+<code class="descname">from_world</code><span class="sig-paren">(</span><em>X : ndarray</em><span class="sig-paren">)</span> &#x2192; ndarray<a class="headerlink" href="#kontiki.trajectories.Trajectory.from_world" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform a 3D point from the world coordinate frame to the trajectory coordinate frame.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kontiki.trajectories.Trajectory.to_world">
+<code class="descname">to_world</code><span class="sig-paren">(</span><em>X : ndarray</em><span class="sig-paren">)</span> &#x2192; ndarray<a class="headerlink" href="#kontiki.trajectories.Trajectory.to_world" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform a 3D point from the trajectory to the world coordinate frame.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kontiki.trajectories.Trajectory.clone">
+<code class="descname">clone</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Trajectory<a class="headerlink" href="#kontiki.trajectories.Trajectory.clone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clone the trajectory</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.trajectories.Trajectory.min_time">
+<code class="descname">min_time</code><a class="headerlink" href="#kontiki.trajectories.Trajectory.min_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Minimum time (including) that the trajectory is valid</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.trajectories.Trajectory.max_time">
+<code class="descname">max_time</code><a class="headerlink" href="#kontiki.trajectories.Trajectory.max_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maximum time (excluding) that the trajectory is valid</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.trajectories.Trajectory.valid_time">
+<code class="descname">valid_time</code><a class="headerlink" href="#kontiki.trajectories.Trajectory.valid_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tuple of (<a class="reference internal" href="#kontiki.trajectories.Trajectory.min_time" title="kontiki.trajectories.Trajectory.min_time"><code class="xref py py-attr docutils literal notranslate"><span class="pre">min_time</span></code></a>, <a class="reference internal" href="#kontiki.trajectories.Trajectory.max_time" title="kontiki.trajectories.Trajectory.max_time"><code class="xref py py-attr docutils literal notranslate"><span class="pre">max_time</span></code></a>)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.trajectories.Trajectory.locked">
+<code class="descname">locked</code><a class="headerlink" href="#kontiki.trajectories.Trajectory.locked" title="Permalink to this definition">¶</a></dt>
+<dd><p>If <cite>True</cite> then the trajectory is unchanged during estimation</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="section" id="splined-trajectories">
+<h2>Splined trajectories<a class="headerlink" href="#splined-trajectories" title="Permalink to this headline">¶</a></h2>
+<p>The splined trajectories are cubic B-splines, defined as in <a class="reference internal" href="#qin2000" id="id1">[Qin2000]</a>.</p>
+<dl class="class">
+<dt id="kontiki.trajectories.SplinedTrajectory">
+<em class="property">class </em><code class="descclassname">kontiki.trajectories.</code><code class="descname">SplinedTrajectory</code><span class="sig-paren">(</span><em>dt=1</em>, <em>t0=0</em><span class="sig-paren">)</span><a class="headerlink" href="#kontiki.trajectories.SplinedTrajectory" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>A splined trajectory with knot spacing <cite>dt</cite> and time offset <cite>t0</cite>.
+The time offset <cite>t0</cite> is the first valid time of the spline.</div></blockquote>
+<dl class="attribute">
+<dt id="kontiki.trajectories.SplinedTrajectory.dt">
+<code class="descname">dt</code><a class="headerlink" href="#kontiki.trajectories.SplinedTrajectory.dt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Spline knot spacing</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.trajectories.SplinedTrajectory.t0">
+<code class="descname">t0</code><a class="headerlink" href="#kontiki.trajectories.SplinedTrajectory.t0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Spline time offset  (always same as <a class="reference internal" href="#kontiki.trajectories.Trajectory.min_time" title="kontiki.trajectories.Trajectory.min_time"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Trajectory.min_time</span></code></a>)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kontiki.trajectories.SplinedTrajectory.__len__">
+<code class="descname">__len__</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#kontiki.trajectories.SplinedTrajectory.__len__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of spline knots and control points</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kontiki.trajectories.SplinedTrajectory.__getitem__">
+<code class="descname">__getitem__</code><span class="sig-paren">(</span><em>k : int</em><span class="sig-paren">)</span> &#x2192; ndarray<a class="headerlink" href="#kontiki.trajectories.SplinedTrajectory.__getitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return control point k</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kontiki.trajectories.SplinedTrajectory.__setitem__">
+<code class="descname">__setitem__</code><span class="sig-paren">(</span><em>k : int</em>, <em>cp : ndarray</em><span class="sig-paren">)</span><a class="headerlink" href="#kontiki.trajectories.SplinedTrajectory.__setitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set control point k</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kontiki.trajectories.SplinedTrajectory.append_knot">
+<code class="descname">append_knot</code><span class="sig-paren">(</span><em>cp : ndarray</em><span class="sig-paren">)</span><a class="headerlink" href="#kontiki.trajectories.SplinedTrajectory.append_knot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append a new control point (and knot)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kontiki.trajectories.SplinedTrajectory.extend_to">
+<code class="descname">extend_to</code><span class="sig-paren">(</span><em>t : float</em>, <em>cp : ndarray</em><span class="sig-paren">)</span><a class="headerlink" href="#kontiki.trajectories.SplinedTrajectory.extend_to" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extend the spline to be valid at least up to <cite>t</cite> by appending control points <cite>cp</cite></p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="section" id="splined-trajectory-classes">
+<h3>Splined trajectory classes<a class="headerlink" href="#splined-trajectory-classes" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="kontiki.trajectories.UniformSE3SplineTrajectory">
+<em class="property">class </em><code class="descclassname">kontiki.trajectories.</code><code class="descname">UniformSE3SplineTrajectory</code><a class="headerlink" href="#kontiki.trajectories.UniformSE3SplineTrajectory" title="Permalink to this definition">¶</a></dt>
+<dd><p>A spline with control points in SE(3)</p>
+<p>Control points are 4x4 matrices T = [R, p; 0, 1].</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="kontiki.trajectories.UniformR3SplineTrajectory">
+<em class="property">class </em><code class="descclassname">kontiki.trajectories.</code><code class="descname">UniformR3SplineTrajectory</code><a class="headerlink" href="#kontiki.trajectories.UniformR3SplineTrajectory" title="Permalink to this definition">¶</a></dt>
+<dd><p>A spline with control points in R3</p>
+<p>Control points are vectors in R3.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="kontiki.trajectories.UniformSO3SplineTrajectory">
+<em class="property">class </em><code class="descclassname">kontiki.trajectories.</code><code class="descname">UniformSO3SplineTrajectory</code><a class="headerlink" href="#kontiki.trajectories.UniformSO3SplineTrajectory" title="Permalink to this definition">¶</a></dt>
+<dd><p>A spline with control points in SO(3)</p>
+<p>Control points are unit quaternions q=(w, x, y, z).</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="other-trajectories">
+<h2>Other trajectories<a class="headerlink" href="#other-trajectories" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="kontiki.trajectories.SplitTrajectory">
+<em class="property">class </em><code class="descclassname">kontiki.trajectories.</code><code class="descname">SplitTrajectory</code><a class="headerlink" href="#kontiki.trajectories.SplitTrajectory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split interpolation trajectory</p>
+<p>This trajectory is implemented using two splines: one in R3 and one in SO3.</p>
+<dl class="method">
+<dt id="kontiki.trajectories.SplitTrajectory.SplitTrajectory">
+<code class="descname">SplitTrajectory</code><span class="sig-paren">(</span><em>r3_dt=1</em>, <em>so3_dt=1</em>, <em>r3_t0=0</em>, <em>so3_t0=0</em><span class="sig-paren">)</span><a class="headerlink" href="#kontiki.trajectories.SplitTrajectory.SplitTrajectory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct new split trajectory from specified knot spacings and time offsets.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">SplitTrajectory</code><span class="sig-paren">(</span><em>r3_trajectory</em>, <em>so3_trajectory</em><span class="sig-paren">)</span></dt>
+<dd><p>Construct split trajectory by wrapping two previously created
+<a class="reference internal" href="#kontiki.trajectories.UniformR3SplineTrajectory" title="kontiki.trajectories.UniformR3SplineTrajectory"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformR3SplineTrajectory</span></code></a> and <a class="reference internal" href="#kontiki.trajectories.UniformSO3SplineTrajectory" title="kontiki.trajectories.UniformSO3SplineTrajectory"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformSO3SplineTrajectory</span></code></a> instances.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.trajectories.SplitTrajectory.R3_spline">
+<code class="descname">R3_spline</code><a class="headerlink" href="#kontiki.trajectories.SplitTrajectory.R3_spline" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#kontiki.trajectories.UniformR3SplineTrajectory" title="kontiki.trajectories.UniformR3SplineTrajectory"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformR3SplineTrajectory</span></code></a> instance</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.trajectories.SplitTrajectory.SO3_spline">
+<code class="descname">SO3_spline</code><a class="headerlink" href="#kontiki.trajectories.SplitTrajectory.SO3_spline" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#kontiki.trajectories.UniformSO3SplineTrajectory" title="kontiki.trajectories.UniformSO3SplineTrajectory"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformSO3SplineTrajectory</span></code></a> instance</p>
+</dd></dl>
+
+</dd></dl>
+
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="qin2000" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[Qin2000]</a></td><td>Qin, K.
+<em>General matrix representations for b-splines</em>
+The Visual Computer, 16(3–4)</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Trajectories</a><ul>
+<li><a class="reference internal" href="#splined-trajectories">Splined trajectories</a><ul>
+<li><a class="reference internal" href="#splined-trajectory-classes">Splined trajectory classes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#other-trajectories">Other trajectories</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="kontiki.html" title="previous chapter">Overview</a></li>
+      <li>Next: <a href="sensors.html" title="next chapter">Sensors</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/trajectories.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Hannes Ovrén.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/trajectories.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

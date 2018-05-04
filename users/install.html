@@ -1,0 +1,288 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Installation &mdash; kontiki 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Overview" href="kontiki.html" />
+    <link rel="prev" title="User’s guide" href="toctree.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> kontiki
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="toctree.html">User’s guide</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#precompiled-wheel">Precompiled wheel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#from-source">From source</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#requirements">Requirements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#instructions">Instructions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="kontiki.html">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trajectories.html">Trajectories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sensors.html">Sensors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="measurements.html">Measurements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="estimator.html">Trajectory estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfm.html">Structure from motion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="io.html">Input and output functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../developers/toctree.html">Developer’s guide</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">kontiki</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="toctree.html">User’s guide</a> &raquo;</li>
+        
+      <li>Installation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/users/install.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="precompiled-wheel">
+<h2>Precompiled wheel<a class="headerlink" href="#precompiled-wheel" title="Permalink to this headline">¶</a></h2>
+<p>We build precompiled binary wheels that should hopefully work on most newer Linux distributions.
+Download the <code class="docutils literal notranslate"><span class="pre">kontiki-X.Y-cp36-cp36m-linux_x86_64.whl</span></code> file from the GitHub release page.
+The run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">kontiki</span><span class="o">-</span><span class="n">X</span><span class="o">.</span><span class="n">Y</span><span class="o">-</span><span class="n">cp36</span><span class="o">-</span><span class="n">cp36m</span><span class="o">-</span><span class="n">linux_x86_64</span><span class="o">.</span><span class="n">whl</span>
+</pre></div>
+</div>
+<p>Note that this requires that you have the <a class="reference external" href="https://ceres-solver.org">Ceres-Solver</a> shared library
+(<code class="docutils literal notranslate"><span class="pre">libceres.so.1</span></code>), and its dependencies, installed on your system.</p>
+</div>
+<div class="section" id="from-source">
+<h2>From source<a class="headerlink" href="#from-source" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="requirements">
+<h3>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Python 3.6+ and development headers</li>
+<li>A C++14 compiler</li>
+<li>pybind11</li>
+<li>Eigen3</li>
+<li>Ceres-Solver</li>
+<li>CMake</li>
+<li>scipy</li>
+<li>numpy</li>
+<li>h5py</li>
+<li><a class="reference external" href="https://github.com/strasdat/Sophus">Sophus</a>  (use commit <code class="docutils literal notranslate"><span class="pre">00f3fd91c153ef04</span></code>)</li>
+<li>pytest (optional)</li>
+</ul>
+<p>To install all dependencies (except Sophus) on Ubuntu 18.04 run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">git</span> <span class="n">build</span><span class="o">-</span><span class="n">essential</span> <span class="n">cmake</span> <span class="n">python3</span><span class="o">-</span><span class="n">dev</span> <span class="n">python3</span><span class="o">-</span><span class="n">setuptools</span> <span class="n">python3</span><span class="o">-</span><span class="n">pytest</span> <span class="n">python3</span><span class="o">-</span><span class="n">scipy</span> <span class="n">python3</span><span class="o">-</span><span class="n">h5py</span> <span class="n">libceres</span><span class="o">-</span><span class="n">dev</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="instructions">
+<h3>Instructions<a class="headerlink" href="#instructions" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>Clone the source code from the repository at <a class="reference external" href="https://github.com/hovren/kontiki">https://github.com/hovren/kontiki</a>.</li>
+<li>From <code class="docutils literal notranslate"><span class="pre">kontiki/python/</span></code> run <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">setup.py</span> <span class="pre">install</span></code></li>
+</ol>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="kontiki.html" class="btn btn-neutral float-right" title="Overview" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="toctree.html" class="btn btn-neutral" title="User’s guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Hannes Ovrén.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          
+          SphinxRtdTheme.Navigation.enableSticky();
+          
+      });
+  </script> 
+
+</body>
+</html>

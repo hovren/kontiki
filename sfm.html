@@ -1,0 +1,253 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Structure from motion &#8212; kontiki 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Input and output functions" href="io.html" />
+    <link rel="prev" title="Trajectory estimation" href="estimator.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="structure-from-motion">
+<span id="sec-sfm"></span><h1>Structure from motion<a class="headerlink" href="#structure-from-motion" title="Permalink to this headline">¶</a></h1>
+<p>The structure from motion primitives used by Kontiki are perhaps a bit different from what you are used to.
+Instead of modelling landmarks as e.g. a 3D-point in world coordinates, we instead use a combination of
+a reference observation and an inverse depth.</p>
+<p>This formulation is nice because it is simple to represent landmarks at infinity, and also only require
+us to optimize a single scalar (the inverse depth) instead of a full 3D-point.
+For a more detailed description see e.g. <a class="reference internal" href="#lovegrove2013" id="id1">[Lovegrove2013]</a>.</p>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>To setup a structure from motion problem we create <a class="reference internal" href="#kontiki.sfm.View" title="kontiki.sfm.View"><code class="xref py py-class docutils literal notranslate"><span class="pre">View</span></code></a> and <a class="reference internal" href="#kontiki.sfm.Landmark" title="kontiki.sfm.Landmark"><code class="xref py py-class docutils literal notranslate"><span class="pre">Landmark</span></code></a> objects, and then add
+<a class="reference internal" href="#kontiki.sfm.Observation" title="kontiki.sfm.Observation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Observation</span></code></a> objects by calling <a class="reference internal" href="#kontiki.sfm.View.create_observation" title="kontiki.sfm.View.create_observation"><code class="xref py py-meth docutils literal notranslate"><span class="pre">View.create_observation()</span></code></a>.
+Note that it is impossible to create <a class="reference internal" href="#kontiki.sfm.Observation" title="kontiki.sfm.Observation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Observation</span></code></a> objects any other way.</p>
+<p>Assume that we have a list of tracks that each contain a list of tuples <cite>(n, x)</cite>, where <cite>n</cite> is a frame number,
+and <cite>y</cite> is an image point. Then creating the structure from motion objects looks like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">landmarks</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">views</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># frame number -&gt; View</span>
+
+<span class="k">for</span> <span class="n">track_data</span> <span class="ow">in</span> <span class="n">tracks</span><span class="p">:</span>
+    <span class="n">lm</span> <span class="o">=</span> <span class="n">Landmark</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">track_data</span><span class="p">:</span>
+        <span class="n">view</span> <span class="o">=</span> <span class="n">views</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">View</span><span class="p">(</span><span class="n">n</span> <span class="o">/</span> <span class="n">frame_rate</span><span class="p">))</span>
+        <span class="n">view</span><span class="o">.</span><span class="n">create_observation</span><span class="p">(</span><span class="n">lm</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To be usable, we also need to set the reference observation for each landmark. Easiest is to use the first one:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">lm</span> <span class="ow">in</span> <span class="n">landmarks</span><span class="p">:</span>
+    <span class="n">lm</span><span class="o">.</span><span class="n">reference</span> <span class="o">=</span> <span class="n">lm</span><span class="o">.</span><span class="n">observations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="kontiki.sfm.View">
+<em class="property">class </em><code class="descclassname">kontiki.sfm.</code><code class="descname">View</code><a class="headerlink" href="#kontiki.sfm.View" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="kontiki.sfm.View.create_observation">
+<code class="descname">create_observation</code><span class="sig-paren">(</span><em>self: kontiki.sfm.View, arg0: kontiki.sfm.Landmark, arg1: numpy.ndarray[float64[2, 1]]</em><span class="sig-paren">)</span> &#x2192; kontiki.sfm.Observation<a class="headerlink" href="#kontiki.sfm.View.create_observation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new observation</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sfm.View.frame_nr">
+<code class="descname">frame_nr</code><a class="headerlink" href="#kontiki.sfm.View.frame_nr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Frame number</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sfm.View.observations">
+<code class="descname">observations</code><a class="headerlink" href="#kontiki.sfm.View.observations" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of observations</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kontiki.sfm.View.remove_observation">
+<code class="descname">remove_observation</code><span class="sig-paren">(</span><em>self: kontiki.sfm.View</em>, <em>arg0: kontiki.sfm.Observation</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#kontiki.sfm.View.remove_observation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove an observation</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sfm.View.t0">
+<code class="descname">t0</code><a class="headerlink" href="#kontiki.sfm.View.t0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start of frame time</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="kontiki.sfm.Landmark">
+<em class="property">class </em><code class="descclassname">kontiki.sfm.</code><code class="descname">Landmark</code><a class="headerlink" href="#kontiki.sfm.Landmark" title="Permalink to this definition">¶</a></dt>
+<dd><p>A 3D landmark</p>
+<p>Landmarks are represented by a reference observation, and an inverse depth.</p>
+<dl class="attribute">
+<dt id="kontiki.sfm.Landmark.id">
+<code class="descname">id</code><a class="headerlink" href="#kontiki.sfm.Landmark.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Landmark ID</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The landmark ID is only unique within a session. You can not trust an ID to be the same e.g. if loading
+the same problem from disk twice.</p>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sfm.Landmark.inverse_depth">
+<code class="descname">inverse_depth</code><a class="headerlink" href="#kontiki.sfm.Landmark.inverse_depth" title="Permalink to this definition">¶</a></dt>
+<dd><p>The inverse depth, relative to the reference observation</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sfm.Landmark.locked">
+<code class="descname">locked</code><a class="headerlink" href="#kontiki.sfm.Landmark.locked" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lock landmark to not allow it to change during optimization. Defaults to False.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sfm.Landmark.observations">
+<code class="descname">observations</code><a class="headerlink" href="#kontiki.sfm.Landmark.observations" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of all landmark observations</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sfm.Landmark.reference">
+<code class="descname">reference</code><a class="headerlink" href="#kontiki.sfm.Landmark.reference" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reference observation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="kontiki.sfm.Observation">
+<em class="property">class </em><code class="descclassname">kontiki.sfm.</code><code class="descname">Observation</code><a class="headerlink" href="#kontiki.sfm.Observation" title="Permalink to this definition">¶</a></dt>
+<dd><p>An observation of a landmark in a view</p>
+<dl class="attribute">
+<dt id="kontiki.sfm.Observation.is_reference">
+<code class="descname">is_reference</code><a class="headerlink" href="#kontiki.sfm.Observation.is_reference" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if this is the landmark reference observation</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sfm.Observation.landmark">
+<code class="descname">landmark</code><a class="headerlink" href="#kontiki.sfm.Observation.landmark" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#kontiki.sfm.Landmark" title="kontiki.sfm.Landmark"><code class="xref py py-class docutils literal notranslate"><span class="pre">Landmark</span></code></a> this observation belongs to</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sfm.Observation.uv">
+<code class="descname">uv</code><a class="headerlink" href="#kontiki.sfm.Observation.uv" title="Permalink to this definition">¶</a></dt>
+<dd><p>The image measurement.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sfm.Observation.view">
+<code class="descname">view</code><a class="headerlink" href="#kontiki.sfm.Observation.view" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#kontiki.sfm.View" title="kontiki.sfm.View"><code class="xref py py-class docutils literal notranslate"><span class="pre">View</span></code></a> this observation belongs to</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="section" id="references">
+<h3>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h3>
+<table class="docutils citation" frame="void" id="lovegrove2013" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[Lovegrove2013]</a></td><td>Lovegrove, S.; Patron-Perez, A.; and Sibley, G.
+<em>Spline Fusion: A continuous-time representation for visual-inertial fusion with application to rolling shutter cameras</em>
+In Procedings of the British Machine Vision Conference 2013</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Structure from motion</a><ul>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#classes">Classes</a><ul>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="estimator.html" title="previous chapter">Trajectory estimation</a></li>
+      <li>Next: <a href="io.html" title="next chapter">Input and output functions</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/sfm.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Hannes Ovrén.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/sfm.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

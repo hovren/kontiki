@@ -1,0 +1,392 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Structure from motion &mdash; kontiki 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Spline Error Weighting" href="sew.html" />
+    <link rel="prev" title="Trajectory estimation" href="estimator.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> kontiki
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="toctree.html">User’s guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kontiki.html">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trajectories.html">Trajectories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sensors.html">Sensors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="measurements.html">Measurements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="estimator.html">Trajectory estimation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Structure from motion</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#classes">Classes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sew.html">Spline Error Weighting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="io.html">Input and output functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../developers/toctree.html">Developer’s guide</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">kontiki</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="toctree.html">User’s guide</a> &raquo;</li>
+        
+      <li>Structure from motion</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/users/sfm.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="structure-from-motion">
+<span id="sec-sfm"></span><h1>Structure from motion<a class="headerlink" href="#structure-from-motion" title="Permalink to this headline">¶</a></h1>
+<p>The structure from motion primitives used by Kontiki are perhaps a bit different from what you are used to.
+Instead of modelling landmarks as e.g. a 3D-point in world coordinates, we instead use a combination of
+a reference observation and an inverse depth.</p>
+<p>This formulation is nice because it is simple to represent landmarks at infinity, and also only require
+us to optimize a single scalar (the inverse depth) instead of a full 3D-point.
+For a more detailed description see e.g. <a class="reference internal" href="#lovegrove2013" id="id1">[Lovegrove2013]</a>.</p>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>To setup a structure from motion problem we create <a class="reference internal" href="#kontiki.sfm.View" title="kontiki.sfm.View"><code class="xref py py-class docutils literal notranslate"><span class="pre">View</span></code></a> and <a class="reference internal" href="#kontiki.sfm.Landmark" title="kontiki.sfm.Landmark"><code class="xref py py-class docutils literal notranslate"><span class="pre">Landmark</span></code></a> objects, and then add
+<a class="reference internal" href="#kontiki.sfm.Observation" title="kontiki.sfm.Observation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Observation</span></code></a> objects by calling <a class="reference internal" href="#kontiki.sfm.View.create_observation" title="kontiki.sfm.View.create_observation"><code class="xref py py-meth docutils literal notranslate"><span class="pre">View.create_observation()</span></code></a>.
+Note that it is impossible to create <a class="reference internal" href="#kontiki.sfm.Observation" title="kontiki.sfm.Observation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Observation</span></code></a> objects any other way.</p>
+<p>Assume that we have a list of tracks that each contain a list of tuples <cite>(n, x)</cite>, where <cite>n</cite> is a frame number,
+and <cite>y</cite> is an image point. Then creating the structure from motion objects looks like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">landmarks</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">views</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># frame number -&gt; View</span>
+
+<span class="k">for</span> <span class="n">track_data</span> <span class="ow">in</span> <span class="n">tracks</span><span class="p">:</span>
+    <span class="n">lm</span> <span class="o">=</span> <span class="n">Landmark</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">track_data</span><span class="p">:</span>
+        <span class="n">view</span> <span class="o">=</span> <span class="n">views</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">View</span><span class="p">(</span><span class="n">n</span> <span class="o">/</span> <span class="n">frame_rate</span><span class="p">))</span>
+        <span class="n">view</span><span class="o">.</span><span class="n">create_observation</span><span class="p">(</span><span class="n">lm</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To be usable, we also need to set the reference observation for each landmark. Easiest is to use the first one:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">lm</span> <span class="ow">in</span> <span class="n">landmarks</span><span class="p">:</span>
+    <span class="n">lm</span><span class="o">.</span><span class="n">reference</span> <span class="o">=</span> <span class="n">lm</span><span class="o">.</span><span class="n">observations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="kontiki.sfm.View">
+<em class="property">class </em><code class="descclassname">kontiki.sfm.</code><code class="descname">View</code><a class="headerlink" href="#kontiki.sfm.View" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="kontiki.sfm.View.create_observation">
+<code class="descname">create_observation</code><span class="sig-paren">(</span><em>self: kontiki.sfm.View, arg0: kontiki.sfm.Landmark, arg1: numpy.ndarray[float64[2, 1]]</em><span class="sig-paren">)</span> &#x2192; kontiki.sfm.Observation<a class="headerlink" href="#kontiki.sfm.View.create_observation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new observation</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sfm.View.frame_nr">
+<code class="descname">frame_nr</code><a class="headerlink" href="#kontiki.sfm.View.frame_nr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Frame number</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sfm.View.observations">
+<code class="descname">observations</code><a class="headerlink" href="#kontiki.sfm.View.observations" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of observations</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kontiki.sfm.View.remove_observation">
+<code class="descname">remove_observation</code><span class="sig-paren">(</span><em>self: kontiki.sfm.View</em>, <em>arg0: kontiki.sfm.Observation</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#kontiki.sfm.View.remove_observation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove an observation</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sfm.View.t0">
+<code class="descname">t0</code><a class="headerlink" href="#kontiki.sfm.View.t0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start of frame time</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="kontiki.sfm.Landmark">
+<em class="property">class </em><code class="descclassname">kontiki.sfm.</code><code class="descname">Landmark</code><a class="headerlink" href="#kontiki.sfm.Landmark" title="Permalink to this definition">¶</a></dt>
+<dd><p>A 3D landmark</p>
+<p>Landmarks are represented by a reference observation, and an inverse depth.</p>
+<dl class="attribute">
+<dt id="kontiki.sfm.Landmark.id">
+<code class="descname">id</code><a class="headerlink" href="#kontiki.sfm.Landmark.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Landmark ID</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The landmark ID is only unique within a session. You can not trust an ID to be the same e.g. if loading
+the same problem from disk twice.</p>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sfm.Landmark.inverse_depth">
+<code class="descname">inverse_depth</code><a class="headerlink" href="#kontiki.sfm.Landmark.inverse_depth" title="Permalink to this definition">¶</a></dt>
+<dd><p>The inverse depth, relative to the reference observation</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sfm.Landmark.locked">
+<code class="descname">locked</code><a class="headerlink" href="#kontiki.sfm.Landmark.locked" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lock landmark to not allow it to change during optimization. Defaults to False.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sfm.Landmark.observations">
+<code class="descname">observations</code><a class="headerlink" href="#kontiki.sfm.Landmark.observations" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of all landmark observations</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sfm.Landmark.reference">
+<code class="descname">reference</code><a class="headerlink" href="#kontiki.sfm.Landmark.reference" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reference observation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="kontiki.sfm.Observation">
+<em class="property">class </em><code class="descclassname">kontiki.sfm.</code><code class="descname">Observation</code><a class="headerlink" href="#kontiki.sfm.Observation" title="Permalink to this definition">¶</a></dt>
+<dd><p>An observation of a landmark in a view</p>
+<dl class="attribute">
+<dt id="kontiki.sfm.Observation.is_reference">
+<code class="descname">is_reference</code><a class="headerlink" href="#kontiki.sfm.Observation.is_reference" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if this is the landmark reference observation</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sfm.Observation.landmark">
+<code class="descname">landmark</code><a class="headerlink" href="#kontiki.sfm.Observation.landmark" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#kontiki.sfm.Landmark" title="kontiki.sfm.Landmark"><code class="xref py py-class docutils literal notranslate"><span class="pre">Landmark</span></code></a> this observation belongs to</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sfm.Observation.uv">
+<code class="descname">uv</code><a class="headerlink" href="#kontiki.sfm.Observation.uv" title="Permalink to this definition">¶</a></dt>
+<dd><p>The image measurement.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kontiki.sfm.Observation.view">
+<code class="descname">view</code><a class="headerlink" href="#kontiki.sfm.Observation.view" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#kontiki.sfm.View" title="kontiki.sfm.View"><code class="xref py py-class docutils literal notranslate"><span class="pre">View</span></code></a> this observation belongs to</p>
+</dd></dl>
+
+</dd></dl>
+
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="lovegrove2013" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[Lovegrove2013]</a></td><td>Lovegrove, S.; Patron-Perez, A.; and Sibley, G.
+<em>Spline Fusion: A continuous-time representation for visual-inertial fusion with application to rolling shutter cameras</em>
+In Procedings of the British Machine Vision Conference 2013</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="sew.html" class="btn btn-neutral float-right" title="Spline Error Weighting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="estimator.html" class="btn btn-neutral" title="Trajectory estimation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Hannes Ovrén.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          
+          SphinxRtdTheme.Navigation.enableSticky();
+          
+      });
+  </script> 
+
+</body>
+</html>
