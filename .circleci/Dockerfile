@@ -5,6 +5,7 @@ RUN apt-get update  &&              \
         python3-dev                 \
         python3-setuptools          \
         python3-wheel               \
+        python3-pip                 \
         python3-pytest              \
         python3-h5py                \
         python3-scipy               \
