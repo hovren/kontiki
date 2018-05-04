@@ -5,7 +5,6 @@
 #ifndef KONTIKIV2_TRAJECTORY_DEFS_H
 #define KONTIKIV2_TRAJECTORY_DEFS_H
 
-#include <kontiki/trajectories/linear_trajectory.h>
 #include <kontiki/trajectories/uniform_r3_spline_trajectory.h>
 #include <kontiki/trajectories/uniform_so3_spline_trajectory.h>
 #include <kontiki/trajectories/uniform_se3_spline_trajectory.h>
@@ -14,7 +13,6 @@
 namespace TT = kontiki::trajectories;
 
 static constexpr auto trajectory_types = hana::tuple_t<
-    TT::LinearTrajectory,
     TT::UniformR3SplineTrajectory,
     TT::UniformSO3SplineTrajectory,
     TT::UniformSE3SplineTrajectory,

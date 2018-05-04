@@ -61,7 +61,6 @@ endfunction()
 kontiki_add_module(kontiki._ceres)
 
 # Trajectories
-kontiki_add_module(kontiki.trajectories._linear_trajectory)
 kontiki_add_module(kontiki.trajectories._uniform_r3_spline_trajectory)
 kontiki_add_module(kontiki.trajectories._uniform_so3_spline_trajectory)
 kontiki_add_module(kontiki.trajectories._uniform_se3_spline_trajectory)

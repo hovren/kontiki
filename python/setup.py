@@ -102,7 +102,6 @@ ext_modules = [
     KontikiExtension('sfm'),
     KontikiExtension('_trajectory_estimator'),
     KontikiExtension('_ceres'),
-    TrajectoryExtension('_linear_trajectory'),
     TrajectoryExtension('_uniform_r3_spline_trajectory'),
     TrajectoryExtension('_uniform_so3_spline_trajectory'),
     TrajectoryExtension('_uniform_se3_spline_trajectory'),
