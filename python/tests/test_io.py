@@ -5,7 +5,7 @@ import h5py
 
 from kontiki.sfm import Landmark, View
 from kontiki.io import save_structure, load_structure, save_trajectory, load_trajectory
-from kontiki.trajectories import UniformSE3SplineTrajectory, UniformSO3SplineTrajectory, UniformR3SplineTrajectory, SplitTrajectory, LinearTrajectory
+from kontiki.trajectories import UniformSE3SplineTrajectory, UniformSO3SplineTrajectory, UniformR3SplineTrajectory, SplitTrajectory
 
 def random_structure():
     frame_times = np.arange(0, np.random.uniform(1.5, 3), np.random.uniform(1/30, 1/10))
@@ -112,9 +112,6 @@ def assert_trajectory_equal(traj1, traj2):
 
 
 def test_save_load_trajectory(tmpdir, trajectory):
-    if type(trajectory) == LinearTrajectory:
-        pytest.xfail("We have not implemented I/O for LinearTrajectory")
-
     f = tmpdir.join("trajectory.h5")
 
     # SE3 trajectories have a weird bug where there is some precision loss (in the order of 10^-16) while saving to HDF5
@@ -131,9 +128,6 @@ def test_save_load_trajectory(tmpdir, trajectory):
 
 
 def test_save_load_trajectory_grouped(tmpdir, trajectory):
-    if type(trajectory) == LinearTrajectory:
-        pytest.xfail("We have not implemented I/O for LinearTrajectory")
-
     # Create a new trajectory that is slightly longer by extending the splines
     trajectory2 = trajectory.clone()
 

@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from kontiki.utils import safe_time, safe_time_span
-from kontiki.trajectories import LinearTrajectory, UniformR3SplineTrajectory, UniformSO3SplineTrajectory, UniformSE3SplineTrajectory, SplitTrajectory
+from kontiki.trajectories import UniformR3SplineTrajectory, UniformSO3SplineTrajectory, UniformSE3SplineTrajectory, SplitTrajectory
 from kontiki.rotations import quat_to_rotation_matrix
 
 from kontiki import TrajectoryEstimator
@@ -22,37 +22,8 @@ def trajectory_example(trajectory):
 
     zero = np.zeros(3)
     q0 = np.array([1, 0, 0, 0])
-    if cls == LinearTrajectory:
-        example_data = make_example(-np.inf, np.inf)
-        # Example positions
-        p_ex1 = 0, np.array([-0.2, 0, -0.8])
-        p_ex2 = -1, np.array([-0.3, 0, -1.2])
-        p_ex3 = 2, zero
-        example_data.position.extend([p_ex1, p_ex2, p_ex3])
-
-        # Example velocities
-        example_data.velocity.extend([
-            (0, np.array([.1, 0, .4])),
-            (1, np.array([.1, 0, .4]))
-        ])
-
-        # Example accelerations
-        example_data.acceleration.extend([
-            (0, zero)
-        ])
-
-        # Orientations
-        example_data.orientation.extend([
-            (2, q0),  # t=t0 -> identity
-            #(3, np.array([-0.47129323,  0.21391074,  0.        ,  0.85564297])),
-            (3, np.array([ 0.97882515,  0.04964659,  0.        ,  0.19858634])),
-        ])
-
-        example_data.angular_velocity.extend([
-            (0, np.array([.1, 0, .4])),
-            (1, np.array([.1, 0, .4]))
-        ])
-    elif cls == UniformR3SplineTrajectory:
+    
+    if cls == UniformR3SplineTrajectory:
         from test_spline_trajectories import scipy_bspline_for_trajectory, scipy_bspline_valid_time_interval
         bspline = scipy_bspline_for_trajectory(trajectory)
         bspline_vel = bspline.derivative(1)

@@ -5,15 +5,13 @@ import numpy as np
 from fixtures.camera_fixtures import *
 from fixtures.sfm_fixtures import *
 
-from kontiki.trajectories import LinearTrajectory, UniformR3SplineTrajectory, UniformSO3SplineTrajectory, SplitTrajectory, \
-    UniformSE3SplineTrajectory
+from kontiki.trajectories import UniformR3SplineTrajectory, UniformSO3SplineTrajectory, SplitTrajectory, UniformSE3SplineTrajectory
 from kontiki.measurements import PositionMeasurement, NewtonRsCameraMeasurement, LiftingRsCameraMeasurement, StaticRsCameraMeasurement, GyroscopeMeasurement, AccelerometerMeasurement
 from kontiki.sensors import BasicImu, ConstantBiasImu
 from kontiki.utils import safe_time_span
 from kontiki.rotations import quat_to_rotation_matrix, random_quaternion
 
 trajectory_classes = [
-    LinearTrajectory,
     UniformR3SplineTrajectory,
     UniformSO3SplineTrajectory,
     UniformSE3SplineTrajectory,
@@ -31,11 +29,7 @@ def trajectory(request):
     "Handcrafted 'simple' trajectory which is at least 5 seconds long"
     cls = request.param
 
-    if cls == LinearTrajectory:
-        t0 = 2
-        k = np.array([0.1, 0, 0.4])
-        return cls(t0, k)
-    elif cls == UniformR3SplineTrajectory:
+    if cls == UniformR3SplineTrajectory:
         dt = 2.3
         t0 = 1.22
 
