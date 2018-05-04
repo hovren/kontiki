@@ -64,7 +64,7 @@ jobs:
               pip3 install python/dist/*.whl
 
         - run:
-            name: Sphinx: Build HTML
+            name: Sphinx - Build HTML
             command: |
               cd docs
               make html
