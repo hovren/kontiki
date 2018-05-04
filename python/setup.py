@@ -37,7 +37,8 @@ class CMakeBuild(build_ext):
         cfg = 'Debug' if self.debug else 'Release'
         build_args = ['--config', cfg]
 
-        cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
+        cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg,
+                       '-DVERSION_INFO=' + self.distribution.get_version()]
 
         # Assuming Makefiles
         build_args += ['--', '-j2']
@@ -98,6 +99,7 @@ class SensorExtension(KontikiExtension):
 
 
 ext_modules = [
+    KontikiExtension('_version'),
     KontikiExtension('sfm'),
     KontikiExtension('_trajectory_estimator'),
     KontikiExtension('_ceres'),

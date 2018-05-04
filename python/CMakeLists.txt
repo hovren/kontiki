@@ -17,6 +17,11 @@ message("Kontiki: ${Kontiki_INCLUDE_DIRS}")
 # Load pybind11
 add_subdirectory(deps/pybind11)
 
+# Add version number to build
+if(VERSION_INFO)
+    add_definitions('-DVERSION_INFO="${VERSION_INFO}"')
+endif()
+
 # Build a Python extension module using pybind11
 #   kontiki_add_module(<module>)
 # Here <module> should be the fully qualifued name for the module,
@@ -59,6 +64,7 @@ endfunction()
 
 # Ceres types
 kontiki_add_module(kontiki._ceres)
+kontiki_add_module(kontiki._version)
 
 # Trajectories
 kontiki_add_module(kontiki.trajectories._uniform_r3_spline_trajectory)

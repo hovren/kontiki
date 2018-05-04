@@ -2,6 +2,9 @@ from .templatemeta import TemplateMeta
 from . import _trajectory_estimator as __MODULE
 from . import trajectories
 
+# Load version from compiled module
+from ._version import __version__
+
 # Import Ceres-Solver classes into kontiki namespace
 from ._ceres import Summary, IterationSummary, CallbackReturnType
 
