@@ -76,9 +76,12 @@ jobs:
 workflows:
   version: 2
 
-  build_and_test:
+  build_test_docs:
     jobs:
       - build
       - test:
+          requires:
+            - build
+      - docs:
           requires:
             - build
