@@ -82,6 +82,7 @@ jobs:
 
         - store_artifacts:
             path: documentation.tar.gz
+            destination: docs
 
 workflows:
   version: 2
