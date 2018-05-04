@@ -74,9 +74,13 @@ jobs:
               cd docs
               make html
 
+        - run:
+          name: Archive documentation
+          command: |
+            tar -cvzf documentation.tar.gz docs/_build
+
         - store_artifacts:
-            path: docs/_build
-            destination: documentation
+            path: documentation.tar.gz
 
 workflows:
   version: 2
