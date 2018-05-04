@@ -76,9 +76,9 @@ jobs:
               make html
 
         - run:
-          name: Archive documentation
-          command: |
-            tar -cvzf documentation.tar.gz docs/_build
+            name: Archive documentation
+            command: |
+              tar -cvzf documentation.tar.gz docs/_build
 
         - store_artifacts:
             path: documentation.tar.gz
