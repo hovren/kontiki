@@ -64,6 +64,11 @@ jobs:
               pip3 install python/dist/*.whl
 
         - run:
+            name: Install Sphinx
+            command: |
+              pip3 install sphinx sphinx-rtd-theme
+
+        - run:
             name: Sphinx - Build HTML
             command: |
               cd docs
