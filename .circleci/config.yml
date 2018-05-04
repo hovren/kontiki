@@ -8,6 +8,10 @@ defaults: &defaults
 jobs:
   build:
     <<: *defaults
+
+    branches:
+      ignore: gh-pages
+
     steps:
       - checkout
       - run: git submodule sync
