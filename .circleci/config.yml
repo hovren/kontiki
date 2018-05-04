@@ -9,9 +9,6 @@ jobs:
   build:
     <<: *defaults
 
-    branches:
-      ignore: gh-pages
-
     steps:
       - checkout
       - run: git submodule sync
@@ -91,7 +88,10 @@ workflows:
 
   build_test_docs:
     jobs:
-      - build
+      - build:
+          filters:
+            branches:
+              ignore: gh-pages
       - test:
           requires:
             - build
