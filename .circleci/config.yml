@@ -30,16 +30,17 @@ jobs:
           destination: dist
 
       - persist_to_workspace:
-          root: python
+          root: .
           paths:
-            - tests
-            - dist
+            - python/tests
+            - python/dist
+            - docs
 
   test:
     <<: *defaults
     steps:
       - attach_workspace:
-          at: python
+          at: .
 
       - run:
           name: Install wheel
@@ -50,6 +51,27 @@ jobs:
           name: Run tests
           command: |
             python3 -m pytest python/tests
+
+  docs:
+      <<: *defaults
+      steps:
+        - attach_workspace:
+            at: .
+
+        - run:
+            name: Install wheel
+            command: |
+              pip3 install python/dist/*.whl
+
+        - run:
+            name: Sphinx: Build HTML
+            command: |
+              cd docs
+              make html
+
+        - store_artifacts:
+            path: docs/_build
+            destination: documentation
 
 workflows:
   version: 2
