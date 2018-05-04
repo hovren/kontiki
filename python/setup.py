@@ -98,7 +98,6 @@ class SensorExtension(KontikiExtension):
 
 
 ext_modules = [
-#    KontikiExtension('dummy'),
     KontikiExtension('sfm'),
     KontikiExtension('_trajectory_estimator'),
     KontikiExtension('_ceres'),
