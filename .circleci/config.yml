@@ -1,11 +1,13 @@
 version: 2
+
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: hovren/kontiki:build
+
 jobs:
   build:
-    docker:
-      - image: hovren/kontiki:build
-
-    working_directory: ~/repo
-
+    <<: *defaults
     steps:
       - checkout
       - run: git submodule sync
@@ -23,14 +25,38 @@ jobs:
             cd python
             python3 setup.py bdist_wheel
 
-      - run:
-          name: Run tests
-          command: |
-            cd python
-            python3 setup.py install
-            cd /tmp
-            python3 -m pytest ~/repo/python/tests
-
       - store_artifacts:
           path: python/dist
           destination: dist
+
+      - persist_to_workspace:
+        root: python
+        paths:
+          - tests
+          - dist
+
+  test:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: python
+
+      - run:
+          name: Install wheel
+          command: |
+            pip3 install python/dist/*.whl
+
+      - run:
+          name: Run tests
+          command: |
+            python3 -m pytest python/tests
+
+workflows:
+  version: 2
+
+  build_and_test:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
