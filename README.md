@@ -38,5 +38,5 @@ Example: Visual-inertial structure from motion
     
 Installation
 ============
-See the documentation.
+See the documentation at https://hovren.github.io/kontiki/users/install.html.
 
