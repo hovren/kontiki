@@ -4,7 +4,7 @@ Kontiki - the continuous time toolkit
 Kontiki is a toolkit for continuous-time structure from motion.
 In short, it can estimate a trajectory (and 3D structure) from a set of measurements.
 
-The documentation is available at ???.
+The documentation is available at https://hovren.github.io/kontiki/.
 
 Example: Visual-inertial structure from motion
 ---------------------------------------------
